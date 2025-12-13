@@ -1,22 +1,20 @@
-import { LoaderIcon } from "lucide-react";
+"use client";
+import { Item, ItemContent, ItemMedia, ItemTitle } from "@/components/ui/item";
+import { Spinner } from "@/components/ui/spinner";
 
-import { cn } from "@/lib/utils";
-
-function Spinner({ className, ...props }: React.ComponentProps<"svg">) {
+const Loading = () => {
   return (
-    <LoaderIcon
-      role="status"
-      aria-label="Loading"
-      className={cn("size-4 animate-spin", className)}
-      {...props}
-    />
-  );
-}
-
-export function Loading() {
-  return (
-    <div className="flex items-center gap-4">
-      <Spinner />
+    <div className="flex w-full max-w-xs flex-col gap-4 [--radius:1rem]">
+      <Item variant="muted">
+        <ItemMedia>
+          <Spinner />
+        </ItemMedia>
+        <ItemContent>
+          <ItemTitle className="line-clamp-1">Loaidng...</ItemTitle>
+        </ItemContent>
+      </Item>
     </div>
   );
-}
+};
+
+export default Loading;
