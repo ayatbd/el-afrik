@@ -1,21 +1,8 @@
 "use client";
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
+import { ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { Star } from "lucide-react";
 
-// --- Mock Data ---
+// mock data
 
 const topStats = [
   { label: "Total Users", value: "125" },
@@ -23,51 +10,6 @@ const topStats = [
   { label: "New Signups", value: "300" },
   { label: "Total Points Issued", value: "200" },
   { label: "Rewards Redeemed Today", value: "200" },
-];
-
-const userOverviewData = [
-  { name: "Jan", value: 40 },
-  { name: "Feb", value: 30 },
-  { name: "Mar", value: 60 },
-  { name: "Apr", value: 45 },
-  { name: "May", value: 70 },
-  { name: "Jun", value: 55 },
-  { name: "July", value: 40 },
-  { name: "Aug", value: 45 },
-  { name: "Sept", value: 75 },
-  { name: "Oct", value: 50 },
-  { name: "Nov", value: 60 },
-  { name: "Dec", value: 90 },
-];
-
-const salesMetricsData = [
-  { name: "Jan", combo: 500, drinks: 900 },
-  { name: "Feb", combo: 380, drinks: 650 },
-  { name: "Mar", combo: 250, drinks: 480 },
-  { name: "Apr", combo: 350, drinks: 600 },
-  { name: "May", combo: 280, drinks: 500 },
-  { name: "Jun", combo: 320, drinks: 550 },
-  { name: "July", combo: 400, drinks: 700 },
-  { name: "Aug", combo: 300, drinks: 580 },
-  { name: "Sep", combo: 330, drinks: 600 },
-  { name: "Oct", combo: 310, drinks: 580 },
-  { name: "Nov", combo: 320, drinks: 580 },
-  { name: "Dec", combo: 350, drinks: 900 },
-];
-
-const loginReviewsData = [
-  { name: "Jan", logins: 800, reviews: 600 },
-  { name: "Feb", logins: 900, reviews: 600 },
-  { name: "Mar", logins: 1000, reviews: 650 },
-  { name: "Apr", logins: 1100, reviews: 620 },
-  { name: "May", logins: 1050, reviews: 680 },
-  { name: "Jun", logins: 900, reviews: 700 },
-  { name: "July", logins: 1200, reviews: 600 },
-  { name: "Aug", logins: 1150, reviews: 500 },
-  { name: "Sep", logins: 1250, reviews: 650 },
-  { name: "Oct", logins: 1300, reviews: 700 },
-  { name: "Nov", logins: 1350, reviews: 800 },
-  { name: "Dec", logins: 1200, reviews: 850 },
 ];
 
 const rewardsData = [
@@ -81,7 +23,7 @@ const foodItems = [
   {
     id: 1,
     name: "Jollof Rice",
-    img: "https://images.unsplash.com/photo-1574484284008-81dcec8005e2?q=80&w=100&auto=format&fit=crop",
+    img: "/images/dashboard/content/home/Mask.png",
     revenue: "$1,560",
     rating: 4.6,
     category: "Fast Food",
@@ -90,7 +32,7 @@ const foodItems = [
   {
     id: 2,
     name: "Fried Rice",
-    img: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?q=80&w=100&auto=format&fit=crop",
+    img: "/images/dashboard/content/home/Mask.png",
     revenue: "$1,560",
     rating: 4.6,
     category: "Fast Food",
@@ -99,7 +41,7 @@ const foodItems = [
   {
     id: 3,
     name: "Meat Pie",
-    img: "https://images.unsplash.com/photo-1572383672419-2f432ddb56b2?q=80&w=100&auto=format&fit=crop",
+    img: "/images/dashboard/content/home/Mask.png",
     revenue: "$1,560",
     rating: 4.6,
     category: "Fast Food",
@@ -108,7 +50,7 @@ const foodItems = [
   {
     id: 4,
     name: "Fish Roll",
-    img: "https://plus.unsplash.com/premium_photo-1661600135892-74b12367d302?q=80&w=100&auto=format&fit=crop",
+    img: "/images/dashboard/content/home/Mask.png",
     revenue: "$1,560",
     rating: 4.6,
     category: "Fast Food",
@@ -117,7 +59,7 @@ const foodItems = [
   {
     id: 5,
     name: "Puff Puff",
-    img: "https://images.unsplash.com/photo-1621510456600-4db001968855?q=80&w=100&auto=format&fit=crop",
+    img: "/images/dashboard/content/home/Mask.png",
     revenue: "$1,560",
     rating: 4.6,
     category: "Fast Food",
@@ -126,7 +68,7 @@ const foodItems = [
   {
     id: 6,
     name: "Fried Rice",
-    img: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?q=80&w=100&auto=format&fit=crop",
+    img: "/images/dashboard/content/home/Mask.png",
     revenue: "$1,560",
     rating: 4.6,
     category: "Fast Food",
@@ -134,7 +76,7 @@ const foodItems = [
   },
 ];
 
-// --- Components ---
+// --- components ---
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -146,12 +88,15 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import UserOverview from "../modules/dashboard-home/UserOverview";
+import SalesMatricData from "../modules/dashboard-home/SalesMatricData";
+import LoginReviewsData from "../modules/dashboard-home/LoginReviewsData";
 
 export default function Main() {
   return (
-    <div className="p-6 bg-gray-50 min-h-screen space-y-6">
+    <div className="p-6 bg-white min-h-screen space-y-6">
       {/* 1. Top Stats Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-12">
         {topStats.map((stat, idx) => (
           <Card key={idx} className="shadow-sm border-gray-100">
             <CardContent className="flex flex-col items-center justify-center py-6 text-center">
@@ -192,16 +137,17 @@ export default function Main() {
             </div>
             <div className="flex gap-2">
               <Select defaultValue="user">
-                <SelectTrigger className="w-[100px] h-8 text-xs">
+                <SelectTrigger className="w-25 h-8 text-xs">
                   <SelectValue placeholder="Account Type" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="user">User</SelectItem>
                   <SelectItem value="manager">Manager</SelectItem>
+                  <SelectItem value="Stap">Stap</SelectItem>
                 </SelectContent>
               </Select>
               <Select defaultValue="2024">
-                <SelectTrigger className="w-[80px] h-8 text-xs">
+                <SelectTrigger className="w-20 h-8 text-xs">
                   <SelectValue placeholder="Year" />
                 </SelectTrigger>
                 <SelectContent>
@@ -211,63 +157,36 @@ export default function Main() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="h-[250px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={userOverviewData}>
-                  <defs>
-                    <linearGradient id="colorUser" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#FB923C" stopOpacity={0.8} />
-                      <stop offset="95%" stopColor="#FB923C" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    vertical={false}
-                    stroke="#E5E7EB"
-                  />
-                  <XAxis
-                    dataKey="name"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 12, fill: "#9CA3AF" }}
-                    dy={10}
-                  />
-                  <YAxis
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 12, fill: "#9CA3AF" }}
-                  />
-                  <Tooltip />
-                  <Area
-                    type="monotone"
-                    dataKey="value"
-                    stroke="#F97316"
-                    strokeWidth={3}
-                    fillOpacity={1}
-                    fill="url(#colorUser)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
+            <UserOverview />
           </CardContent>
         </Card>
 
         {/* Right: Sales Metrics */}
         <Card className="shadow-sm border-gray-100">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardHeader className="pb-2">
             <div>
-              <CardTitle className="text-lg font-medium text-gray-800">
-                Daily/Weekly/Monthly Sales Metrics
-              </CardTitle>
-              <div className="flex space-x-4 mt-2 text-xs text-gray-500">
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                  <span>Combo</span>
+              <div className="flex flex-row items-center justify-between">
+                <CardTitle className="text-lg font-medium text-gray-800">
+                  Daily/Weekly/Monthly Sales Metrics
+                </CardTitle>
+                <div className="flex space-x-4 mt-2 text-xs text-gray-500">
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                    <span>Combo</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full bg-orange-700"></div>
+                    <span>Drinks</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-full bg-orange-700"></div>
-                  <span>Drinks</span>
-                </div>
+                <Select defaultValue="2024">
+                  <SelectTrigger className="w-20 h-8 text-xs">
+                    <SelectValue placeholder="Year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="2024">2024</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="flex space-x-4 mt-1 text-xs text-gray-500">
                 <div>
@@ -284,52 +203,9 @@ export default function Main() {
                 </div>
               </div>
             </div>
-            <Select defaultValue="2024">
-              <SelectTrigger className="w-[80px] h-8 text-xs">
-                <SelectValue placeholder="Year" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="2024">2024</SelectItem>
-              </SelectContent>
-            </Select>
           </CardHeader>
           <CardContent>
-            <div className="h-[250px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={salesMetricsData} barGap={4}>
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    vertical={false}
-                    stroke="#E5E7EB"
-                  />
-                  <XAxis
-                    dataKey="name"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 10, fill: "#9CA3AF" }}
-                    dy={10}
-                  />
-                  <YAxis
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 10, fill: "#9CA3AF" }}
-                  />
-                  <Tooltip cursor={{ fill: "transparent" }} />
-                  <Bar
-                    dataKey="combo"
-                    fill="#22c55e"
-                    radius={[4, 4, 0, 0]}
-                    barSize={8}
-                  />
-                  <Bar
-                    dataKey="drinks"
-                    fill="#c2410c"
-                    radius={[4, 4, 0, 0]}
-                    barSize={8}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            <SalesMatricData />
           </CardContent>
         </Card>
       </div>
@@ -344,7 +220,7 @@ export default function Main() {
             </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col md:flex-row items-center justify-center gap-8">
-            <div className="relative h-[220px] w-[220px]">
+            <div className="relative h-55 w-55">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -434,7 +310,7 @@ export default function Main() {
               </div>
             </div>
             <Select defaultValue="2024">
-              <SelectTrigger className="w-[80px] h-8 text-xs">
+              <SelectTrigger className="w-20 h-8 text-xs">
                 <SelectValue placeholder="Year" />
               </SelectTrigger>
               <SelectContent>
@@ -443,42 +319,7 @@ export default function Main() {
             </Select>
           </CardHeader>
           <CardContent>
-            <div className="h-[250px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={loginReviewsData} barGap={4}>
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    vertical={false}
-                    stroke="#E5E7EB"
-                  />
-                  <XAxis
-                    dataKey="name"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 10, fill: "#9CA3AF" }}
-                    dy={10}
-                  />
-                  <YAxis
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 10, fill: "#9CA3AF" }}
-                  />
-                  <Tooltip cursor={{ fill: "transparent" }} />
-                  <Bar
-                    dataKey="logins"
-                    fill="#fbbf24"
-                    radius={[4, 4, 0, 0]}
-                    barSize={8}
-                  />
-                  <Bar
-                    dataKey="reviews"
-                    fill="#ea580c"
-                    radius={[4, 4, 0, 0]}
-                    barSize={8}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            <LoginReviewsData />
           </CardContent>
         </Card>
       </div>
