@@ -274,17 +274,19 @@ export default function Main() {
         <Card className="shadow-sm border-gray-100">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <div>
-              <CardTitle className="text-lg font-medium text-gray-800">
-                Daily/Weekly/Monthly Logins & Reviews
-              </CardTitle>
-              <div className="flex space-x-4 mt-2 text-xs text-gray-500">
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
-                  <span>Logins</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-full bg-orange-600"></div>
-                  <span>Reviews</span>
+              <div className="flex flex-row items-center justify-between">
+                <CardTitle className="text-lg font-medium text-gray-800">
+                  Daily/Weekly/Monthly Logins & Reviews
+                </CardTitle>
+                <div className="flex space-x-4 mt-2 text-xs text-gray-500">
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
+                    <span>Logins</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full bg-orange-600"></div>
+                    <span>Reviews</span>
+                  </div>
                 </div>
               </div>
               <div className="flex space-x-4 mt-1 text-xs text-gray-500">

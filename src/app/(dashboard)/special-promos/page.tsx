@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, RotateCw, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, Image as ImageIcon, Plus } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,7 @@ import {
 
 export default function SpecialPromoPage() {
   return (
-    <div className="min-h-screen bg-[#FAFAFA] p-6 md:p-10 font-sans text-gray-800">
+    <div className="min-h-screen max-w-7xl mx-auto bg-white p-6 md:p-10 font-sans text-gray-800">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
         <div className="flex items-center gap-3">
           <Link
@@ -30,17 +30,14 @@ export default function SpecialPromoPage() {
         </div>
 
         <div className="flex items-center gap-4">
-          <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-md text-gray-600 text-sm hover:bg-gray-200 transition-colors">
-            Data Refresh
-            <RotateCw className="h-4 w-4 text-blue-600" />
-          </button>
-          <div className="px-4 py-2 bg-white border border-gray-100 rounded-md text-sm text-gray-500 shadow-sm">
-            March 25,2024 10:43 Am
-          </div>
+          <Button className="cursor-pointer bg-[#00B25D] hover:bg-[#009e52] text-white px-6 h-11">
+            <Plus className="ml-2 h-4 w-4" />
+            VIP Events
+          </Button>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto space-y-8">
+      <div className="space-y-8">
         <div className="space-y-4">
           <Label className="text-base font-normal text-gray-500">
             Upload Product Image
@@ -63,7 +60,7 @@ export default function SpecialPromoPage() {
         </div>
 
         <div className="space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="space-y-3">
               <Label htmlFor="name" className="text-gray-500 font-normal">
                 Product Name
@@ -77,40 +74,22 @@ export default function SpecialPromoPage() {
 
             <div className="space-y-3">
               <Label htmlFor="price" className="text-gray-500 font-normal">
-                Price
+                Promo Validity Date
               </Label>
               <Input
-                id="price"
-                placeholder="$100"
+                id=""
+                placeholder="12-20min"
                 className="h-12 border-gray-200 bg-white"
               />
             </div>
 
             <div className="space-y-3">
-              <Label className="text-gray-500 font-normal">
-                Select Currency
-              </Label>
-              <Select>
-                <SelectTrigger className="border-gray-200 bg-white text-gray-400">
-                  <SelectValue placeholder="$90" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="usd">USD ($)</SelectItem>
-                  <SelectItem value="eur">EUR (€)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-3">
-              <Label
-                htmlFor="deliveryFee"
-                className="text-gray-500 font-normal"
-              >
-                Delivery Fee
+              <Label htmlFor="price" className="text-gray-500 font-normal">
+                Promo Code
               </Label>
               <Input
-                id="deliveryFee"
-                placeholder="$9"
+                id="price"
+                placeholder="100"
                 className="h-12 border-gray-200 bg-white"
               />
             </div>

@@ -17,7 +17,7 @@ import {
 
 export default function AddProductPage() {
   return (
-    <div className="min-h-screen bg-[#FAFAFA] p-6 md:p-10 font-sans text-gray-800">
+    <div className="min-h-screen max-w-7xl mx-auto bg-white p-6 md:p-10 font-sans text-gray-800">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
         <div className="flex items-center gap-3">
           <Link
@@ -40,7 +40,7 @@ export default function AddProductPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto space-y-8">
+      <div className="space-y-8">
         <div className="space-y-4">
           <Label className="text-base font-normal text-gray-500">
             Upload Product Image
