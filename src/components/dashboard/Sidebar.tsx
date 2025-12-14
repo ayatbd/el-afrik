@@ -106,7 +106,7 @@ export default function Sidebar() {
                 <li key={item.name}>
                   <Link
                     href={item.href}
-                    className="menu-item text-gray-300 text-[15px] font-medium flex items-center gap-3 cursor-pointer hover:bg-[#0b1739] rounded-md px-3 py-3 transition-all duration-300"
+                    className="menu-item text-gray-300 text-[15px] font-medium flex items-center gap-3 cursor-pointer hover:bg-[#00C058] hover:text-white rounded-md px-3 py-3 transition-all duration-300"
                   >
                     {item.icon}
                     <span>{item.name}</span>

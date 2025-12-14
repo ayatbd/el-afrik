@@ -18,14 +18,12 @@ type PageProps = {
     id: string;
     name: string;
     avatar: string;
-    mobile: string;
     email: string;
-    dateJoined: string;
-    userType: "User" | "Rider";
   };
 };
-export default function UserProfilePage({ params }: PageProps) {
-  console.log(params.id);
+export default async function UserProfilePage({ params }: PageProps) {
+  const { name, avatar, email } = await params;
+  console.log(name);
   return (
     <div className="min-h-screen bg-[#F8F9FA] p-8 md:p-14 font-sans">
       <div className="flex items-center gap-4 mb-8">
@@ -35,14 +33,14 @@ export default function UserProfilePage({ params }: PageProps) {
         >
           <ArrowLeft className="h-6 w-6" />
         </Link>
-        <h1 className="text-xl font-semibold text-gray-900">User</h1>
+        <h1 className="text-xl font-semibold text-gray-900">{name}</h1>
       </div>
 
       <div className="mb-10">
         <Avatar className="h-32 w-32 border-4 border-white shadow-sm">
           {/* Using a placeholder image similar to the one in the screenshot */}
           <AvatarImage
-            src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=200&auto=format&fit=crop"
+            src={avatar}
             alt="User Profile"
             className="object-cover"
           />
@@ -57,11 +55,11 @@ export default function UserProfilePage({ params }: PageProps) {
             htmlFor="fullName"
             className="text-base font-normal text-gray-900"
           >
-            Full Name
+            {name}
           </Label>
           <Input
             id="fullName"
-            defaultValue="Bessie"
+            defaultValue={name}
             className="h-12 border-gray-300 text-gray-600 bg-white focus-visible:ring-offset-0 focus-visible:ring-1 focus-visible:ring-gray-400"
           />
         </div>
@@ -72,11 +70,11 @@ export default function UserProfilePage({ params }: PageProps) {
             htmlFor="email"
             className="text-base font-normal text-gray-900"
           >
-            Email
+            {email}
           </Label>
           <Input
             id="email"
-            defaultValue="cido@gmail.com"
+            defaultValue={email}
             className="h-12 border-gray-300 text-gray-600 bg-white focus-visible:ring-offset-0 focus-visible:ring-1 focus-visible:ring-gray-400"
           />
         </div>
@@ -106,7 +104,7 @@ export default function UserProfilePage({ params }: PageProps) {
           </Label>
           <Input
             id="pointBalance"
-            defaultValue="1200"
+            defaultValue="0"
             className="h-12 border-gray-300 text-gray-600 bg-white focus-visible:ring-offset-0 focus-visible:ring-1 focus-visible:ring-gray-400"
           />
         </div>
