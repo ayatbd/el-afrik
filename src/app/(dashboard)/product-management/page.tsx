@@ -49,7 +49,6 @@ const getStatusBadgeStyles = (status: ProductStatus) => {
 export default function ManageProductsPage() {
   return (
     <div className="min-h-screen bg-[#FAFAFA] p-6 font-sans text-gray-800">
-      {/* 1. Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div className="flex items-center gap-2">
           <Link
@@ -74,10 +73,8 @@ export default function ManageProductsPage() {
         </div>
       </div>
 
-      {/* 2. Controls Section */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <div className="flex items-center gap-4 w-full md:w-auto">
-          {/* Search */}
           <div className="relative w-full md:w-70">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
@@ -85,7 +82,7 @@ export default function ManageProductsPage() {
               className="pl-10 h-11 border-gray-300 bg-white"
             />
           </div>
-          {/* Category Dropdown */}
+
           <Select>
             <SelectTrigger className="w-45 h-11 border-gray-300 bg-white text-gray-500">
               <SelectValue placeholder="Category" />
@@ -98,14 +95,12 @@ export default function ManageProductsPage() {
           </Select>
         </div>
 
-        {/* Add Button */}
         <Button className="cursor-pointer bg-[#00B25D] hover:bg-[#009e52] text-white px-6 h-11">
           Add Products
           <Plus className="ml-2 h-4 w-4" />
         </Button>
       </div>
 
-      {/* 3. Stats Line */}
       <div className="mb-6 text-sm">
         <span className="text-purple-700 font-medium">Total Products:</span>
         <span className="ml-2 text-gray-900 font-semibold">All</span>
@@ -115,7 +110,6 @@ export default function ManageProductsPage() {
         <span className="ml-1 text-gray-500">(16)</span>
       </div>
 
-      {/* 4. Table Section */}
       <div className="bg-transparent overflow-hidden">
         <Table>
           <TableHeader>
@@ -153,7 +147,6 @@ export default function ManageProductsPage() {
                   {product.id}.
                 </TableCell>
 
-                {/* Product Name & Image */}
                 <TableCell className="py-4">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10 rounded-md">
@@ -180,7 +173,6 @@ export default function ManageProductsPage() {
                   {product.price}
                 </TableCell>
 
-                {/* Date (Conditional Red Color) */}
                 <TableCell
                   className={`py-4 ${
                     product.isDateLate
@@ -191,7 +183,6 @@ export default function ManageProductsPage() {
                   {product.date}
                 </TableCell>
 
-                {/* Stock (Conditional Blue Color for low stock #) */}
                 <TableCell
                   className={`py-4 ${
                     product.status === "Short Stock"
@@ -202,7 +193,6 @@ export default function ManageProductsPage() {
                   {product.stock}
                 </TableCell>
 
-                {/* Status Badge */}
                 <TableCell className="py-4">
                   <Badge
                     className={`rounded-sm px-3 py-1 font-normal border-0 shadow-none ${getStatusBadgeStyles(
@@ -213,7 +203,6 @@ export default function ManageProductsPage() {
                   </Badge>
                 </TableCell>
 
-                {/* Actions */}
                 <TableCell className="py-4">
                   <div className="flex items-center justify-center gap-3">
                     <button className="cursor-pointer text-[#5D5FEF] hover:text-[#4a4ccf]">

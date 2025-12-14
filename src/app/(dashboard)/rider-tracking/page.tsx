@@ -112,7 +112,6 @@ const requests: RiderRequest[] = [
 export default function RiderTrackingPage() {
   return (
     <div className="min-h-screen bg-white p-6 md:p-10 font-sans text-gray-900">
-      {/* Header */}
       <div className="flex items-center gap-3 mb-8">
         <Link
           href="#"
@@ -123,10 +122,8 @@ export default function RiderTrackingPage() {
         <h1 className="text-xl font-semibold text-gray-900">Rider Request</h1>
       </div>
 
-      {/* table container */}
       <div className="w-full overflow-hidden rounded-lg">
         <Table>
-          {/* table header */}
           <TableHeader>
             <TableRow className="bg-[#F9FAFB] hover:bg-[#F9FAFB] border-b-0">
               <TableHead className="w-25 text-black font-semibold text-base py-5">
@@ -150,7 +147,6 @@ export default function RiderTrackingPage() {
             </TableRow>
           </TableHeader>
 
-          {/* table body */}
           <TableBody>
             {requests.map((request, index) => (
               <TableRow
@@ -163,7 +159,6 @@ export default function RiderTrackingPage() {
                   {request.id}.
                 </TableCell>
 
-                {/* name and avatar */}
                 <TableCell className="py-6">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-12 w-12 border border-gray-100">
@@ -197,7 +192,6 @@ export default function RiderTrackingPage() {
                   {request.userType}
                 </TableCell>
 
-                {/* action buttons */}
                 <TableCell className="text-right py-6">
                   <div className="flex justify-end gap-3">
                     <Button className="bg-[#00C058] hover:bg-[#00a84d] text-white rounded-full px-6 h-9 text-sm font-medium shadow-none cursor-pointer">

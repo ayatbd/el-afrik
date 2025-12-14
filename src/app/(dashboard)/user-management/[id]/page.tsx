@@ -38,7 +38,6 @@ export default async function UserProfilePage({ params }: PageProps) {
 
       <div className="mb-10">
         <Avatar className="h-32 w-32 border-4 border-white shadow-sm">
-          {/* Using a placeholder image similar to the one in the screenshot */}
           <AvatarImage
             src={avatar}
             alt="User Profile"
@@ -49,7 +48,6 @@ export default async function UserProfilePage({ params }: PageProps) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8 max-w-5xl">
-        {/* full name */}
         <div className="space-y-3">
           <Label
             htmlFor="fullName"
@@ -64,7 +62,6 @@ export default async function UserProfilePage({ params }: PageProps) {
           />
         </div>
 
-        {/* Email */}
         <div className="space-y-3">
           <Label
             htmlFor="email"
@@ -79,7 +76,6 @@ export default async function UserProfilePage({ params }: PageProps) {
           />
         </div>
 
-        {/* user type */}
         <div className="space-y-3">
           <Label
             htmlFor="userType"
@@ -94,7 +90,6 @@ export default async function UserProfilePage({ params }: PageProps) {
           />
         </div>
 
-        {/* point balance */}
         <div className="space-y-3">
           <Label
             htmlFor="pointBalance"
@@ -109,7 +104,6 @@ export default async function UserProfilePage({ params }: PageProps) {
           />
         </div>
 
-        {/* last view */}
         <div className="space-y-3">
           <Label
             htmlFor="lastView"
@@ -124,7 +118,6 @@ export default async function UserProfilePage({ params }: PageProps) {
           />
         </div>
 
-        {/* loyalty tier */}
         <div className="space-y-3">
           <Label className="text-base font-normal text-gray-900">
             Loyalty tier
@@ -148,7 +141,6 @@ export default async function UserProfilePage({ params }: PageProps) {
         </div>
       </div>
 
-      {/* Action Buttons */}
       <div className="mt-12">
         <Button
           variant="outline"

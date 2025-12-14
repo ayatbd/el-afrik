@@ -23,7 +23,6 @@ import { users } from "@/app/data/userData";
 export default function UserManagementPage() {
   return (
     <div className="min-h-screen bg-[#F9FAFB] p-6 md:p-10 font-sans text-gray-900">
-      {/* header section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div className="flex items-center gap-4">
           <Button
@@ -47,7 +46,6 @@ export default function UserManagementPage() {
         </div>
       </div>
 
-      {/* Table */}
       <div className="w-full">
         <Table>
           <TableHeader>
@@ -120,7 +118,6 @@ export default function UserManagementPage() {
         </Table>
       </div>
 
-      {/* footer */}
       <div className="mt-10 flex items-center justify-center gap-4 text-sm font-medium text-gray-600">
         <button className="p-2 text-black cursor-pointer">
           <ChevronLeft className="h-7 w-7" />

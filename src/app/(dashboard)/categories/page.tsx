@@ -24,7 +24,6 @@ import { products } from "@/app/data/categoriesData";
 export default function ManageProductsPage() {
   return (
     <div className="min-h-screen bg-[#FAFAFA] p-6 font-sans text-gray-800">
-      {/* 1. Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div className="flex items-center gap-2">
           <Link
@@ -47,10 +46,8 @@ export default function ManageProductsPage() {
         </div>
       </div>
 
-      {/* 2. Controls Section */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <div className="flex items-center gap-4 w-full md:w-auto">
-          {/* Category Dropdown */}
           <Select>
             <SelectTrigger className="w-45 h-11 border-gray-300 bg-white text-gray-500">
               <SelectValue placeholder="Category" />
@@ -63,14 +60,12 @@ export default function ManageProductsPage() {
           </Select>
         </div>
 
-        {/* Add Button */}
         <Button className="cursor-pointer bg-[#00B25D] hover:bg-[#009e52] text-white px-6 h-11">
           Add Products
           <Plus className="ml-2 h-4 w-4" />
         </Button>
       </div>
 
-      {/* 4. Table Section */}
       <div className="bg-transparent overflow-hidden">
         <Table>
           <TableHeader>
@@ -100,7 +95,6 @@ export default function ManageProductsPage() {
                   {product.id}.
                 </TableCell>
 
-                {/* Product Name & Image */}
                 <TableCell className="py-4">
                   <div className="">
                     <Avatar className="h-10 w-10 rounded-md">
@@ -122,7 +116,6 @@ export default function ManageProductsPage() {
                   {product.id}
                 </TableCell>
 
-                {/* Actions */}
                 <TableCell className="py-4">
                   <div className="flex items-center justify-center gap-3">
                     <button className="cursor-pointer text-[#5D5FEF] hover:text-[#4a4ccf]">

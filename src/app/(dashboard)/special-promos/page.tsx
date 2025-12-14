@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export default function AddProductPage() {
+export default function SpecialPromoPage() {
   return (
     <div className="min-h-screen bg-[#FAFAFA] p-6 md:p-10 font-sans text-gray-800">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">

@@ -95,7 +95,6 @@ import LoginReviewsData from "../modules/dashboard-home/LoginReviewsData";
 export default function Main() {
   return (
     <div className="p-6 bg-white min-h-screen space-y-6">
-      {/* 1. Top Stats Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-12">
         {topStats.map((stat, idx) => (
           <Card key={idx} className="shadow-sm border-gray-100">
@@ -111,9 +110,7 @@ export default function Main() {
         ))}
       </div>
 
-      {/* 2. Middle Charts Row */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        {/* Left: User Overview */}
         <Card className="shadow-sm border-gray-100">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <div>
@@ -161,7 +158,6 @@ export default function Main() {
           </CardContent>
         </Card>
 
-        {/* Right: Sales Metrics */}
         <Card className="shadow-sm border-gray-100">
           <CardHeader className="pb-2">
             <div>
@@ -210,9 +206,7 @@ export default function Main() {
         </Card>
       </div>
 
-      {/* 3. Bottom Charts Row */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        {/* Left: Most Redeemed Rewards */}
         <Card className="shadow-sm border-gray-100">
           <CardHeader>
             <CardTitle className="text-lg font-medium text-gray-800">
@@ -277,7 +271,6 @@ export default function Main() {
           </CardContent>
         </Card>
 
-        {/* Right: Logins & Reviews */}
         <Card className="shadow-sm border-gray-100">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <div>
@@ -324,7 +317,6 @@ export default function Main() {
         </Card>
       </div>
 
-      {/* 4. Food Items Table */}
       <Card className="shadow-sm border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
