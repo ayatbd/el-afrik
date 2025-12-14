@@ -282,7 +282,7 @@ export default function OrdersPage() {
 
                 <TableCell className="py-6 text-right pr-4 align-middle">
                   <Button
-                    className={`w-[110px] h-9 text-sm font-normal shadow-none hover:opacity-90 transition-opacity ${
+                    className={`w-27.5 h-9 text-sm font-normal shadow-none hover:opacity-90 transition-opacity ${
                       order.status === "Completed"
                         ? "bg-[#00C058] hover:bg-[#00a84d] text-white"
                         : "bg-[#FF4D4F] hover:bg-[#e04143] text-white"

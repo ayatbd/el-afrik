@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import Link from "next/link";
 import { ArrowLeft, RotateCw, Image as ImageIcon } from "lucide-react";
 
@@ -23,7 +22,7 @@ export default function AddProductPage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
         <div className="flex items-center gap-3">
           <Link
-            href="#"
+            href="/"
             className="p-1 -ml-2 hover:bg-gray-200 rounded-full transition-colors"
           >
             <ArrowLeft className="h-6 w-6 text-gray-900" />
@@ -96,7 +95,7 @@ export default function AddProductPage() {
                 Select Currency
               </Label>
               <Select>
-                <SelectTrigger className="h-12 border-gray-200 bg-white text-gray-400">
+                <SelectTrigger className="border-gray-200 bg-white text-gray-400">
                   <SelectValue placeholder="$90" />
                 </SelectTrigger>
                 <SelectContent>
@@ -172,7 +171,7 @@ export default function AddProductPage() {
             <Textarea
               id="description"
               placeholder="Write here...."
-              className="min-h-[120px] border-gray-200 bg-white resize-none p-4"
+              className="min-h-30 border-gray-200 bg-white resize-none p-4"
             />
           </div>
         </div>
