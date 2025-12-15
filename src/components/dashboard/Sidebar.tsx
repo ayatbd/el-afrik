@@ -16,6 +16,11 @@ import { IoTrophySharp } from "react-icons/io5";
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
+
+  const toggleSubmenu = (menuName: string) => {
+    setOpenSubmenu(openSubmenu === menuName ? null : menuName);
+  };
 
   const navItems = [
     {
@@ -73,10 +78,32 @@ export default function Sidebar() {
       href: "/rewards",
       icon: <IoTrophySharp size={20} />,
     },
+  ];
+
+  const NavSubItems = [
     {
-      name: "Settings",
-      href: "/settings",
-      icon: <CiSettings size={20} />,
+      name: "Profile",
+      href: "/profile",
+    },
+    {
+      name: "Privacy Policy",
+      href: "/privacy-policy",
+    },
+    {
+      name: "Terms & Conditions",
+      href: "/terms-conditions",
+    },
+    {
+      name: "FAQs",
+      href: "/faqs",
+    },
+    {
+      name: "Notifications",
+      href: "/notifications",
+    },
+    {
+      name: "Operating Hours",
+      href: "/operating-hours",
     },
   ];
 
@@ -113,6 +140,44 @@ export default function Sidebar() {
                   </Link>
                 </li>
               ))}
+
+              {/* ------------------------------------------ */}
+              <li>
+                <button
+                  onClick={() => toggleSubmenu("posts")}
+                  className="menu-item text-gray-300 text-[15px] font-medium flex items-center gap-3 cursor-pointer hover:bg-[#00C058] focus:bg-[#00C058] active:bg-[#00C058] focus:text-white hover:text-white rounded-md px-3 py-3 transition-all duration-300 w-full"
+                >
+                  <span className="overflow-hidden text-ellipsis whitespace-nowrap flex gap-3">
+                    <CiSettings size={20} />
+                    Setting
+                  </span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className={`w-3 fill-current ml-auto transition-all duration-500 ${
+                      openSubmenu === "posts" ? "rotate-0" : "-rotate-90"
+                    }`}
+                    viewBox="0 0 451.847 451.847"
+                  >
+                    <path d="M225.923 354.706c-8.098 0-16.195-3.092-22.369-9.263L9.27 151.157c-12.359-12.359-12.359-32.397 0-44.751 12.354-12.354 32.388-12.354 44.748 0l171.905 171.915 171.906-171.909c12.359-12.354 32.391-12.354 44.744 0 12.365 12.354 12.365 32.392 0 44.751L248.292 345.449c-6.177 6.172-14.274 9.257-22.369 9.257z" />
+                  </svg>
+                </button>
+                <ul
+                  className={`sub menu overflow-hidden transition-[max-height] duration-500 ease-in-out ml-8 ${
+                    openSubmenu === "posts" ? "max-h-125" : "max-h-0"
+                  }`}
+                >
+                  {NavSubItems.map((item) => (
+                    <li key={item.name}>
+                      <Link
+                        href={item.href}
+                        className="menu-item text-gray-300 text-[15px] font-medium flex items-center gap-3 cursor-pointer hover:bg-[#00C058] focus:bg-[#00C058] active:bg-[#00C058] focus:text-white hover:text-white rounded-md px-3 py-2.5 transition-all duration-300"
+                      >
+                        <span>{item.name}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </li>
             </ul>
           </div>
         </div>

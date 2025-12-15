@@ -12,9 +12,9 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { DialogClose } from "@radix-ui/react-dialog";
 
-export default function ConfirmationModal() {
+export default function TierModal() {
   const handleConfirm = () => {
-    toast.success("Refund has been issued", {
+    toast.success("Successfully updated", {
       position: "top-center",
       autoClose: 5000,
       hideProgressBar: false,
@@ -29,37 +29,46 @@ export default function ConfirmationModal() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="w-50 h-12 bg-[#00C058] hover:bg-[#00a049] text-white rounded-full text-base font-medium">
-          Continue
+        <Button className="bg-green-500 hover:bg-green-600 text-white font-medium px-4 py-2 h-10 rounded-md shadow-sm transition-all flex items-center gap-2">
+          Tier Management
         </Button>
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-125 bg-white p-8 md:p-10">
         <DialogHeader className="mb-6">
           <DialogTitle className="text-base text-center">
-            Are you sure want to issue a refund?
+            Tier Management
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
           <div>
-            <Label className="text-base">Order ID</Label>
+            <Label className="text-base">Set tier names</Label>
             <input
               type="text"
               className="w-full p-2 mt-3 border border-gray-300 rounded-md text-black"
             />
           </div>
           <div>
-            <Label className="text-base">Refund Amount</Label>
+            <Label className="text-base">Set tier requirements</Label>
             <input
-              type="number"
+              type="text"
               className="w-full p-2 mt-3 border border-gray-300 rounded-md text-black"
             />
           </div>
           <div>
-            <Label className="text-base">Payment method</Label>
+            <Label className="text-base">Tier-specific perks</Label>
             <input
-              type="number"
+              type="text"
+              className="w-full p-2 mt-3 border border-gray-300 rounded-md text-black"
+            />
+          </div>
+          <div>
+            <Label className="text-base">
+              Access control (Platinum-only sections)
+            </Label>
+            <input
+              type="text"
               className="w-full p-2 mt-3 border border-gray-300 rounded-md text-black"
             />
           </div>
@@ -71,12 +80,7 @@ export default function ConfirmationModal() {
                 onClick={handleConfirm}
                 className="w-50 h-12 bg-[#00C058] hover:bg-[#00a049] text-white rounded-full text-base font-medium cursor-pointer"
               >
-                Continue
-              </Button>
-            </DialogClose>
-            <DialogClose asChild>
-              <Button className="w-50 h-12 bg-[#CE502A] hover:bg-[#c75431] text-white rounded-full text-base font-medium cursor-pointer">
-                Cancel
+                Submit
               </Button>
             </DialogClose>
           </div>

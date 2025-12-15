@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, RotateCw, Plus, Pencil, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ArrowLeft, RotateCw, Trash2 } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -20,6 +19,8 @@ import {
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { products } from "@/app/data/categoriesData";
+import AddCategoryModal from "@/components/modules/categories/AddCategoryModal";
+import EditCategoryModal from "@/components/modules/categories/EditCategoryModal";
 
 export default function ManageProductsPage() {
   return (
@@ -60,10 +61,7 @@ export default function ManageProductsPage() {
           </Select>
         </div>
 
-        <Button className="cursor-pointer bg-[#00B25D] hover:bg-[#009e52] text-white px-6 h-11">
-          Add Products
-          <Plus className="ml-2 h-4 w-4" />
-        </Button>
+        <AddCategoryModal />
       </div>
 
       <div className="bg-transparent overflow-hidden">
@@ -118,9 +116,7 @@ export default function ManageProductsPage() {
 
                 <TableCell className="py-4">
                   <div className="flex items-center justify-center gap-3">
-                    <button className="cursor-pointer text-[#5D5FEF] hover:text-[#4a4ccf]">
-                      <Pencil className="h-4 w-4" />
-                    </button>
+                    <EditCategoryModal />
                     <button className="cursor-pointer text-red-500 hover:text-red-700">
                       <Trash2 className="h-4 w-4" />
                     </button>

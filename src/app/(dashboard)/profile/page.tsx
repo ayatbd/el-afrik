@@ -134,7 +134,48 @@ export default function ProfilePage() {
 
           <TabsContent value="password">
             <div className="py-10 text-center text-gray-500">
-              Password change form would go here.
+              <div className="w-1/2 space-y-7">
+                <div className="space-y-3">
+                  <Label
+                    htmlFor="fullname"
+                    className="text-gray-700 font-normal"
+                  >
+                    Full Name
+                  </Label>
+                  <Input
+                    id="fullname"
+                    defaultValue="Giring Furqon"
+                    className="h-12 border-gray-200 bg-white focus-visible:ring-[#D85C2F]"
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <Label htmlFor="email" className="text-gray-700 font-normal">
+                    Email
+                  </Label>
+                  <Input
+                    id="email"
+                    defaultValue="alma.lawson@ecample.com"
+                    className="h-12 border-gray-200 bg-white focus-visible:ring-[#D85C2F]"
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <Label htmlFor="phone" className="text-gray-700 font-normal">
+                    Phone Number
+                  </Label>
+                  <Input
+                    id="phone"
+                    defaultValue="(+33)7 00 55 57 60"
+                    className="h-12 border-gray-200 bg-white focus-visible:ring-[#D85C2F]"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="pt-4">
+              <Button className="bg-[#D85C2F] hover:bg-[#b04b26] text-white h-12 px-8 rounded-md text-base font-medium">
+                Update
+              </Button>
             </div>
           </TabsContent>
         </Tabs>
