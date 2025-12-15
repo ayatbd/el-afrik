@@ -124,7 +124,7 @@ export default async function UserProfilePage({ params }: PageProps) {
           </Label>
           <Select defaultValue="gold">
             <SelectTrigger className="h-12 border-gray-300 text-gray-600 bg-white focus:ring-1 focus:ring-gray-400">
-              <SelectValue placeholder="Select tier" />
+              <SelectValue 
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="gold" className="text-gray-600">

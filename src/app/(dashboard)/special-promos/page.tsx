@@ -1,7 +1,5 @@
-"use client";
-
 import Link from "next/link";
-import { ArrowLeft, Image as ImageIcon, Plus } from "lucide-react";
+import { ArrowLeft, Image as ImageIcon } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -14,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import PromoModal from "@/components/modules/special-promos/PromoModal";
 
 export default function SpecialPromoPage() {
   return (
@@ -30,10 +29,7 @@ export default function SpecialPromoPage() {
         </div>
 
         <div className="flex items-center gap-4">
-          <Button className="cursor-pointer bg-[#00B25D] hover:bg-[#009e52] text-white px-6 h-11">
-            <Plus className="ml-2 h-4 w-4" />
-            VIP Events
-          </Button>
+          <PromoModal />
         </div>
       </div>
 

@@ -207,7 +207,7 @@ const CateringPage = () => {
             </Label>
             <Textarea
               id="instructions"
-              className="min-h-[150px] border-gray-200 bg-white resize-none p-4 focus-visible:ring-1 focus-visible:ring-gray-300"
+              className="min-h-37.5 border-gray-200 bg-white resize-none p-4 focus-visible:ring-1 focus-visible:ring-gray-300"
             />
           </div>
 
