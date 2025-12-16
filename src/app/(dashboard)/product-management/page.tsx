@@ -48,7 +48,7 @@ const getStatusBadgeStyles = (status: ProductStatus) => {
 
 export default function ManageProductsPage() {
   return (
-    <div className="min-h-screen bg-[#FAFAFA] p-6 font-sans text-gray-800">
+    <div className="min-h-screen w-full bg-[#FAFAFA] p-6 font-sans text-gray-800">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div className="flex items-center gap-2">
           <Link

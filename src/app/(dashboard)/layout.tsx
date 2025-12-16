@@ -8,11 +8,10 @@ export default function DashboardLayout({
 }) {
   return (
     <div className="relative bg-white h-full min-h-screen font-[sans-serif] overflow-x-hidden">
-      <div className="flex items-start">
-        <Sidebar />
-
-        <section className="main-content w-full">
-          <Navbar />
+      <div className="">
+        <Navbar />
+        <section className="w-full lg:flex">
+          <Sidebar />
           {children}
         </section>
       </div>

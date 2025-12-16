@@ -9,8 +9,7 @@ import { Label } from "@/components/ui/label";
 
 export default function RewardSetupPage() {
   return (
-    <div className="min-h-screen bg-gray-50/30 p-8 md:p-12 font-sans text-slate-900">
-      {/* --- Top Header Section --- */}
+    <div className="min-h-screen w-full bg-gray-50/30 p-8 md:p-12 font-sans text-slate-900">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
           Reward Setup
@@ -18,9 +17,7 @@ export default function RewardSetupPage() {
         <TierModal />
       </div>
 
-      {/* --- First Form Section (Reward Setup) --- */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8 mb-12">
-        {/* Field: Create new rewards */}
         <div className="space-y-3">
           <Label
             htmlFor="create-rewards"
@@ -34,7 +31,6 @@ export default function RewardSetupPage() {
           />
         </div>
 
-        {/* Field: Add reward expiry */}
         <div className="space-y-3">
           <Label
             htmlFor="reward-expiry"
@@ -48,7 +44,6 @@ export default function RewardSetupPage() {
           />
         </div>
 
-        {/* Field: Reward visibility settings */}
         <div className="space-y-3">
           <Label
             htmlFor="visibility"
@@ -61,20 +56,17 @@ export default function RewardSetupPage() {
             className="h-12 border-gray-200 bg-white focus-visible:ring-1 focus-visible:ring-gray-300"
           />
         </div>
-        {/* Empty column to maintain grid layout matches image */}
+
         <div className="hidden md:block"></div>
       </div>
 
-      {/* --- Section Divider Title --- */}
       <div className="mb-10">
         <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
           Point Rules
         </h2>
       </div>
 
-      {/* --- Second Form Section (Point Rules) --- */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8 mb-16">
-        {/* Field: Points per purchase */}
         <div className="space-y-3">
           <Label
             htmlFor="points-purchase"
@@ -88,7 +80,6 @@ export default function RewardSetupPage() {
           />
         </div>
 
-        {/* Field: Points for daily login */}
         <div className="space-y-3">
           <Label
             htmlFor="points-login"
@@ -102,7 +93,6 @@ export default function RewardSetupPage() {
           />
         </div>
 
-        {/* Field: Points for reviews */}
         <div className="space-y-3">
           <Label
             htmlFor="points-reviews"
@@ -116,7 +106,6 @@ export default function RewardSetupPage() {
           />
         </div>
 
-        {/* Field: Points for sharing */}
         <div className="space-y-3">
           <Label
             htmlFor="points-sharing"
@@ -130,7 +119,6 @@ export default function RewardSetupPage() {
           />
         </div>
 
-        {/* Field: Referral bonus points */}
         <div className="space-y-3">
           <Label
             htmlFor="referral-points"
@@ -144,7 +132,6 @@ export default function RewardSetupPage() {
           />
         </div>
 
-        {/* Field: Tier upgrade rules */}
         <div className="space-y-3">
           <Label
             htmlFor="tier-rules"
@@ -159,7 +146,6 @@ export default function RewardSetupPage() {
         </div>
       </div>
 
-      {/* --- Footer Action --- */}
       <div className="flex justify-center mb-8">
         <Button className="bg-[#D05634] hover:bg-[#b84a2c] text-white text-lg font-medium py-6 px-16 w-full md:w-auto rounded-md shadow-sm transition-all">
           Publish

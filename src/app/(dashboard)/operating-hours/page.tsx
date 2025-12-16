@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import Link from "next/link";
 
 // Data structure for the week
 const scheduleData = [
@@ -25,7 +26,6 @@ const scheduleData = [
 export default function OperatingHours() {
   return (
     <div className="w-full max-w-5xl mx-auto p-6 md:p-10 bg-white min-h-screen">
-      {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-4">
         <div>
           <h1 className="text-3xl font-semibold text-gray-900">
@@ -35,12 +35,13 @@ export default function OperatingHours() {
             Set restaurant opening, closing and holiday hours
           </p>
         </div>
-        <Button className="bg-[#00B050] hover:bg-[#009643] text-white font-medium px-6 py-2 h-auto rounded-md shadow-none transition-colors">
-          Holiday Hours Section
-        </Button>
+        <Link href="/holiday-hours">
+          <Button className="w-50 h-12 bg-[#00C058] hover:bg-[#00a049] text-white rounded-full text-base font-medium">
+            Holiday Hours Section
+          </Button>
+        </Link>
       </div>
 
-      {/* Table Section */}
       <div className="w-full">
         <Table className="text-base">
           <TableHeader>

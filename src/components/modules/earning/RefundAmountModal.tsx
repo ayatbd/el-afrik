@@ -17,7 +17,6 @@ export default function RefundAmountModal() {
 
       <DialogContent className="sm:max-w-125 bg-white p-8 md:p-10">
         <div className="space-y-6">
-          {/* Radio Group Options */}
           <RadioGroup
             defaultValue="wrong-item"
             className="flex flex-col space-y-4"
@@ -50,7 +49,6 @@ export default function RefundAmountModal() {
             />
           </div>
 
-          {/* Continue Button */}
           <div className="pt-6 flex justify-center">
             <ConfirmationModal />
           </div>

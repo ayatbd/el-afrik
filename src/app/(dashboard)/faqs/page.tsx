@@ -1,6 +1,6 @@
 const FaqPage = () => {
   return (
-    <div>
+    <div className="w-full">
       <div className="p-10">
         <div className="max-w-4xl mx-auto">
           <h2 className="sm:text-3xl text-2xl font-semibold text-gray-800 mb-12">

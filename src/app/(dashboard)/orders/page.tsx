@@ -144,7 +144,7 @@ const orders: Order[] = [
 
 export default function OrdersPage() {
   return (
-    <div className="min-h-screen bg-[#F8F9FA] p-6 md:p-10 font-sans text-gray-900">
+    <div className="min-h-screen w-full bg-[#F8F9FA] p-6 md:p-10 font-sans text-gray-900">
       <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
         <div className="flex items-center gap-4 w-full md:w-auto">
           <Link

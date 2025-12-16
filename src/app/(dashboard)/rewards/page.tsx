@@ -96,8 +96,7 @@ const rewardsData: Reward[] = [
 
 export default function RewardsPage() {
   return (
-    <div className="min-h-screen bg-gray-50/50 p-8 font-sans text-slate-800">
-      {/* --- Top Stats Section --- */}
+    <div className="min-h-screen w-full bg-gray-50/50 p-8 font-sans text-slate-800">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
         {statsData.map((stat, index) => (
           <Card
@@ -116,7 +115,6 @@ export default function RewardsPage() {
         ))}
       </div>
 
-      {/* --- Action Bar --- */}
       <div className="flex justify-end mb-6">
         <Link href="/rewards/tier-management">
           <Button className="cursor-pointer bg-[#00B25D] hover:bg-[#009e52] text-white px-6 h-11">
@@ -126,7 +124,6 @@ export default function RewardsPage() {
         </Link>
       </div>
 
-      {/* --- Data Table --- */}
       <div className="bg-white rounded-lg p-2 shadow-sm border border-gray-100">
         <Table>
           <TableHeader>

@@ -118,7 +118,7 @@ import RefundReasonModal from "@/components/modules/earning/RefundReasonModal";
 
 export default function EarningsPage() {
   return (
-    <div className="min-h-screen bg-white p-6 md:p-8 font-sans text-slate-900">
+    <div className="min-h-screen w-full bg-white p-6 md:p-8 font-sans text-slate-900">
       <div className="flex items-center gap-3 mb-8">
         <Link
           href="/"

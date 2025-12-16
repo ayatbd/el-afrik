@@ -26,7 +26,6 @@ export default function SidebarItem({
 
   return (
     <li>
-      {/* Parent */}
       {hasChildren ? (
         <button
           type="button"
@@ -37,7 +36,6 @@ export default function SidebarItem({
           {icon}
           <span className="flex-1 text-left">{name}</span>
 
-          {/* Arrow */}
           <svg
             className={`w-3 h-3 transition-transform duration-300 ${
               open ? "rotate-0" : "-rotate-90"
@@ -59,7 +57,6 @@ export default function SidebarItem({
         </Link>
       )}
 
-      {/* Sub menu */}
       {hasChildren && (
         <ul
           className={`ml-8 overflow-hidden transition-[max-height] duration-500 ease-in-out ${

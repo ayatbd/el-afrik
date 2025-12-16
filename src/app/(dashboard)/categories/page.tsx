@@ -24,7 +24,7 @@ import EditCategoryModal from "@/components/modules/categories/EditCategoryModal
 
 export default function CategoryPage() {
   return (
-    <div className="min-h-screen bg-[#FAFAFA] p-6 font-sans text-gray-800">
+    <div className="min-h-screen w-full bg-[#FAFAFA] p-6 font-sans text-gray-800">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div className="flex items-center gap-2">
           <Link
@@ -47,7 +47,7 @@ export default function CategoryPage() {
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+      <div className="flex flex-col md:flex-row justify-between md:items-center mb-6 gap-4">
         <div className="flex items-center gap-4 w-full md:w-auto">
           <Select>
             <SelectTrigger className="w-45 h-11 border-gray-300 bg-white text-gray-500">

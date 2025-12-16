@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { FaUserCircle } from "react-icons/fa";
 import { GoBlocked } from "react-icons/go";
 import Link from "next/link";
@@ -22,7 +21,7 @@ import { users } from "@/app/data/userData";
 
 export default function UserManagementPage() {
   return (
-    <div className="min-h-screen bg-[#F9FAFB] p-6 md:p-10 font-sans text-gray-900">
+    <div className="min-h-screen w-full bg-[#F9FAFB] p-6 md:p-10 font-sans text-gray-900">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div className="flex items-center gap-4 mb-8">
           <Link

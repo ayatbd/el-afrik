@@ -141,7 +141,6 @@ export default function Sidebar() {
                 </li>
               ))}
 
-              {/* ------------------------------------------ */}
               <li>
                 <button
                   onClick={() => toggleSubmenu("posts")}

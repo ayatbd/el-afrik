@@ -73,7 +73,6 @@ export default function TierModal() {
             />
           </div>
 
-          {/* Continue Button */}
           <div className="pt-6 flex justify-center gap-3">
             <DialogClose asChild>
               <Button

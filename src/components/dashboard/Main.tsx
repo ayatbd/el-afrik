@@ -94,7 +94,7 @@ import LoginReviewsData from "../modules/dashboard-home/LoginReviewsData";
 
 export default function Main() {
   return (
-    <div className="p-6 bg-white min-h-screen space-y-6">
+    <div className="p-6 bg-white min-h-screen space-y-6 w-full">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-12">
         {topStats.map((stat, idx) => (
           <Card key={idx} className="shadow-sm border-gray-100">
@@ -109,11 +109,11 @@ export default function Main() {
           </Card>
         ))}
       </div>
-
+      {/* <UserOverview /> */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <Card className="shadow-sm border-gray-100">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <div>
+          <CardHeader className="flex md:flex-row flex-col items-center gap-y-8 justify-between pb-2 md:py-0 py-7">
+            <div className="space-y-5">
               <CardTitle className="text-lg font-medium text-gray-800">
                 User Overview
               </CardTitle>
@@ -157,11 +157,11 @@ export default function Main() {
             <UserOverview />
           </CardContent>
         </Card>
-
+        {/* Sales Matrics */}
         <Card className="shadow-sm border-gray-100">
           <CardHeader className="pb-2">
             <div>
-              <div className="flex flex-row items-center justify-between">
+              <div className="flex sm:flex-row flex-col items-center justify-between">
                 <CardTitle className="text-lg font-medium text-gray-800">
                   Daily/Weekly/Monthly Sales Metrics
                 </CardTitle>

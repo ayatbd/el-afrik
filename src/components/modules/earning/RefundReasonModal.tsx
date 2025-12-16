@@ -34,7 +34,6 @@ export default function RefundReasonModal() {
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Radio Group Options */}
           <RadioGroup
             defaultValue="wrong-item"
             className="flex flex-col space-y-4"
@@ -63,7 +62,6 @@ export default function RefundReasonModal() {
             ))}
           </RadioGroup>
 
-          {/* Others / Textarea Section */}
           <div className="space-y-3 pt-2">
             <Label
               htmlFor="others"
@@ -77,7 +75,6 @@ export default function RefundReasonModal() {
             />
           </div>
 
-          {/* Continue Button */}
           <div className="pt-6 flex justify-center">
             <RefundAmountModal />
           </div>
