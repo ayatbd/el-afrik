@@ -1,7 +1,7 @@
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-const PrivacyAndPolicy = () => {
+const TermsAndCondition = () => {
   return (
     <div className="min-h-screen bg-[#FAFAFA] p-6 md:p-10 font-sans text-gray-800">
       <div>
@@ -67,4 +67,4 @@ const PrivacyAndPolicy = () => {
   );
 };
 
-export default PrivacyAndPolicy;
+export default TermsAndCondition;
