@@ -121,7 +121,7 @@ export default function EarningsPage() {
     <div className="min-h-screen bg-white p-6 md:p-8 font-sans text-slate-900">
       <div className="flex items-center gap-3 mb-8">
         <Link
-          href="#"
+          href="/"
           className="hover:bg-slate-100 p-2 rounded-full transition"
         >
           <ArrowLeft className="w-6 h-6 text-slate-700" />

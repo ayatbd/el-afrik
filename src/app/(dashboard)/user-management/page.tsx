@@ -24,15 +24,14 @@ export default function UserManagementPage() {
   return (
     <div className="min-h-screen bg-[#F9FAFB] p-6 md:p-10 font-sans text-gray-900">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-6 w-6 text-gray-600 hover:text-gray-900"
+        <div className="flex items-center gap-4 mb-8">
+          <Link
+            href="/"
+            className="text-gray-900 hover:opacity-70 transition-opacity"
           >
             <ArrowLeft className="h-6 w-6" />
-          </Button>
-          <h1 className="text-xl md:text-2xl font-semibold tracking-tight">
+          </Link>
+          <h1 className="text-xl font-semibold text-gray-900">
             User Management
           </h1>
         </div>

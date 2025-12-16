@@ -14,7 +14,7 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-white p-6 md:p-10 font-sans text-gray-900">
       <div className="flex items-center gap-3 mb-8">
         <Link
-          href="#"
+          href="/"
           className="p-1 -ml-2 hover:bg-gray-100 rounded-full transition-colors"
         >
           <ArrowLeft className="h-6 w-6 text-gray-800" />

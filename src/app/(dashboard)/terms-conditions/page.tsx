@@ -1,13 +1,13 @@
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-const TermsAndCondition = () => {
+const TermsAndConditions = () => {
   return (
-    <div className="min-h-screen bg-[#FAFAFA] p-6 md:p-10 font-sans text-gray-800">
+    <div className="min-h-screen bg-[#FAFAFA] md:py-10 md:px-40 sm:p-6 font-sans text-gray-800">
       <div>
         <div className="flex items-center gap-3">
           <Link
-            href="#"
+            href="/"
             className="p-1 -ml-2 hover:bg-gray-200 rounded-full transition-colors"
           >
             <ArrowLeft className="h-6 w-6 text-gray-900" />
@@ -67,4 +67,4 @@ const TermsAndCondition = () => {
   );
 };
 
-export default TermsAndCondition;
+export default TermsAndConditions;

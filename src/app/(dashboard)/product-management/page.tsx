@@ -52,7 +52,7 @@ export default function ManageProductsPage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div className="flex items-center gap-2">
           <Link
-            href="#"
+            href="/"
             className="p-1 hover:bg-gray-200 rounded-full transition"
           >
             <ArrowLeft className="h-5 w-5 text-gray-600" />
