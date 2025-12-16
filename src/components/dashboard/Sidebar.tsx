@@ -162,7 +162,7 @@ export default function Sidebar() {
                   </svg>
                 </button>
                 <ul
-                  className={`sub menu overflow-hidden transition-[max-height] duration-500 ease-in-out ml-8 ${
+                  className={`sub menu space-y-2 mt-2 overflow-hidden transition-[max-height] duration-500 ease-in-out ml-8 ${
                     openSubmenu === "posts" ? "max-h-125" : "max-h-0"
                   }`}
                 >
