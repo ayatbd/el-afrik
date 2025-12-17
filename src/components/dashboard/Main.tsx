@@ -111,13 +111,33 @@ export default function Main() {
       </div>
       {/* <UserOverview /> */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        <Card className="shadow-sm border-gray-100">
-          <CardHeader className="flex md:flex-row flex-col items-center gap-y-8 justify-between pb-2 md:py-0 py-7">
-            <div className="space-y-5">
-              <CardTitle className="text-lg font-medium text-gray-800">
-                User Overview
+        <Card className="shadow-sm border-gray-100 space-y-5">
+          <CardHeader className="flex md:flex-row flex-col items-center gap-y-8 justify-between pb-2 py-2">
+            <div className="md:space-y-3 space-y-7 w-full">
+              <CardTitle className="flex md:flex-row flex-col justify-between items-center gap-4 w-full text-lg font-medium text-gray-800">
+                <p>User Overview</p>
+                <div className="flex gap-2">
+                  <Select defaultValue="user">
+                    <SelectTrigger className="w-32 h-8 text-xs">
+                      <SelectValue placeholder="Account Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="user">User</SelectItem>
+                      <SelectItem value="manager">Manager</SelectItem>
+                      <SelectItem value="Stap">Stap</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select defaultValue="2024">
+                    <SelectTrigger className="w-32 h-8 text-xs">
+                      <SelectValue placeholder="Year" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="2024">2024</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </CardTitle>
-              <div className="flex space-x-4 mt-2 text-xs text-gray-500">
+              <div className="flex md:justify-start justify-center space-x-4 mt-2 text-xs text-gray-500">
                 <div>
                   <p className="font-semibold text-gray-800">35.80%</p>
                   <p>Overly Growth</p>
@@ -132,36 +152,16 @@ export default function Main() {
                 </div>
               </div>
             </div>
-            <div className="flex gap-2">
-              <Select defaultValue="user">
-                <SelectTrigger className="w-25 h-8 text-xs">
-                  <SelectValue placeholder="Account Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="user">User</SelectItem>
-                  <SelectItem value="manager">Manager</SelectItem>
-                  <SelectItem value="Stap">Stap</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select defaultValue="2024">
-                <SelectTrigger className="w-20 h-8 text-xs">
-                  <SelectValue placeholder="Year" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="2024">2024</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </CardHeader>
           <CardContent>
             <UserOverview />
           </CardContent>
         </Card>
         {/* Sales Matrics */}
-        <Card className="shadow-sm border-gray-100">
+        <Card className="shadow-sm border-gray-100 space-y-5">
           <CardHeader className="pb-2">
-            <div>
-              <div className="flex sm:flex-row flex-col items-center justify-between">
+            <div className="space-y-5">
+              <div className="flex sm:flex-row flex-col md:gap-0 gap-y-5 items-center justify-between">
                 <CardTitle className="text-lg font-medium text-gray-800">
                   Daily/Weekly/Monthly Sales Metrics
                 </CardTitle>
@@ -176,7 +176,7 @@ export default function Main() {
                   </div>
                 </div>
                 <Select defaultValue="2024">
-                  <SelectTrigger className="w-20 h-8 text-xs">
+                  <SelectTrigger className="w-32 h-8 text-xs">
                     <SelectValue placeholder="Year" />
                   </SelectTrigger>
                   <SelectContent>
@@ -184,7 +184,7 @@ export default function Main() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex space-x-4 mt-1 text-xs text-gray-500">
+              <div className="flex md:justify-start justify-center space-x-4 mt-2 text-xs text-gray-500">
                 <div>
                   <p className="font-semibold text-gray-800">78.18%</p>
                   <p>Overly Growth</p>
@@ -272,24 +272,32 @@ export default function Main() {
         </Card>
 
         <Card className="shadow-sm border-gray-100">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <div>
-              <div className="flex flex-row items-center justify-between">
+          <CardHeader className="pb-2">
+            <div className="space-y-5">
+              <div className="flex sm:flex-row flex-col md:gap-0 gap-y-5 items-center justify-between">
                 <CardTitle className="text-lg font-medium text-gray-800">
                   Daily/Weekly/Monthly Logins & Reviews
                 </CardTitle>
                 <div className="flex space-x-4 mt-2 text-xs text-gray-500">
                   <div className="flex items-center gap-1">
-                    <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
+                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
                     <span>Logins</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <div className="w-2 h-2 rounded-full bg-orange-600"></div>
+                    <div className="w-2 h-2 rounded-full bg-orange-700"></div>
                     <span>Reviews</span>
                   </div>
                 </div>
+                <Select defaultValue="2024">
+                  <SelectTrigger className="w-32 h-8 text-xs">
+                    <SelectValue placeholder="Year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="2024">2024</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              <div className="flex space-x-4 mt-1 text-xs text-gray-500">
+              <div className="flex md:justify-start justify-center space-x-4 mt-2 text-xs text-gray-500">
                 <div>
                   <p className="font-semibold text-gray-800">78.18%</p>
                   <p>Overly Growth</p>
@@ -300,18 +308,10 @@ export default function Main() {
                 </div>
                 <div>
                   <p className="font-semibold text-gray-800">89.80%</p>
-                  <p>Weekly</p>
+                  <p>Daily</p>
                 </div>
               </div>
             </div>
-            <Select defaultValue="2024">
-              <SelectTrigger className="w-20 h-8 text-xs">
-                <SelectValue placeholder="Year" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="2024">2024</SelectItem>
-              </SelectContent>
-            </Select>
           </CardHeader>
           <CardContent>
             <LoginReviewsData />

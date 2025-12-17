@@ -13,6 +13,7 @@ import { Proportions } from "lucide-react";
 import { SiFuturelearn } from "react-icons/si";
 import { CiSettings } from "react-icons/ci";
 import { IoTrophySharp } from "react-icons/io5";
+import { usePathname } from "next/navigation";
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -107,6 +108,8 @@ export default function Sidebar() {
     },
   ];
 
+  const pathname = usePathname();
+
   return (
     <>
       <nav id="sidebar" className="lg:min-w-67.5 w-max max-lg:min-w-8">
@@ -129,17 +132,23 @@ export default function Sidebar() {
 
           <div className="py-6 px-6">
             <ul className="space-y-2">
-              {navItems.map((item) => (
-                <li key={item.name}>
-                  <Link
-                    href={item.href}
-                    className="menu-item text-gray-300 text-[15px] font-medium flex items-center gap-3 cursor-pointer hover:bg-[#00C058] focus:bg-[#00C058] active:bg-[#00C058] focus:text-white hover:text-white rounded-md px-3 py-3 transition-all duration-300"
-                  >
-                    {item.icon}
-                    <span>{item.name}</span>
-                  </Link>
-                </li>
-              ))}
+              {navItems.map((item) => {
+                const isActive = pathname === item.href;
+
+                return (
+                  <li key={item.name}>
+                    <Link
+                      href={item.href}
+                      className={`menu-item text-gray-300 text-[15px] font-medium flex items-center gap-3 cursor-pointer hover:bg-[#00C058] focus:bg-[#00C058] active:bg-[#00C058] focus:text-white hover:text-white rounded-md px-3 py-3 transition-all duration-300 ${
+                        isActive ? "bg-[#00C058] text-white" : ""
+                      } w-full`}
+                    >
+                      {item.icon}
+                      <span>{item.name}</span>
+                    </Link>
+                  </li>
+                );
+              })}
 
               <li>
                 <button
