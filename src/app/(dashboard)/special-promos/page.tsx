@@ -1,5 +1,7 @@
+"use client";
+
 import Link from "next/link";
-import { ArrowLeft, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -40,23 +42,51 @@ export default function SpecialPromoPage() {
           </Label>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[1, 2, 3].map((item) => (
-              <div
-                key={item}
-                className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50/50 hover:bg-gray-50 transition-colors cursor-pointer group"
-              >
-                <div className="bg-gray-200 p-2 rounded-md mb-3 group-hover:bg-gray-300 transition-colors">
-                  <ImageIcon className="h-8 w-8 text-gray-500" />
-                </div>
-                <span className="text-[#00C058] font-medium text-sm">
-                  Browse Image
-                </span>
+              <div key={item} className="">
+                {/* <ImageIcon className="h-8 w-8 text-gray-500" /> */}
+
+                <label
+                  htmlFor="imageUpload"
+                  className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50/50 hover:bg-gray-50 transition-colors cursor-pointer group"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-12 w-12 text-gray-500 mb-3"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M3 5a2 2 0 012-2h4l2 2h8a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5z"
+                    />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M8 13l2-2 3 3 3-3"
+                    />
+                  </svg>
+
+                  <p className="text-green-500 font-medium text-lg">
+                    Browse Image
+                  </p>
+
+                  <input
+                    id="imageUpload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                  />
+                </label>
               </div>
             ))}
           </div>
         </div>
 
         <div className="space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="space-y-3">
               <Label htmlFor="name" className="text-gray-500 font-normal">
                 Product Name
@@ -70,22 +100,40 @@ export default function SpecialPromoPage() {
 
             <div className="space-y-3">
               <Label htmlFor="price" className="text-gray-500 font-normal">
-                Promo Validity Date
+                Price
               </Label>
               <Input
-                id=""
-                placeholder="12-20min"
+                id="price"
+                placeholder="$100"
                 className="h-12 border-gray-200 bg-white"
               />
             </div>
 
             <div className="space-y-3">
-              <Label htmlFor="price" className="text-gray-500 font-normal">
-                Promo Code
+              <Label className="text-gray-500 font-normal">
+                Select Currency
+              </Label>
+              <Select>
+                <SelectTrigger className="border-gray-200 bg-white text-gray-400">
+                  <SelectValue placeholder="$90" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="usd">USD ($)</SelectItem>
+                  <SelectItem value="eur">EUR (€)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-3">
+              <Label
+                htmlFor="deliveryFee"
+                className="text-gray-500 font-normal"
+              >
+                Delivery Fee
               </Label>
               <Input
-                id="price"
-                placeholder="100"
+                id="deliveryFee"
+                placeholder="$9"
                 className="h-12 border-gray-200 bg-white"
               />
             </div>

@@ -114,7 +114,6 @@ export default function Sidebar() {
     <>
       <nav id="sidebar" className="lg:min-w-67.5 w-max max-lg:min-w-8">
         <div
-          id="sidebar-collapse-menu"
           className={`bg-[#081028] shadow-lg h-screen fixed top-0 left-0 overflow-auto z-99 lg:min-w-67.5 lg:w-max transition-all duration-500
           ${isOpen ? "w-62.5 visible" : "max-lg:w-0 max-lg:invisible"}`}
         >

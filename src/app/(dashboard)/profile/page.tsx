@@ -12,17 +12,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 export default function ProfilePage() {
   return (
     <div className="min-h-screen w-full bg-white p-6 md:p-10 font-sans text-gray-900">
-      <div className="flex items-center gap-3 mb-8">
-        <Link
-          href="/"
-          className="p-1 -ml-2 hover:bg-gray-100 rounded-full transition-colors"
-        >
-          <ArrowLeft className="h-6 w-6 text-gray-800" />
-        </Link>
-        <h1 className="text-xl font-medium text-gray-900">Profile</h1>
-      </div>
-
       <div className="max-w-4xl mx-auto">
+        <div className="flex items-center gap-3 mb-8">
+          <Link
+            href="/"
+            className="p-1 -ml-2 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <ArrowLeft className="h-6 w-6 text-gray-800" />
+          </Link>
+          <h1 className="text-xl font-medium text-gray-900">Profile</h1>
+        </div>
         <div className="relative bg-[#F4F5F7] rounded-xl flex flex-col items-center justify-center py-10 mb-10">
           <button className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 transition-colors">
             <Pencil className="h-5 w-5" />

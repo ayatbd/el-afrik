@@ -7,13 +7,13 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative bg-white h-full min-h-screen font-[sans-serif] overflow-x-hidden">
+    <div className="relative bg-white h-full min-h-screen font-[sans-serif]">
       <div className="">
         <Navbar />
-        <section className="w-full lg:flex">
+        <main className="w-full lg:flex">
           <Sidebar />
           {children}
-        </section>
+        </main>
       </div>
     </div>
   );

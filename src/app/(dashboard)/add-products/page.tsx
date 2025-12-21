@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, RotateCw, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, RotateCw } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
