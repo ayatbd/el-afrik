@@ -208,9 +208,11 @@ export default function ManageProductsPage() {
                     <button className="cursor-pointer text-[#5D5FEF] hover:text-[#4a4ccf]">
                       <Pencil className="h-4 w-4" />
                     </button>
-                    <button className="cursor-pointer text-gray-700 hover:text-black">
-                      <UserCircle className="h-5 w-5" />
-                    </button>
+                    <Link href={`/product-management/${product.id}`}>
+                      <button className="cursor-pointer text-gray-700 hover:text-black">
+                        <UserCircle className="h-5 w-5" />
+                      </button>
+                    </Link>
                     <button className="cursor-pointer text-red-500 hover:text-red-700">
                       <Trash2 className="h-4 w-4" />
                     </button>
