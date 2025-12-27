@@ -2,6 +2,7 @@
 
 import JoditEditor from "jodit-react";
 import { useRef, useState } from "react";
+import { toast } from "react-toastify";
 
 export default function EditTerms() {
   const editor = useRef(null);
@@ -13,7 +14,7 @@ export default function EditTerms() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ content }),
     });
-    alert("Terms updated successfully");
+    toast.success("Terms & Conditions updated successfully");
   };
 
   return (
