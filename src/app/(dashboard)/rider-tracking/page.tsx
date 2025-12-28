@@ -13,6 +13,9 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Swal from "sweetalert2";
+import { useState } from "react";
+import ViewDriverDetails from "@/components/modules/rider-tracking/ViewDriverDetails";
 
 // mock data
 
@@ -110,6 +113,34 @@ const requests: RiderRequest[] = [
 ];
 
 export default function RiderTrackingPage() {
+  const [approve, setApprove] = useState(true);
+  const handleApprove = (id: number) => {
+    Swal.fire({
+      position: "top-end",
+      icon: "success",
+      title: "Approved Successfully",
+      showConfirmButton: false,
+      timer: 1500,
+    });
+    setApprove(false);
+  };
+
+  // --- Delete Handler ---
+  const handleCancel = () => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire("Cancelled!", "Your request has been cancelled.", "success");
+      }
+    });
+  };
   return (
     <div className="min-h-screen w-full bg-white p-6 md:p-10 font-sans text-gray-900">
       <div className="flex items-center gap-3 mb-8">
@@ -194,10 +225,17 @@ export default function RiderTrackingPage() {
 
                 <TableCell className="text-right py-6">
                   <div className="flex justify-end gap-3">
-                    <Button className="bg-[#00C058] hover:bg-[#00a84d] text-white rounded-full px-6 h-9 text-sm font-medium shadow-none cursor-pointer">
-                      Approve
+                    <ViewDriverDetails />
+                    <Button
+                      onClick={() => handleApprove(request.id)}
+                      className="bg-[#00C058] hover:bg-[#00a84d] text-white rounded-full px-3 text-[12px] font-medium shadow-none cursor-pointer transition-all delay-75"
+                    >
+                      {!approve ? "Approved" : "Approve"}
                     </Button>
-                    <Button className="bg-[#D32F2F] hover:bg-[#b71c1c] text-white rounded-full px-6 h-9 text-sm font-medium shadow-none cursor-pointer">
+                    <Button
+                      onClick={handleCancel}
+                      className="bg-[#D32F2F] hover:bg-[#b71c1c] text-white rounded-full px-3 text-[12px] font-medium shadow-none cursor-pointer transition-all delay-75"
+                    >
                       Cancel
                     </Button>
                   </div>

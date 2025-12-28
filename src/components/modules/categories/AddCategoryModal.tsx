@@ -77,16 +77,6 @@ export default function AddCategoryModal() {
               <Switch className="" id="airplane-mode" />
             </div>
           </div>
-          <div className="space-y-3">
-            <Label htmlFor="categoryName" className="text-gray-500 font-normal">
-              Category Name
-            </Label>
-            <Input
-              id="categoryName"
-              placeholder="Food"
-              className="h-12 border-gray-200 bg-white placeholder:text-gray-400 focus-visible:ring-[#4BD37B]"
-            />
-          </div>
         </div>
 
         <div className="flex justify-center mt-4">

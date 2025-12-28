@@ -45,7 +45,7 @@ export const products: Product[] = [
         image:
             "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=100&q=80",
         weight: "500-600gm",
-        category: "Foods",
+        category: "Snacks",
         price: "$ 15",
         date: "05/12/2024",
         stock: 300,
@@ -93,7 +93,7 @@ export const products: Product[] = [
         image:
             "https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?auto=format&fit=crop&w=100&q=80",
         weight: "500-600gm",
-        category: "Foods",
+        category: "Drinks",
         price: "$ 12",
         date: "05/12/2024",
         stock: 800,

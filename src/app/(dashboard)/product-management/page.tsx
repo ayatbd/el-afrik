@@ -136,7 +136,7 @@ export default function ManageProductsPage() {
     }
   };
 
-  const handleDelete = (productId: number) => {
+  const handleDelete = () => {
     Swal.fire({
       title: "Are you sure?",
       text: "You won't be able to revert this!",
@@ -322,7 +322,7 @@ export default function ManageProductsPage() {
                     <div className="flex items-center justify-center gap-5">
                       <EditProductModal />
                       <button
-                        onClick={() => handleDelete(product.id)}
+                        onClick={() => handleDelete()}
                         className="cursor-pointer text-red-500 hover:text-red-900"
                       >
                         <Trash2 className="h-4 w-4" />

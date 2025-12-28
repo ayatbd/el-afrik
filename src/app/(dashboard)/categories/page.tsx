@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, RotateCw, Trash2 } from "lucide-react";
+import { ArrowLeft, Trash2 } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -21,8 +21,61 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { products } from "@/app/data/categoriesData";
 import AddCategoryModal from "@/components/modules/categories/AddCategoryModal";
 import EditCategoryModal from "@/components/modules/categories/EditCategoryModal";
+import { useEffect, useState } from "react";
+import Swal from "sweetalert2";
 
 export default function CategoryPage() {
+  // --- Date Time Logic ---
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  useEffect(() => {
+    // Only run on client to avoid hydration mismatch
+    const interval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const formattedTime = currentTime.toLocaleString("en-US", {
+    month: "long",
+    day: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  });
+
+  // --- Delete Handler ---
+  const handleDelete = () => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire("Deleted!", "Your file has been deleted.", "success");
+      }
+    });
+  };
+
+  const handleCategoryChange = (value: string) => {
+    setCategoryFilter(value);
+  };
+
+  // --- Filtering Logic ---
+  const filteredProducts = products.filter((product) => {
+    // Category Filter
+    const matchesCategory =
+      categoryFilter === "all" ||
+      product.category.toLowerCase() === categoryFilter.toLowerCase();
+
+    return matchesCategory;
+  });
   return (
     <div className="min-h-screen w-full bg-[#FAFAFA] p-6 font-sans text-gray-800">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
@@ -36,24 +89,21 @@ export default function CategoryPage() {
           <h1 className="text-xl font-semibold text-gray-900">Categories</h1>
         </div>
 
-        <div className="flex items-center gap-4">
-          <button className="cursor-pointer flex items-center gap-2 text-gray-500 text-sm hover:text-gray-900 transition-colors">
-            Data Refresh
-            <RotateCw className="h-4 w-4" />
-          </button>
-          <div className="px-4 py-2 bg-white border border-gray-200 rounded-md text-sm text-gray-500 shadow-sm">
-            March 25,2024 10:43 Am
+        <div className="">
+          <div className="md:min-w-72 py-2 bg-white border text-center border-gray-200 rounded-md text-sm text-gray-500 shadow-sm">
+            {formattedTime}
           </div>
         </div>
       </div>
 
       <div className="flex flex-col md:flex-row justify-between md:items-center mb-6 gap-4">
         <div className="flex items-center gap-4 w-full md:w-auto">
-          <Select>
+          <Select value={categoryFilter} onValueChange={handleCategoryChange}>
             <SelectTrigger className="w-45 h-11 border-gray-300 bg-white text-gray-500">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
               <SelectItem value="foods">Foods</SelectItem>
               <SelectItem value="drinks">Drinks</SelectItem>
               <SelectItem value="snacks">Snacks</SelectItem>
@@ -84,7 +134,7 @@ export default function CategoryPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {products.map((product) => (
+            {filteredProducts.map((product) => (
               <TableRow
                 key={product.id}
                 className="border-b border-gray-100 hover:bg-white/50"
@@ -115,9 +165,12 @@ export default function CategoryPage() {
                 </TableCell>
 
                 <TableCell className="py-4">
-                  <div className="flex items-center justify-center gap-3">
+                  <div className="flex items-center justify-center gap-5">
                     <EditCategoryModal />
-                    <button className="cursor-pointer text-red-500 hover:text-red-700">
+                    <button
+                      onClick={() => handleDelete()}
+                      className="cursor-pointer text-red-500 hover:text-red-900"
+                    >
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>

@@ -4,6 +4,7 @@ import { Image as ImageIcon, Pencil } from "lucide-react";
 
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogHeader,
   DialogTitle,
@@ -13,8 +14,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import Swal from "sweetalert2";
 
-export default function AddCategoryModal() {
+export default function EditCategoryModal() {
+  // handling the edit action
+  const handleEdit = () => {
+    console.log("Edit product with ID:");
+    Swal.fire({
+      position: "top-end",
+      icon: "success",
+      title: "Updated Successfully",
+      showConfirmButton: false,
+      timer: 1500,
+    });
+  };
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -26,7 +39,7 @@ export default function AddCategoryModal() {
       <DialogContent className="sm:max-w-125 bg-white p-6 md:p-8 gap-6">
         <DialogHeader className="mb-2">
           <DialogTitle className="text-xl font-semibold text-gray-800">
-            Add VIP Events
+            Edit Category
           </DialogTitle>
         </DialogHeader>
 
@@ -76,22 +89,18 @@ export default function AddCategoryModal() {
               <Switch className="" id="airplane-mode" />
             </div>
           </div>
-          <div className="space-y-3">
-            <Label htmlFor="categoryName" className="text-gray-500 font-normal">
-              Category Name
-            </Label>
-            <Input
-              id="categoryName"
-              placeholder="Food"
-              className="h-12 border-gray-200 bg-white placeholder:text-gray-400 focus-visible:ring-[#4BD37B]"
-            />
-          </div>
         </div>
 
         <div className="flex justify-center mt-4">
-          <Button className="bg-[#00B25D] hover:bg-[#00924c] text-white px-12 h-11 text-base font-medium rounded-md w-50">
-            Submit
-          </Button>
+          <DialogClose asChild>
+            <Button
+              type="button"
+              onClick={handleEdit}
+              className="bg-[#00B25D] hover:bg-[#00924c] text-white px-12 h-11 text-base font-medium rounded-md w-50 cursor-pointer"
+            >
+              Publish
+            </Button>
+          </DialogClose>
         </div>
       </DialogContent>
     </Dialog>
