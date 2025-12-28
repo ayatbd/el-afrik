@@ -1,6 +1,6 @@
 "use client";
 import { ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { Star } from "lucide-react";
+import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 
 // mock data
 
@@ -124,15 +124,21 @@ export default function Main() {
                     <SelectContent>
                       <SelectItem value="user">User</SelectItem>
                       <SelectItem value="manager">Manager</SelectItem>
-                      <SelectItem value="Stap">Stap</SelectItem>
+                      <SelectItem value="staff">Staff</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Select defaultValue="2024">
+                  <Select defaultValue="2026">
                     <SelectTrigger className="w-32 h-8 text-xs">
                       <SelectValue placeholder="Year" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="2028">2028</SelectItem>
+                      <SelectItem value="2027">2027</SelectItem>
+                      <SelectItem value="2026">2026</SelectItem>
+                      <SelectItem value="2025">2025</SelectItem>
                       <SelectItem value="2024">2024</SelectItem>
+                      <SelectItem value="2023">2023</SelectItem>
+                      <SelectItem value="2022">2022</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -175,12 +181,18 @@ export default function Main() {
                     <span>Drinks</span>
                   </div>
                 </div>
-                <Select defaultValue="2024">
+                <Select defaultValue="2026">
                   <SelectTrigger className="w-32 h-8 text-xs">
                     <SelectValue placeholder="Year" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="2028">2028</SelectItem>
+                    <SelectItem value="2027">2027</SelectItem>
+                    <SelectItem value="2026">2026</SelectItem>
+                    <SelectItem value="2025">2025</SelectItem>
                     <SelectItem value="2024">2024</SelectItem>
+                    <SelectItem value="2023">2023</SelectItem>
+                    <SelectItem value="2022">2022</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -288,12 +300,18 @@ export default function Main() {
                     <span>Reviews</span>
                   </div>
                 </div>
-                <Select defaultValue="2024">
+                <Select defaultValue="2026">
                   <SelectTrigger className="w-32 h-8 text-xs">
                     <SelectValue placeholder="Year" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="2028">2028</SelectItem>
+                    <SelectItem value="2027">2027</SelectItem>
+                    <SelectItem value="2026">2026</SelectItem>
+                    <SelectItem value="2025">2025</SelectItem>
                     <SelectItem value="2024">2024</SelectItem>
+                    <SelectItem value="2023">2023</SelectItem>
+                    <SelectItem value="2022">2022</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -371,6 +389,26 @@ export default function Main() {
                 </tr>
               ))}
             </tbody>
+            <div className="mt-10 flex items-center justify-center gap-4 text-sm font-medium text-gray-600">
+              <button className="p-2 text-black cursor-pointer">
+                <ChevronLeft className="h-7 w-7" />
+              </button>
+
+              <span className="flex h-8 w-8 items-center justify-center rounded bg-gray-300 text-black">
+                1
+              </span>
+              <span className="cursor-pointer hover:text-black">2</span>
+              <span className="cursor-pointer hover:text-black">3</span>
+              <span className="cursor-default tracking-widest text-gray-400">
+                4.....30
+              </span>
+              <span className="cursor-pointer hover:text-black">60</span>
+              <span className="cursor-pointer hover:text-black">120</span>
+
+              <button className="p-2 text-black cursor-pointer">
+                <ChevronRight className="h-7 w-7" />
+              </button>
+            </div>
           </table>
         </div>
       </Card>
