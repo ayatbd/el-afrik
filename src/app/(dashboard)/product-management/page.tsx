@@ -1,16 +1,7 @@
 "use client";
 
-import React from "react";
 import Link from "next/link";
-import {
-  ArrowLeft,
-  RotateCw,
-  Search,
-  Plus,
-  Pencil,
-  UserCircle,
-  Trash2,
-} from "lucide-react";
+import { ArrowLeft, RotateCw, Search, Plus, Trash2 } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -32,6 +23,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { products, ProductStatus } from "@/app/data/categoriesData";
+import { useEffect, useState } from "react";
+import Swal from "sweetalert2";
+import EditProductModal from "@/components/modules/product-management/EditProductModal";
 
 const getStatusBadgeStyles = (status: ProductStatus) => {
   switch (status) {
@@ -47,6 +41,49 @@ const getStatusBadgeStyles = (status: ProductStatus) => {
 };
 
 export default function ManageProductsPage() {
+  //---- the current date and time----------
+  const [currentTime, setCurrentTime] = useState(new Date());
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+  const formattedTime = currentTime.toLocaleString("en-US", {
+    month: "long",
+    day: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  });
+
+  // -----------------------------------------
+
+  // handling the delete action
+  const handleDelete = (productId: number) => {
+    console.log("Delete product with ID:", productId);
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire({
+          title: "Deleted!",
+          text: "Your file has been deleted.",
+          icon: "success",
+        });
+      }
+    });
+  };
+
   return (
     <div className="min-h-screen w-full bg-[#FAFAFA] p-6 font-sans text-gray-800">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
@@ -62,13 +99,9 @@ export default function ManageProductsPage() {
           </h1>
         </div>
 
-        <div className="flex items-center gap-4">
-          <button className="cursor-pointer flex items-center gap-2 text-gray-500 text-sm hover:text-gray-900 transition-colors">
-            Data Refresh
-            <RotateCw className="h-4 w-4" />
-          </button>
-          <div className="px-4 py-2 bg-white border border-gray-200 rounded-md text-sm text-gray-500 shadow-sm">
-            March 25,2024 10:43 Am
+        <div className="">
+          <div className="md:min-w-72 py-2 bg-white border text-center border-gray-200 rounded-md text-sm text-gray-500 shadow-sm">
+            {formattedTime}
           </div>
         </div>
       </div>
@@ -94,11 +127,12 @@ export default function ManageProductsPage() {
             </SelectContent>
           </Select>
         </div>
-
-        <Button className="cursor-pointer bg-[#00B25D] hover:bg-[#009e52] text-white px-6 h-11">
-          Add Products
-          <Plus className="ml-2 h-4 w-4" />
-        </Button>
+        <Link href="/add-products">
+          <Button className="cursor-pointer bg-[#00B25D] hover:bg-[#009e52] text-white px-6 h-11">
+            Add Products
+            <Plus className="ml-2 h-4 w-4" />
+          </Button>
+        </Link>
       </div>
 
       <div className="mb-6 text-sm">
@@ -204,16 +238,19 @@ export default function ManageProductsPage() {
                 </TableCell>
 
                 <TableCell className="py-4">
-                  <div className="flex items-center justify-center gap-3">
-                    <button className="cursor-pointer text-[#5D5FEF] hover:text-[#4a4ccf]">
+                  <div className="flex items-center justify-center gap-5">
+                    {/* <button
+                      onClick={() => handleEdit(product.id)}
+                      className="cursor-pointer text-[#5D5FEF] hover:text-[#1115eb]"
+                    >
                       <Pencil className="h-4 w-4" />
-                    </button>
-                    <Link href={`/product-management/${product.id}`}>
-                      <button className="cursor-pointer text-gray-700 hover:text-black">
-                        <UserCircle className="h-5 w-5" />
-                      </button>
-                    </Link>
-                    <button className="cursor-pointer text-red-500 hover:text-red-700">
+                    </button> */}
+
+                    <EditProductModal />
+                    <button
+                      onClick={() => handleDelete(product.id)}
+                      className="cursor-pointer text-red-500 hover:text-red-900"
+                    >
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>

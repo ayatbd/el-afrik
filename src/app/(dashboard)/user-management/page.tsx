@@ -16,7 +16,6 @@ import { Input } from "@/components/ui/input";
 import { FaUserCircle } from "react-icons/fa";
 import { GoBlocked } from "react-icons/go";
 import Link from "next/link";
-// import { users } from "@/app/data/userData"; // Keeping your import, but using mock below for demo
 import Swal from "sweetalert2";
 
 // --- Mock Data (If you use your import, delete this array and uncomment the import above) ---
@@ -162,7 +161,7 @@ export default function UserManagementPage() {
                       <button
                         type="button"
                         onClick={handleBlock}
-                        className="p-0.5 rounded-sm border border-gray-800 text-gray-700 hover:bg-gray-100 transition-colors"
+                        className="p-0.5 rounded-sm border border-gray-800 text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
                       >
                         <GoBlocked className="h-4 w-4" />
                       </button>
@@ -176,7 +175,7 @@ export default function UserManagementPage() {
                   colSpan={6}
                   className="text-center py-10 text-gray-500"
                 >
-                  No users found matching "{searchTerm}"
+                  No users found matching &quot;{searchTerm}&quot;
                 </TableCell>
               </TableRow>
             )}
@@ -211,14 +210,15 @@ export default function UserManagementPage() {
               {page}
             </button>
           ))}
-
-          <button
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="p-2 text-black cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
-          >
-            <ChevronRight className="h-7 w-7" />
-          </button>
+          <Link href={`/product-management/12`}>
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="p-2 text-black disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              <ChevronRight className="h-7 w-7" />
+            </button>
+          </Link>
         </div>
       )}
     </div>

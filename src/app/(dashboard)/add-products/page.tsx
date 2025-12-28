@@ -30,10 +30,6 @@ export default function AddProductPage() {
         </div>
 
         <div className="flex items-center gap-4">
-          <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-md text-gray-600 text-sm hover:bg-gray-200 transition-colors">
-            Data Refresh
-            <RotateCw className="h-4 w-4 text-blue-600" />
-          </button>
           <div className="px-4 py-2 bg-white border border-gray-100 rounded-md text-sm text-gray-500 shadow-sm">
             March 25,2024 10:43 Am
           </div>
