@@ -115,10 +115,10 @@ export default function RewardsPage() {
         ))}
       </div>
 
-      <div className="flex justify-end mb-6">
+      <div className="text-end mb-6">
         <Link href="/rewards/tier-management">
-          <Button className="cursor-pointer bg-[#00B25D] hover:bg-[#009e52] text-white px-6 h-11">
-            <Plus className="ml-2 h-4 w-4" />
+          <Button className="cursor-pointer bg-[#00B25D] hover:bg-[#009e52] text-white px-12! py-6!">
+            <Plus className="h-4 w-4" />
             Add
           </Button>
         </Link>

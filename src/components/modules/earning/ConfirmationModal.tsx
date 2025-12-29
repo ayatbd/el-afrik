@@ -11,8 +11,11 @@ import {
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { DialogClose } from "@radix-ui/react-dialog";
+import React from "react";
 
 export default function ConfirmationModal() {
+  const [open, setOpen] = React.useState(false);
+
   const handleConfirm = () => {
     toast.success("Refund has been issued", {
       position: "top-center",
@@ -25,9 +28,11 @@ export default function ConfirmationModal() {
       theme: "light",
       transition: Bounce,
     });
+    setOpen(false);
   };
+
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="w-50 h-12 bg-[#00C058] hover:bg-[#00a049] text-white rounded-full text-base font-medium">
           Continue
@@ -65,14 +70,12 @@ export default function ConfirmationModal() {
           </div>
 
           <div className="pt-6 flex justify-center gap-3">
-            <DialogClose asChild>
-              <Button
-                onClick={handleConfirm}
-                className="w-50 h-12 bg-[#00C058] hover:bg-[#00a049] text-white rounded-full text-base font-medium cursor-pointer"
-              >
-                Continue
-              </Button>
-            </DialogClose>
+            <Button
+              onClick={handleConfirm}
+              className="w-50 h-12 bg-[#00C058] hover:bg-[#00a049] text-white rounded-full text-base font-medium cursor-pointer"
+            >
+              Continue
+            </Button>
             <DialogClose asChild>
               <Button className="w-50 h-12 bg-[#CE502A] hover:bg-[#c75431] text-white rounded-full text-base font-medium cursor-pointer">
                 Cancel

@@ -38,7 +38,7 @@ export default function AddProductPage() {
   };
 
   return (
-    <div className="min-h-screen max-w-7xl mx-auto bg-white p-6 md:p-10 font-sans text-gray-800">
+    <div className="min-h-screen md:min-w-7xl mx-auto bg-white p-6 md:p-10 font-sans text-gray-800">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
         <div className="flex items-center gap-3">
           <Link
@@ -199,8 +199,11 @@ export default function AddProductPage() {
                   <SelectValue placeholder="Points" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="10">05 Points</SelectItem>
                   <SelectItem value="10">10 Points</SelectItem>
-                  <SelectItem value="20">20 Points</SelectItem>
+                  <SelectItem value="10">15 Points</SelectItem>
+                  <SelectItem value="10">20 Points</SelectItem>
+                  <SelectItem value="20">25 Points</SelectItem>
                 </SelectContent>
               </Select>
             </div>
