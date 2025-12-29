@@ -155,22 +155,6 @@ export default function OrdersPage() {
           </Link>
           <h1 className="text-xl font-medium text-gray-900">Orders</h1>
         </div>
-
-        <div className="flex items-center gap-3 w-full md:w-auto justify-end">
-          <Button
-            variant="outline"
-            className="border-green-100 text-[#00C058] hover:text-[#00C058] hover:bg-green-50 h-11 px-6 text-base font-normal bg-white"
-          >
-            Current Order
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="border-green-100 text-[#00C058] hover:text-[#00C058] hover:bg-green-50 h-11 w-11 bg-white"
-          >
-            <ChevronRight className="h-5 w-5" />
-          </Button>
-        </div>
       </div>
 
       <div className="w-full overflow-hidden">
