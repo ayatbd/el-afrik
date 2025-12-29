@@ -15,6 +15,27 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import Link from "next/link";
+import Swal from "sweetalert2";
+
+// --- Helper Component for Status ---
+function StatusBadge({ status }: { status: RewardStatus }) {
+  const isAvailable = status === "Available";
+
+  return (
+    <span
+      className={`
+        px-4 py-1.5 rounded-md text-sm font-medium
+        ${
+          isAvailable
+            ? "bg-green-100 text-green-600"
+            : "bg-red-100 text-red-600"
+        }
+      `}
+    >
+      {status}
+    </span>
+  );
+}
 
 // --- Types ---
 type RewardStatus = "Available" | "unavailable";
@@ -94,7 +115,23 @@ const rewardsData: Reward[] = [
   },
 ];
 
-export default function RewardsPage() {
+// delete handler
+const handleDelete = () => {
+  Swal.fire({
+    title: "Are you sure?",
+    text: "You won't be able to revert this!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#3085d6",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Yes, delete it!",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      Swal.fire("Deleted!", "Your file has been deleted.", "success");
+    }
+  });
+};
+export default function TierManagement() {
   return (
     <div className="min-h-screen w-full bg-gray-50/50 p-8 font-sans text-slate-800">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
@@ -163,10 +200,14 @@ export default function RewardsPage() {
                 </TableCell>
                 <TableCell className="text-right pr-6">
                   <div className="flex items-center justify-end gap-3">
-                    <button className="text-blue-600 hover:text-blue-800 transition-colors p-1">
+                    <button className="text-blue-600 hover:text-blue-800 transition-colors p-1 cursor-pointer">
                       <Pencil className="h-5 w-5" />
                     </button>
-                    <button className="text-red-500 hover:text-red-700 transition-colors p-1">
+                    <button
+                      type="button"
+                      onClick={() => handleDelete()}
+                      className="text-red-500 hover:text-red-700 transition-colors p-1 cursor-pointer"
+                    >
                       <Trash2 className="h-5 w-5" />
                     </button>
                   </div>
@@ -177,25 +218,5 @@ export default function RewardsPage() {
         </Table>
       </div>
     </div>
-  );
-}
-
-// --- Helper Component for Status ---
-function StatusBadge({ status }: { status: RewardStatus }) {
-  const isAvailable = status === "Available";
-
-  return (
-    <span
-      className={`
-        px-4 py-1.5 rounded-md text-sm font-medium
-        ${
-          isAvailable
-            ? "bg-green-100 text-green-600"
-            : "bg-red-100 text-red-600"
-        }
-      `}
-    >
-      {status}
-    </span>
   );
 }

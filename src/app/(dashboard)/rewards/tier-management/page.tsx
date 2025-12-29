@@ -6,8 +6,24 @@ import TierModal from "@/components/modules/rewards/TierModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Bounce, toast } from "react-toastify";
 
 export default function RewardSetupPage() {
+  const handlePublish = () => {
+    // Implement publish logic here
+    console.log("Publish button clicked");
+    toast.success("Reward settings published successfully!", {
+      position: "top-center",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+      transition: Bounce,
+    });
+  };
   return (
     <div className="min-h-screen w-full bg-gray-50/30 p-8 md:p-12 font-sans text-slate-900">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
@@ -147,7 +163,11 @@ export default function RewardSetupPage() {
       </div>
 
       <div className="flex justify-center mb-8">
-        <Button className="bg-[#D05634] hover:bg-[#b84a2c] text-white text-lg font-medium py-6 px-16 w-full md:w-auto rounded-md shadow-sm transition-all">
+        <Button
+          type="submit"
+          onClick={handlePublish}
+          className="bg-[#D05634] hover:bg-[#b84a2c] text-white text-lg font-medium py-6 px-16 w-full md:w-auto rounded-md shadow-sm transition-all"
+        >
           Publish
         </Button>
       </div>
