@@ -133,7 +133,6 @@ export default function Sidebar() {
             <ul className="space-y-2">
               {navItems.map((item) => {
                 const isActive = pathname === item.href;
-
                 return (
                   <li key={item.name}>
                     <Link
@@ -173,16 +172,21 @@ export default function Sidebar() {
                     openSubmenu === "posts" ? "max-h-125" : "max-h-0"
                   }`}
                 >
-                  {NavSubItems.map((item) => (
-                    <li key={item.name}>
-                      <Link
-                        href={item.href}
-                        className="menu-item text-gray-300 text-[15px] font-medium flex items-center gap-3 cursor-pointer hover:bg-[#00C058] focus:bg-[#00C058] active:bg-[#00C058] focus:text-white hover:text-white rounded-md px-3 py-2.5 transition-all duration-300"
-                      >
-                        <span>{item.name}</span>
-                      </Link>
-                    </li>
-                  ))}
+                  {NavSubItems.map((item) => {
+                    const isActive = pathname === item.href;
+                    return (
+                      <li key={item.name}>
+                        <Link
+                          href={item.href}
+                          className={`menu-item text-gray-300 text-[15px] font-medium flex items-center gap-3 cursor-pointer hover:bg-[#00C058] focus:bg-[#00C058] active:bg-[#00C058] focus:text-white hover:text-white rounded-md px-3 py-2.5 transition-all duration-300 ${
+                            isActive ? "bg-[#00C058] text-white" : ""
+                          }`}
+                        >
+                          <span>{item.name}</span>
+                        </Link>
+                      </li>
+                    );
+                  })}
                 </ul>
               </li>
             </ul>

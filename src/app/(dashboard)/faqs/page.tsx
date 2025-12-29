@@ -1,11 +1,16 @@
+import AddQNAModal from "@/components/modules/faq/AddQNAModal";
+
 const FaqPage = () => {
   return (
     <div className="w-full">
       <div className="p-10">
         <div className="max-w-4xl mx-auto">
-          <h2 className="sm:text-3xl text-2xl font-semibold text-gray-800 mb-12">
-            Frequently Asked Questions
-          </h2>
+          <div className="flex justify-between">
+            <h2 className="sm:text-3xl text-2xl font-semibold text-gray-800 mb-12">
+              Frequently Asked Questions
+            </h2>
+            <AddQNAModal />
+          </div>
           <div className="space-y-8">
             <div className="flex items-start">
               <div className="shrink-0">

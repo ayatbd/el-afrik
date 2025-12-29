@@ -50,7 +50,6 @@ export default function AddProductPage() {
           </Link>
           <h1 className="text-xl font-semibold text-gray-900">Add Product</h1>
         </div>
-
         <div className="flex items-center gap-4">
           <PromoModal />
         </div>

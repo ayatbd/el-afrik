@@ -295,7 +295,7 @@ export default function ProfilePage() {
             <div className="pt-4 animate-in slide-in-from-bottom-5 fade-in duration-300">
               <Button
                 onClick={handleUpdate}
-                disabled={isLoading}
+                disabled={isLoading || !isEditing}
                 className="bg-[#D85C2F] hover:bg-[#b04b26] text-white h-12 px-8 rounded-md text-base font-medium min-w-37.5"
               >
                 {isLoading ? (

@@ -91,8 +91,44 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import UserOverview from "../modules/dashboard-home/UserOverview";
 import SalesMatricData from "../modules/dashboard-home/SalesMatricData";
 import LoginReviewsData from "../modules/dashboard-home/LoginReviewsData";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../ui/table";
+import { useState } from "react";
+import Link from "next/link";
+
+// --- Mock Data (If you use your import, delete this array and uncomment the import above) ---
+const items = Array.from({ length: 50 }, (_, i) => ({
+  id: i + 1,
+  name: `Item ${i + 1}`,
+  img: "/images/dashboard/content/home/Mask.png",
+  revenue: "$1,560",
+  rating: 4.6,
+  category: "Fast Food",
+  status: "Top Selling",
+}));
+// -----------------------------------------------------------------------------------------
 
 export default function Main() {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const itemsPerPage = 8;
+
+  const totalPages = Math.ceil(items.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentData = items.slice(startIndex, startIndex + itemsPerPage);
+
+  // 3. Handlers
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
   return (
     <div className="p-6 bg-white min-h-screen space-y-6 w-full">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-12">
@@ -337,81 +373,130 @@ export default function Main() {
         </Card>
       </div>
 
-      <Card className="shadow-sm border-gray-100 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="text-gray-900 font-semibold border-b border-gray-100 bg-white">
-              <tr>
-                <th className="px-6 py-4">Item Image</th>
-                <th className="px-6 py-4">Item Name</th>
-                <th className="px-6 py-4 text-center">Revenue Generated</th>
-                <th className="px-6 py-4 text-center">Avg.Rating</th>
-                <th className="px-6 py-4 text-center">Category</th>
-                <th className="px-6 py-4 text-right">Status</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white">
-              {foodItems.map((item) => (
-                <tr
-                  key={item.id}
-                  className="hover:bg-gray-50 border-b border-gray-50 last:border-none"
-                >
-                  <td className="px-6 py-4">
-                    <Avatar className="h-12 w-12 rounded-full border border-gray-100">
-                      <AvatarImage
-                        src={item.img}
-                        alt={item.name}
-                        className="object-cover"
-                      />
-                      <AvatarFallback>{item.name[0]}</AvatarFallback>
-                    </Avatar>
-                  </td>
-                  <td className="px-6 py-4 text-gray-700 font-medium">
-                    {item.name}
-                  </td>
-                  <td className="px-6 py-4 text-center text-gray-600">
-                    {item.revenue}
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <div className="flex items-center justify-center gap-1 text-gray-600">
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      {item.rating}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-center text-gray-600">
-                    {item.category}
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <Badge className="bg-green-100 text-green-600 hover:bg-green-100 hover:text-green-600 border-none px-3 py-1 font-normal">
-                      {item.status}
-                    </Badge>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-            <div className="mt-10 flex items-center justify-center gap-4 text-sm font-medium text-gray-600">
-              <button className="p-2 text-black cursor-pointer">
-                <ChevronLeft className="h-7 w-7" />
-              </button>
+      <Table>
+        <TableHeader>
+          <TableRow className="border-b-0 hover:bg-transparent">
+            <TableHead className="w-25 text-base font-semibold text-black">
+              Item Image
+            </TableHead>
+            <TableHead className="text-base font-semibold text-black">
+              Item Name
+            </TableHead>
+            <TableHead className="text-base font-semibold text-black">
+              Revenue Generated
+            </TableHead>
+            <TableHead className="text-base font-semibold text-black">
+              Avg.Rating
+            </TableHead>
+            <TableHead className="text-base font-semibold text-black">
+              Category
+            </TableHead>
+            <TableHead className="text-base font-semibold text-black text-right pr-6">
+              Status
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {currentData.length > 0 ? (
+            currentData.map((item) => (
+              <TableRow
+                key={item.id}
+                className="border-b-0 hover:bg-gray-50/50 transition-colors"
+              >
+                {/* Image Column */}
+                <TableCell className="py-4">
+                  <Avatar className="h-14 w-14 border border-gray-100">
+                    <AvatarImage
+                      src={item.img}
+                      alt={item.name}
+                      className="object-cover"
+                    />
+                    <AvatarFallback className="bg-orange-100 text-orange-600">
+                      {item.name.substring(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                </TableCell>
 
-              <span className="flex h-8 w-8 items-center justify-center rounded bg-gray-300 text-black">
-                1
-              </span>
-              <span className="cursor-pointer hover:text-black">2</span>
-              <span className="cursor-pointer hover:text-black">3</span>
-              <span className="cursor-default tracking-widest text-gray-400">
-                4.....30
-              </span>
-              <span className="cursor-pointer hover:text-black">60</span>
-              <span className="cursor-pointer hover:text-black">120</span>
+                {/* Name Column */}
+                <TableCell className="py-4 text-base font-medium text-gray-700">
+                  {item.name}
+                </TableCell>
 
-              <button className="p-2 text-black cursor-pointer">
-                <ChevronRight className="h-7 w-7" />
-              </button>
-            </div>
-          </table>
+                {/* Revenue Column */}
+                <TableCell className="py-4 text-base text-gray-700">
+                  {item.revenue}
+                </TableCell>
+
+                {/* Rating Column */}
+                <TableCell className="py-4">
+                  <div className="flex items-center gap-1.5 text-base text-gray-700">
+                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                    <span>{item.rating}</span>
+                  </div>
+                </TableCell>
+
+                {/* Category Column */}
+                <TableCell className="py-4 text-base text-gray-700">
+                  {item.category}
+                </TableCell>
+
+                {/* Status Column */}
+                <TableCell className="py-4 text-right pr-6">
+                  <Badge className="bg-[#E6F8EB] text-[#00B25D] hover:bg-[#d8f5df] border-0 rounded-md px-3 py-1 text-sm font-normal shadow-none">
+                    {item.status}
+                  </Badge>
+                </TableCell>
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell
+                colSpan={6}
+                className="text-center py-10 text-gray-500"
+              >
+                No users found matching &quot;{searchTerm}&quot;
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+      {totalPages > 1 && (
+        <div className="mt-10 flex items-center justify-center gap-4 text-sm font-medium text-gray-600">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="p-2 text-black cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            <ChevronLeft className="h-7 w-7" />
+          </button>
+
+          {/* Generate Page Numbers Dynamically */}
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            // Simple logic: Show all pages if less than 7, otherwise simple slice could be added
+            // For now, this renders all page numbers.
+            <button
+              key={page}
+              onClick={() => handlePageChange(page)}
+              className={`flex h-8 w-8 items-center justify-center rounded transition-colors ${
+                currentPage === page
+                  ? "bg-gray-300 text-black cursor-default"
+                  : "cursor-pointer hover:bg-gray-200 hover:text-black"
+              }`}
+            >
+              {page}
+            </button>
+          ))}
+          <Link href={`/product-management/12`}>
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="p-2 text-black disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              <ChevronRight className="h-7 w-7" />
+            </button>
+          </Link>
         </div>
-      </Card>
+      )}
     </div>
   );
 }
