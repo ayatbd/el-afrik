@@ -152,6 +152,25 @@ export default function ManageProductsPage() {
     });
   };
 
+  // --- Generate visible page numbers (max 5) ---
+  const getVisiblePages = () => {
+    const pages = [];
+    const maxVisible = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+    let endPage = startPage + maxVisible - 1;
+
+    if (endPage > totalPages) {
+      endPage = totalPages;
+      startPage = Math.max(1, endPage - maxVisible + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+
+    return pages;
+  };
+
   return (
     <div className="min-h-screen w-full bg-[#FAFAFA] p-6 font-sans text-gray-800">
       {/* Header */}
@@ -347,17 +366,18 @@ export default function ManageProductsPage() {
 
       {/* Pagination Controls */}
       {totalPages > 1 && (
-        <div className="mt-8 flex items-center justify-center gap-4 text-sm font-medium text-gray-600 pb-10">
+        <div className="mt-10 flex items-center justify-center gap-4 text-sm font-medium text-gray-600">
+          {/* Previous */}
           <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
             className="p-2 text-black cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
           >
-            <ChevronLeft className="h-6 w-6" />
+            <ChevronLeft className="h-7 w-7" />
           </button>
 
-          {/* Page Numbers */}
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+          {/* Page Numbers (Max 5) */}
+          {getVisiblePages().map((page) => (
             <button
               key={page}
               onClick={() => handlePageChange(page)}
@@ -372,11 +392,18 @@ export default function ManageProductsPage() {
           ))}
 
           <button
+            className={`flex h-8 w-8 items-center justify-center rounded transition-colors`}
+          >
+            ...{totalPages}
+          </button>
+
+          {/* Next */}
+          <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="p-2 text-black cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+            className="p-2 text-black disabled:opacity-30 disabled:cursor-not-allowed"
           >
-            <ChevronRight className="h-6 w-6" />
+            <ChevronRight className="h-7 w-7" />
           </button>
         </div>
       )}

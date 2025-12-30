@@ -103,7 +103,7 @@ import { useState } from "react";
 import Link from "next/link";
 
 // --- Mock Data (If you use your import, delete this array and uncomment the import above) ---
-const items = Array.from({ length: 50 }, (_, i) => ({
+const items = Array.from({ length: 100 }, (_, i) => ({
   id: i + 1,
   name: `Item ${i + 1}`,
   img: "/images/dashboard/content/home/Mask.png",
@@ -128,6 +128,20 @@ export default function Main() {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }
+  };
+
+  // Function to get visible page numbers (max 5)
+  const getVisiblePages = () => {
+    const maxVisible = 5;
+    let start = Math.max(1, currentPage - 2);
+    let end = start + maxVisible - 1;
+
+    if (end > totalPages) {
+      end = totalPages;
+      start = Math.max(1, end - maxVisible + 1);
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   };
   return (
     <div className="p-6 bg-white min-h-screen space-y-6 w-full">
@@ -462,6 +476,7 @@ export default function Main() {
       </Table>
       {totalPages > 1 && (
         <div className="mt-10 flex items-center justify-center gap-4 text-sm font-medium text-gray-600">
+          {/* Previous */}
           <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
@@ -470,10 +485,8 @@ export default function Main() {
             <ChevronLeft className="h-7 w-7" />
           </button>
 
-          {/* Generate Page Numbers Dynamically */}
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-            // Simple logic: Show all pages if less than 7, otherwise simple slice could be added
-            // For now, this renders all page numbers.
+          {/* Page Numbers (Max 5) */}
+          {getVisiblePages().map((page) => (
             <button
               key={page}
               onClick={() => handlePageChange(page)}
@@ -486,15 +499,21 @@ export default function Main() {
               {page}
             </button>
           ))}
-          <Link href={`/product-management/12`}>
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className="p-2 text-black disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-              <ChevronRight className="h-7 w-7" />
-            </button>
-          </Link>
+
+          <button
+            className={`flex h-8 w-8 items-center justify-center rounded transition-colors`}
+          >
+            ...{totalPages}
+          </button>
+
+          {/* Next */}
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="p-2 text-black disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            <ChevronRight className="h-7 w-7" />
+          </button>
         </div>
       )}
     </div>

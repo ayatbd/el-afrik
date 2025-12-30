@@ -69,6 +69,25 @@ export default function UserManagementPage() {
     setCurrentPage(1); // Reset to page 1 when searching
   };
 
+  // 4. Generate visible page numbers (max 5)
+  const getVisiblePages = () => {
+    const pages = [];
+    const maxVisible = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+    let endPage = startPage + maxVisible - 1;
+
+    if (endPage > totalPages) {
+      endPage = totalPages;
+      startPage = Math.max(1, endPage - maxVisible + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+
+    return pages;
+  };
+
   return (
     <div className="min-h-screen w-full bg-[#F9FAFB] p-6 md:p-10 font-sans text-gray-900">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
@@ -186,6 +205,7 @@ export default function UserManagementPage() {
       {/* Pagination Controls */}
       {totalPages > 1 && (
         <div className="mt-10 flex items-center justify-center gap-4 text-sm font-medium text-gray-600">
+          {/* Previous */}
           <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
@@ -194,10 +214,8 @@ export default function UserManagementPage() {
             <ChevronLeft className="h-7 w-7" />
           </button>
 
-          {/* Generate Page Numbers Dynamically */}
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-            // Simple logic: Show all pages if less than 7, otherwise simple slice could be added
-            // For now, this renders all page numbers.
+          {/* Page Numbers (Max 5) */}
+          {getVisiblePages().map((page) => (
             <button
               key={page}
               onClick={() => handlePageChange(page)}
@@ -210,15 +228,21 @@ export default function UserManagementPage() {
               {page}
             </button>
           ))}
-          <Link href={`/product-management/12`}>
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className="p-2 text-black disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-              <ChevronRight className="h-7 w-7" />
-            </button>
-          </Link>
+
+          <button
+            className={`flex h-8 w-8 items-center justify-center rounded transition-colors`}
+          >
+            ...{totalPages}
+          </button>
+
+          {/* Next */}
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="p-2 text-black disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            <ChevronRight className="h-7 w-7" />
+          </button>
         </div>
       )}
     </div>

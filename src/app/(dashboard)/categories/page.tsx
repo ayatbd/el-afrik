@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -28,6 +28,40 @@ export default function CategoryPage() {
   // --- Date Time Logic ---
   const [currentTime, setCurrentTime] = useState(new Date());
   const [categoryFilter, setCategoryFilter] = useState("all");
+  // --- Pagination Logic ---
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const productPerPage = 8;
+
+  const totalPages = Math.ceil(products.length / productPerPage);
+  const startIndex = (currentPage - 1) * productPerPage;
+  const currentData = products.slice(startIndex, startIndex + productPerPage);
+
+  // --- Pagination Handlers ---
+  const getVisiblePages = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = startPage + maxVisiblePages - 1;
+
+    if (endPage > totalPages) {
+      endPage = totalPages;
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+
+    return pages;
+  };
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  // --- Update Time Every Second ---
   useEffect(() => {
     // Only run on client to avoid hydration mismatch
     const interval = setInterval(() => {
@@ -68,7 +102,7 @@ export default function CategoryPage() {
   };
 
   // --- Filtering Logic ---
-  const filteredProducts = products.filter((product) => {
+  const filteredProducts = currentData.filter((product) => {
     // Category Filter
     const matchesCategory =
       categoryFilter === "all" ||
@@ -179,6 +213,48 @@ export default function CategoryPage() {
             ))}
           </TableBody>
         </Table>
+        {totalPages > 1 && (
+          <div className="mt-10 flex items-center justify-center gap-4 text-sm font-medium text-gray-600">
+            {/* Previous */}
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="p-2 text-black cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              <ChevronLeft className="h-7 w-7" />
+            </button>
+
+            {/* Page Numbers (Max 5) */}
+            {getVisiblePages().map((page) => (
+              <button
+                key={page}
+                onClick={() => handlePageChange(page)}
+                className={`flex h-8 w-8 items-center justify-center rounded transition-colors ${
+                  currentPage === page
+                    ? "bg-gray-300 text-black cursor-default"
+                    : "cursor-pointer hover:bg-gray-200 hover:text-black"
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+
+            <button
+              className={`flex h-8 w-8 items-center justify-center rounded transition-colors`}
+            >
+              ...{totalPages}
+            </button>
+
+            {/* Next */}
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="p-2 text-black disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              <ChevronRight className="h-7 w-7" />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

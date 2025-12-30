@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 import {
   Table,
@@ -143,6 +143,10 @@ const orders: Order[] = [
 ];
 
 export default function OrdersPage() {
+  const ITEMS_PER_LOAD = 5;
+  const [visibleCount, setVisibleCount] = useState(ITEMS_PER_LOAD);
+
+  const visibleOrders = orders.slice(0, visibleCount);
   return (
     <div className="min-h-screen w-full bg-[#F8F9FA] p-6 md:p-10 font-sans text-gray-900">
       <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
@@ -189,7 +193,7 @@ export default function OrdersPage() {
           </TableHeader>
 
           <TableBody>
-            {orders.map((order) => (
+            {visibleOrders.map((order) => (
               <TableRow
                 key={order.id}
                 className="border-b-0 hover:bg-white bg-transparent"
@@ -277,6 +281,16 @@ export default function OrdersPage() {
             ))}
           </TableBody>
         </Table>
+        {visibleCount < orders.length && (
+          <div className="mt-8 flex justify-center">
+            <Button
+              onClick={() => setVisibleCount((prev) => prev + ITEMS_PER_LOAD)}
+              className="h-11 px-8 bg-black text-white hover:bg-gray-800"
+            >
+              Load more
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
