@@ -1,8 +1,6 @@
 "use client";
 
-import React from "react";
 import { ArrowLeft, ArrowRightLeft, X, Pencil, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -12,6 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import Link from "next/link";
+import Swal from "sweetalert2";
 
 // Data structure based on the screenshot
 const holidayData = [
@@ -25,6 +24,22 @@ const holidayData = [
 ];
 
 export default function HolidayHours() {
+  // --- Delete Handler ---
+  const handleDelete = () => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire("Deleted!", "Your file has been deleted.", "success");
+      }
+    });
+  };
   return (
     <div className="w-full max-w-7xl mx-auto p-6 md:p-10 bg-white min-h-screen font-sans">
       {/* Back Button */}
@@ -107,10 +122,13 @@ export default function HolidayHours() {
                 {/* Action Column */}
                 <TableCell className="py-6 pr-4 align-middle text-right">
                   <div className="flex items-center justify-end gap-4">
-                    <button className="text-black hover:text-gray-700 transition-colors">
+                    <button className="text-black hover:text-gray-700 transition-colors cursor-pointer">
                       <Pencil className="h-5 w-5 fill-current" />
                     </button>
-                    <button className="text-[#DC2626] hover:text-red-700 transition-colors">
+                    <button
+                      onClick={handleDelete}
+                      className="text-[#DC2626] hover:text-red-700 transition-colors cursor-pointer"
+                    >
                       <Trash2 className="h-5 w-5 fill-current" />
                     </button>
                   </div>
