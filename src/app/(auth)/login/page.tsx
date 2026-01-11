@@ -1,17 +1,16 @@
 "use client";
-import { loginUser } from "@/redux/features/auth/authSlice";
-import { RootState, AppDispatch } from "@/redux/store";
+import { useLoginMutation } from "@/redux/features/auth/authApi";
+import { setCredentials } from "@/redux/features/auth/authSlice";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { HiOutlineEye, HiOutlineEyeOff } from "react-icons/hi";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
-
-  const dispatch = useDispatch<AppDispatch>();
-  const { loading, error } = useSelector((state: RootState) => state.auth);
+  const [login, { isLoading, isError, error }] = useLoginMutation();
   const router = useRouter();
+  const dispatch = useDispatch();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -20,10 +19,16 @@ const AdminLogin = () => {
     e.preventDefault();
 
     try {
-      await dispatch(loginUser({ email, password })).unwrap();
+      const result = await login({ email, password }).unwrap();
+      dispatch(
+        setCredentials({
+          user: result.user,
+          token: result.token,
+        })
+      );
       router.push("/");
-    } catch (err) {
-      console.error("Login failed");
+    } catch (err: any) {
+      console.error("Login failed:", err?.data?.message || err);
     }
   };
   return (
@@ -52,6 +57,7 @@ const AdminLogin = () => {
               </label>
               <input
                 type="email"
+                value={email}
                 id="email"
                 onChange={(e) => setEmail(e.target.value)}
                 className="mt-1 block w-full px-3 py-2 sm:px-4 sm:py-3 border border-[#FFE0A7] rounded-lg focus:ring-2 focus:ring-[#ddbe85] focus:border-[#ddbe85] focus:outline-none"
@@ -118,14 +124,17 @@ const AdminLogin = () => {
 
             {/* Submit Button */}
             <button
-              disabled={loading}
+              disabled={isLoading}
               type="submit"
               className="w-full flex justify-center py-2 px-4 sm:py-3 border border-transparent rounded-lg shadow-sm text-[20px]  font-bold text-[#181818] bg-[#FFE0A7] hover:bg-[#ebd3a6] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#e9cc96] cursor-pointer"
             >
-              Sign In
-              {loading ? "Logging in..." : "Login"}
+              {isLoading ? "Logging in..." : "Login"}
             </button>
-            {error && <p className="text-red-500 text-center">{error}</p>}
+            {error && (
+              <p className="text-red-500 text-center">
+                {(error as any)?.data?.message || "Login failed"}
+              </p>
+            )}
           </form>
         </div>
       </div>

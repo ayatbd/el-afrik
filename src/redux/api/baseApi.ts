@@ -1,23 +1,18 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { RootState } from '../store';
 
-// Define a service using a base URL and expected endpoints
 export const baseApi = createApi({
-    reducerPath: 'baseApi',
-    baseQuery: fetchBaseQuery({ baseUrl: process.env.NEXT_PUBLIC_API_URL }),
-    endpoints: (build) => ({
-        getUsers: build.query({
-            query: () => "/user/get-users",
-        }),
-        postUser: build.mutation({
-            query: (newUser) => ({
-                url: 'auth/register',
-                method: 'POST',
-                body: newUser,
-            }),
-        }),
+    reducerPath: 'api',
+    baseQuery: fetchBaseQuery({
+        baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
+        // Automatically attach token to headers
+        prepareHeaders: (headers, { getState }) => {
+            const token = (getState() as RootState).auth.token;
+            if (token) {
+                headers.set('authorization', `Bearer ${token}`);
+            }
+            return headers;
+        },
     }),
-})
-
-// Export hooks for usage in functional components, which are
-// auto-generated based on the defined endpoints
-export const { useGetUsersQuery } = baseApi
+    endpoints: (builder) => ({}),
+});
