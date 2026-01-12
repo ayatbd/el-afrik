@@ -17,50 +17,51 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useAddProductMutation } from "@/redux/api/productApi";
+import { useAddProductsMutation } from "@/redux/api/productApi";
 
-// Define form state interface
+// 1. Cleaned Interface to match your Sample Data exactly
 interface ProductFormState {
   name: string;
   price: string;
-  currency: string;
   deliveryFee: string;
   category: string;
   points: string;
   quantity: string;
   weight: string;
   description: string;
+  status: string;
+  promo: string;
 }
 
 export default function AddProductPage() {
   const router = useRouter();
-  const [addProduct, { isLoading }] = useAddProductMutation();
+  const [addProduct, { isLoading }] = useAddProductsMutation();
 
   // State for Images
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
 
-  // State for Text Fields
+  // State for Text Fields (Currency removed as it wasn't in sample data)
   const [formData, setFormData] = useState<ProductFormState>({
     name: "",
     price: "",
-    currency: "usd",
     deliveryFee: "",
     category: "",
     points: "",
     quantity: "",
-    weight: "", // Added weight as it was in your API response
+    weight: "",
     description: "",
+    status: "",
+    promo: "",
   });
 
-  // Cleanup object URLs to avoid memory leaks
+  // Cleanup object URLs
   useEffect(() => {
     return () => {
       previews.forEach((url) => URL.revokeObjectURL(url));
     };
   }, [previews]);
 
-  // Handle Text Inputs
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -68,40 +69,39 @@ export default function AddProductPage() {
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
-  // Handle Select Inputs
   const handleSelectChange = (key: keyof ProductFormState, value: string) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
-  // Handle Image Selection
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
       const newFiles = Array.from(files);
-
-      // Store actual File objects for upload
       setImageFiles((prev) => [...prev, ...newFiles]);
-
-      // Create URLs for preview
       const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
       setPreviews((prev) => [...prev, ...newPreviews]);
     }
   };
 
-  // Remove Image
   const removeImage = (indexToRemove: number) => {
     setImageFiles((prev) => prev.filter((_, index) => index !== indexToRemove));
     setPreviews((prev) => prev.filter((_, index) => index !== indexToRemove));
   };
 
-  // SUBMIT HANDLER
+  // --- SUBMIT HANDLER ---
   const handleSubmit = async () => {
-    // 1. Basic Validation
-    if (!formData.name || !formData.price || imageFiles.length === 0) {
+    // 1. Validation
+    if (
+      !formData.name ||
+      !formData.price ||
+      !formData.category ||
+      !formData.status ||
+      imageFiles.length === 0
+    ) {
       Swal.fire({
-        icon: "error",
-        title: "Missing Fields",
-        text: "Please fill in all required fields and upload at least one image.",
+        icon: "warning",
+        title: "Missing Information",
+        text: "Please fill in Name, Price, Category, Status, and upload an image.",
       });
       return;
     }
@@ -109,38 +109,53 @@ export default function AddProductPage() {
     try {
       // 2. Prepare FormData
       const data = new FormData();
+      const { promo, ...rest } = formData;
+      const myObj: Record<string, unknown> = {
+        ...rest,
+      };
 
-      // Append plain text fields
-      data.append("name", formData.name);
-      data.append("price", formData.price); // Backend expects number usually, FormData sends string, backend parses
-      data.append("weight", formData.weight);
-      data.append("category", formData.category); // Assuming backend takes the ID string
-      data.append("quantity", formData.quantity);
-      data.append("deliveryFee", formData.deliveryFee);
-      data.append("points", formData.points);
-      data.append("description", formData.description);
-      // Optional fields logic
-      data.append("promo", "NEWYEAR2026"); // Hardcoded based on your JSON example
-      data.append("isFavourite", "true");
+      if (promo) {
+        myObj.promo = formData.promo;
+      }
+      const finalValues = JSON.stringify(formData);
+      data.append("body", finalValues);
 
-      // Append Images
-      // Note: 'images' is the key name expected by Multer/Backend array upload
+      // IMPORTANT: These keys must match the Backend Controller DTO exactly
+      // data.append("name", formData.name);
+      // data.append("price", formData.price);
+      // data.append("weight", formData.weight);
+      // data.append("category", formData.category);
+      // data.append("quantity", formData.quantity);
+      // data.append("deliveryFee", formData.deliveryFee);
+      // data.append("points", formData.points);
+      // data.append("description", formData.description);
+      // data.append("status", formData.status);
+
+      // Only append promo if it has a value, otherwise backend might reject empty string
+
+      // 3. Appending Images
+      // "Unexpected field" usually happens here.
+      // Ensure "images" matches your Multer config (e.g. upload.array('images'))
       imageFiles.forEach((file) => {
-        data.append("images", file);
+        data.append("image", file);
       });
 
-      // 3. Call API
+      // Debug: Log what we are sending
+      // for (let pair of data.entries()) {
+      //   console.log(pair[0] + ', ' + pair[1]);
+      // }
+
       const response = await addProduct(data).unwrap();
 
       if (response.success) {
         Swal.fire({
           icon: "success",
-          title: "Success!",
-          text: "Product created successfully.",
+          title: "Product Created!",
+          text: "Your product has been added successfully.",
           timer: 2000,
           showConfirmButton: false,
         }).then(() => {
-          router.push("/manage-products"); // Redirect to list
+          router.push("/manage-products");
         });
       }
     } catch (error: any) {
@@ -148,7 +163,9 @@ export default function AddProductPage() {
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: error?.data?.message || "Something went wrong. Please try again.",
+        text:
+          error?.data?.message ||
+          "Unexpected field error usually implies image field name mismatch.",
       });
     }
   };
@@ -168,18 +185,18 @@ export default function AddProductPage() {
       </div>
 
       <div className="space-y-8">
-        {/* --- Image Upload Section --- */}
+        {/* --- Image Upload --- */}
         <div className="space-y-4">
           <Label className="text-base font-normal text-gray-500">
             Upload Product Images <span className="text-red-500">*</span>
           </Label>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {/* Upload Button */}
             <label
               htmlFor="imageUpload"
               className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50/50 hover:bg-gray-50 transition-colors cursor-pointer"
             >
+              {/* SVG Icon */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-12 w-12 text-gray-500 mb-3"
@@ -212,7 +229,6 @@ export default function AddProductPage() {
               />
             </label>
 
-            {/* Image Previews */}
             {previews.map((img, index) => (
               <div
                 key={index}
@@ -266,29 +282,11 @@ export default function AddProductPage() {
             </div>
 
             <div className="space-y-3">
-              <Label className="text-gray-500 font-normal">
-                Select Currency
-              </Label>
-              <Select
-                value={formData.currency}
-                onValueChange={(val) => handleSelectChange("currency", val)}
-              >
-                <SelectTrigger className="h-12 border-gray-200 bg-white text-gray-500">
-                  <SelectValue placeholder="USD" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="usd">USD ($)</SelectItem>
-                  <SelectItem value="eur">EUR (€)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-3">
               <Label
                 htmlFor="deliveryFee"
                 className="text-gray-500 font-normal"
               >
-                Delivery Fee
+                Delivery Fee <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="deliveryFee"
@@ -299,9 +297,8 @@ export default function AddProductPage() {
                 className="h-12 border-gray-200 bg-white"
               />
             </div>
-          </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Category */}
             <div className="space-y-3">
               <Label className="text-gray-500 font-normal">
                 Select Category <span className="text-red-500">*</span>
@@ -323,9 +320,13 @@ export default function AddProductPage() {
                 </SelectContent>
               </Select>
             </div>
+          </div>
 
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="space-y-3">
-              <Label className="text-gray-500 font-normal">Points</Label>
+              <Label className="text-gray-500 font-normal">
+                Points <span className="text-red-500">*</span>
+              </Label>
               <Select
                 value={formData.points}
                 onValueChange={(val) => handleSelectChange("points", val)}
@@ -343,33 +344,66 @@ export default function AddProductPage() {
               </Select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <Label htmlFor="quantity" className="text-gray-500 font-normal">
-                  Quantity
-                </Label>
-                <Input
-                  id="quantity"
-                  type="number"
-                  value={formData.quantity}
-                  onChange={handleInputChange}
-                  placeholder="10"
-                  className="h-12 border-gray-200 bg-white"
-                />
-              </div>
-              <div className="space-y-3">
-                <Label htmlFor="weight" className="text-gray-500 font-normal">
-                  Weight (g)
-                </Label>
-                <Input
-                  id="weight"
-                  type="number"
-                  value={formData.weight}
-                  onChange={handleInputChange}
-                  placeholder="25"
-                  className="h-12 border-gray-200 bg-white"
-                />
-              </div>
+            <div className="space-y-3">
+              <Label htmlFor="quantity" className="text-gray-500 font-normal">
+                Quantity <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="quantity"
+                type="number"
+                value={formData.quantity}
+                onChange={handleInputChange}
+                placeholder="10"
+                className="h-12 border-gray-200 bg-white"
+              />
+            </div>
+
+            <div className="space-y-3">
+              <Label htmlFor="weight" className="text-gray-500 font-normal">
+                Weight (g) <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="weight"
+                type="number"
+                value={formData.weight}
+                onChange={handleInputChange}
+                placeholder="25"
+                className="h-12 border-gray-200 bg-white"
+              />
+            </div>
+
+            <div className="space-y-3">
+              <Label className="text-gray-500 font-normal">
+                Product Status <span className="text-red-500">*</span>
+              </Label>
+              <Select
+                value={formData.status}
+                onValueChange={(val) => handleSelectChange("status", val)}
+              >
+                <SelectTrigger className="h-12 border-gray-200 bg-white text-gray-500">
+                  <SelectValue placeholder="Select Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="in_stock">In Stock</SelectItem>
+                  <SelectItem value="out_of_stock">Out of Stock</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div className="space-y-3">
+              <Label htmlFor="promo" className="text-gray-500 font-normal">
+                Promo Code
+              </Label>
+              <Input
+                id="promo"
+                type="text"
+                value={formData.promo}
+                onChange={handleInputChange}
+                placeholder="e.g. NEWYEAR2026"
+                className="h-12 border-gray-200 bg-white"
+              />
             </div>
           </div>
 
@@ -391,7 +425,7 @@ export default function AddProductPage() {
           <Button
             onClick={handleSubmit}
             disabled={isLoading}
-            className="w-full md:w-64 h-12 text-base font-medium bg-[#CF4F26] hover:bg-[#b54420] text-white shadow-md rounded-md disabled:opacity-50"
+            className="w-full md:w-64 h-12 text-base font-medium bg-[#CF4F26] hover:bg-[#b54420] text-white shadow-md rounded-md disabled:opacity-50 cursor-pointer"
           >
             {isLoading ? (
               <>
