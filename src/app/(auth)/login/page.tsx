@@ -1,34 +1,27 @@
 "use client";
 import { useLoginMutation } from "@/redux/features/auth/authApi";
 import { setCredentials } from "@/redux/features/auth/authSlice";
+import { useAppDispatch } from "@/redux/hooks";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { HiOutlineEye, HiOutlineEyeOff } from "react-icons/hi";
-import { useDispatch } from "react-redux";
 const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [login, { isLoading, isError, error }] = useLoginMutation();
-  const router = useRouter();
-  const dispatch = useDispatch();
+  // RTK Query hook
+  const [login, { isLoading, error }] = useLoginMutation();
+
+  const dispatch = useAppDispatch();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
-      const result = await login({ email, password }).unwrap();
-      dispatch(
-        setCredentials({
-          user: result.user,
-          token: result.token,
-        })
-      );
-      router.push("/");
+      const res = await login({ email, password });
+      dispatch(setCredentials(res.data));
     } catch (err: any) {
-      console.error("Login failed:", err?.data?.message || err);
+      console.log(err);
     }
   };
   return (
@@ -46,7 +39,7 @@ const AdminLogin = () => {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleLogin} className="space-y-6">
             {/* Email */}
             <div>
               <label

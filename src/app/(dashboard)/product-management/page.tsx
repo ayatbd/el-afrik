@@ -8,6 +8,7 @@ import {
   Trash2,
   ChevronLeft,
   ChevronRight,
+  Loader2,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
@@ -32,59 +33,176 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import EditProductModal from "@/components/modules/product-management/EditProductModal";
+import { useGetProductsQuery } from "@/redux/api/productApi";
 
-// --- MOCK DATA (Replace this with your actual import) ---
-// import { products, ProductStatus } from "@/app/data/categoriesData";
-type ProductStatus = "Available" | "unavailable" | "Short Stock";
+// --- TYPES BASED ON YOUR API RESPONSE ---
 
-// Mock data generator for demonstration
-const products = Array.from({ length: 45 }, (_, i) => ({
-  id: i + 1,
-  name: i % 2 === 0 ? `Organic Apple ${i}` : `Sparkling Water ${i}`,
-  weight: "1kg",
-  category: i % 3 === 0 ? "Foods" : i % 3 === 1 ? "Drinks" : "Snacks",
-  price: "$10.00",
-  date: "2024-01-15",
-  stock: i * 5,
-  status: (i % 5 === 0
-    ? "unavailable"
-    : i % 4 === 0
-    ? "Short Stock"
-    : "Available") as ProductStatus,
-  image: "",
-  isDateLate: i % 10 === 0,
-}));
-// -------------------------------------------------------
+interface Product {
+  _id: string;
+  id: string; // API returns both _id and id
+  name: string;
+  images: string[];
+  weight: number;
+  category: string; // Currently an ID based on your JSON
+  price: number;
+  quantity: number;
+  status: string; // e.g., "in_stock"
+  createdAt: string;
+  isDateLate?: boolean; // Custom logic field if needed
+}
 
-const getStatusBadgeStyles = (status: ProductStatus) => {
-  switch (status) {
-    case "Available":
-      return "bg-green-100 text-green-600 hover:bg-green-100";
-    case "unavailable":
-      return "bg-red-100 text-red-500 hover:bg-red-100";
-    case "Short Stock":
-      return "bg-purple-100 text-purple-700 hover:bg-purple-100";
-    default:
-      return "bg-gray-100 text-gray-600";
-  }
+interface Meta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPage: number;
+}
+
+interface ApiResponse {
+  success: boolean;
+  message: string;
+  statusCode: number;
+  data: {
+    meta: Meta;
+    result: Product[];
+  };
+}
+
+// --- HELPER FUNCTIONS ---
+
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(amount);
+};
+
+const formatDate = (dateString: string) => {
+  if (!dateString) return "N/A";
+  return new Date(dateString).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
+
+const getStatusBadgeStyles = (status: string) => {
+  const normalized = status?.toLowerCase().replace("_", " ");
+  if (normalized === "in stock" || normalized === "available")
+    return "bg-green-100 text-green-600 hover:bg-green-100 border-green-200";
+  if (normalized === "out of stock" || normalized === "unavailable")
+    return "bg-red-100 text-red-500 hover:bg-red-100 border-red-200";
+  if (normalized === "short stock")
+    return "bg-purple-100 text-purple-700 hover:bg-purple-100 border-purple-200";
+  return "bg-gray-100 text-gray-600 border-gray-200";
+};
+
+const formatStatusLabel = (status: string) => {
+  return status?.replace(/_/g, " ").toUpperCase();
 };
 
 export default function ManageProductsPage() {
-  // --- States for Search, Filter, Pagination ---
+  // --- States ---
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8; // Adjust number of rows per page here
-
-  // --- Date Time Logic ---
+  const [mounted, setMounted] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+
+  // --- RTK Query ---
+  // We pass query params here assuming your backend handles filtering/pagination
+  // If your backend does not accept params yet, remove the argument object.
+  const queryParams = {
+    page: currentPage,
+    limit: 10,
+    searchTerm: searchTerm,
+    category: categoryFilter !== "all" ? categoryFilter : undefined,
+  };
+
+  const {
+    data: apiResponse, // This is the full object { success, data: { meta, result } }
+    isLoading,
+    isError,
+  } = useGetProductsQuery(queryParams, {
+    refetchOnMountOrArgChange: true,
+  });
+
+  // --- Data Extraction ---
+  // Safely extract data based on the provided JSON structure
+  const products: Product[] = apiResponse?.data?.result || [];
+  const meta: Meta = apiResponse?.data?.meta || {
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPage: 1,
+  };
+
+  // --- Effects ---
   useEffect(() => {
-    // Only run on client to avoid hydration mismatch
+    setMounted(true);
     const interval = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
     return () => clearInterval(interval);
   }, []);
+
+  // --- Handlers ---
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1); // Reset to page 1 when searching
+  };
+
+  const handleCategoryChange = (value: string) => {
+    setCategoryFilter(value);
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= meta.totalPage) {
+      setCurrentPage(page);
+    }
+  };
+
+  const handleDelete = (id: string) => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        console.log("Deleting ID:", id);
+        // Add your delete mutation trigger here
+        Swal.fire("Deleted!", "Product has been deleted.", "success");
+      }
+    });
+  };
+
+  // --- Pagination UI Logic ---
+  const getVisiblePages = () => {
+    const total = meta.totalPage;
+    const pages = [];
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      for (let i = 1; i <= total; i++) pages.push(i);
+    } else {
+      let start = Math.max(1, currentPage - 2);
+      let end = Math.min(total, currentPage + 2);
+
+      if (currentPage <= 3) {
+        end = 5;
+      } else if (currentPage >= total - 2) {
+        start = total - 4;
+      }
+
+      for (let i = start; i <= end; i++) pages.push(i);
+    }
+    return pages;
+  };
 
   const formattedTime = currentTime.toLocaleString("en-US", {
     month: "long",
@@ -95,81 +213,6 @@ export default function ManageProductsPage() {
     second: "2-digit",
     hour12: true,
   });
-
-  // --- Filtering Logic ---
-  const filteredProducts = products.filter((product) => {
-    // 1. Search Filter (Name)
-    const matchesSearch = product.name
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-
-    // 2. Category Filter
-    const matchesCategory =
-      categoryFilter === "all" ||
-      product.category.toLowerCase() === categoryFilter.toLowerCase();
-
-    return matchesSearch && matchesCategory;
-  });
-
-  // --- Pagination Logic ---
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentData = filteredProducts.slice(
-    startIndex,
-    startIndex + itemsPerPage
-  );
-
-  // --- Handlers ---
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-    setCurrentPage(1); // Reset to page 1 on search
-  };
-
-  const handleCategoryChange = (value: string) => {
-    setCategoryFilter(value);
-    setCurrentPage(1); // Reset to page 1 on filter
-  };
-
-  const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
-  };
-
-  const handleDelete = () => {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to revert this!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        Swal.fire("Deleted!", "Your file has been deleted.", "success");
-      }
-    });
-  };
-
-  // --- Generate visible page numbers (max 5) ---
-  const getVisiblePages = () => {
-    const pages = [];
-    const maxVisible = 5;
-    let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
-    let endPage = startPage + maxVisible - 1;
-
-    if (endPage > totalPages) {
-      endPage = totalPages;
-      startPage = Math.max(1, endPage - maxVisible + 1);
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
-    }
-
-    return pages;
-  };
 
   return (
     <div className="min-h-screen w-full bg-[#FAFAFA] p-6 font-sans text-gray-800">
@@ -186,17 +229,15 @@ export default function ManageProductsPage() {
             Manage Products
           </h1>
         </div>
-        <div className="">
-          <div className="md:min-w-72 py-2 bg-white border text-center border-gray-200 rounded-md text-sm text-gray-500 shadow-sm">
-            {formattedTime}
-          </div>
+        <div className="md:min-w-72 py-2 bg-white border text-center border-gray-200 rounded-md text-sm text-gray-500 shadow-sm">
+          {mounted ? formattedTime : "Loading..."}
         </div>
       </div>
 
-      {/* Controls: Search, Filter, Add Button */}
+      {/* Controls */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <div className="flex items-center gap-4 w-full md:w-auto">
-          {/* Search Input */}
+          {/* Search */}
           <div className="relative w-full md:w-70">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
@@ -207,37 +248,36 @@ export default function ManageProductsPage() {
             />
           </div>
 
-          {/* Category Select */}
+          {/* Filter */}
           <Select value={categoryFilter} onValueChange={handleCategoryChange}>
             <SelectTrigger className="w-45 h-11 border-gray-300 bg-white text-gray-500">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Categories</SelectItem>
+              {/* These IDs should ideally come from a Category API */}
+              <SelectItem value="60c72b2f9d1c3f5f5f5c7c10">
+                Furniture
+              </SelectItem>
               <SelectItem value="foods">Foods</SelectItem>
-              <SelectItem value="drinks">Drinks</SelectItem>
-              <SelectItem value="snacks">Snacks</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <Link href="/add-products">
           <Button className="cursor-pointer bg-[#00B25D] hover:bg-[#009e52] text-white px-6 h-11">
-            Add Products
-            <Plus className="ml-2 h-4 w-4" />
+            Add Products <Plus className="ml-2 h-4 w-4" />
           </Button>
         </Link>
       </div>
 
-      {/* Stats Line */}
+      {/* Stats */}
       <div className="mb-6 text-sm">
         <span className="text-purple-700 font-medium">Showing:</span>
         <span className="ml-2 text-gray-900 font-semibold">
-          {filteredProducts.length}
+          {products.length}
         </span>
-        <span className="ml-1 text-gray-500">
-          of {products.length} Products
-        </span>
+        <span className="ml-1 text-gray-500">of {meta.total} Products</span>
       </div>
 
       {/* Table */}
@@ -245,7 +285,7 @@ export default function ManageProductsPage() {
         <Table>
           <TableHeader>
             <TableRow className="border-b-0 hover:bg-transparent">
-              <TableHead className="w-12.5 text-gray-500 font-medium">
+              <TableHead className="w-16 text-gray-500 font-medium">
                 S. no
               </TableHead>
               <TableHead className="text-gray-500 font-medium">
@@ -254,9 +294,7 @@ export default function ManageProductsPage() {
               <TableHead className="text-gray-500 font-medium">
                 Weight
               </TableHead>
-              <TableHead className="text-gray-500 font-medium">
-                Category
-              </TableHead>
+              {/* <TableHead className="text-gray-500 font-medium">Category</TableHead> */}
               <TableHead className="text-gray-500 font-medium">Price</TableHead>
               <TableHead className="text-gray-500 font-medium">Date</TableHead>
               <TableHead className="text-gray-500 font-medium">Stock</TableHead>
@@ -269,142 +307,158 @@ export default function ManageProductsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {currentData.length > 0 ? (
-              currentData.map((product) => (
+            {isLoading && (
+              <TableRow>
+                <TableCell colSpan={9} className="h-24 text-center">
+                  <div className="flex items-center justify-center gap-2 text-gray-500">
+                    <Loader2 className="h-6 w-6 animate-spin" /> Loading data...
+                  </div>
+                </TableCell>
+              </TableRow>
+            )}
+
+            {isError && (
+              <TableRow>
+                <TableCell
+                  colSpan={9}
+                  className="h-24 text-center text-red-500"
+                >
+                  Error loading products.
+                </TableCell>
+              </TableRow>
+            )}
+
+            {!isLoading && !isError && products.length === 0 && (
+              <TableRow>
+                <TableCell
+                  colSpan={9}
+                  className="h-32 text-center text-gray-500"
+                >
+                  No products found.
+                </TableCell>
+              </TableRow>
+            )}
+
+            {!isLoading &&
+              !isError &&
+              products.map((product, index) => (
                 <TableRow
-                  key={product.id}
+                  key={product._id}
                   className="border-b border-gray-100 hover:bg-white/50"
                 >
                   <TableCell className="py-4 text-gray-500">
-                    {product.id}.
+                    {/* Calculate serial number based on page */}
+                    {(meta.page - 1) * meta.limit + index + 1}.
                   </TableCell>
 
                   <TableCell className="py-4">
                     <div className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10 rounded-md">
+                      <Avatar className="h-10 w-10 rounded-md border border-gray-200">
                         <AvatarImage
-                          src={product.image}
+                          src={product.images?.[0] || ""}
                           alt={product.name}
                           className="object-cover"
                         />
-                        <AvatarFallback className="rounded-md">
-                          P
+                        <AvatarFallback className="rounded-md bg-gray-100 text-gray-400">
+                          {product.name.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-gray-600 font-normal">
-                        {product.name}
-                      </span>
+                      <div className="flex flex-col">
+                        <span className="text-gray-700 font-medium text-sm">
+                          {product.name}
+                        </span>
+                        {/* Optional: Show Category ID or Name here if needed */}
+                        {/* <span className="text-xs text-gray-400">{product.category}</span> */}
+                      </div>
                     </div>
                   </TableCell>
 
                   <TableCell className="py-4 text-gray-500">
-                    {product.weight}
+                    {product.weight ? `${product.weight}g` : "-"}
                   </TableCell>
-                  <TableCell className="py-4 text-gray-500">
-                    {product.category}
+
+                  <TableCell className="py-4 text-gray-600 font-medium">
+                    {formatCurrency(product.price)}
                   </TableCell>
+
                   <TableCell className="py-4 text-gray-500">
-                    {product.price}
+                    {formatDate(product.createdAt)}
                   </TableCell>
 
                   <TableCell
-                    className={`py-4 ${
-                      product.isDateLate
-                        ? "text-red-600 font-medium"
-                        : "text-gray-500"
+                    className={`py-4 font-medium ${
+                      product.quantity < 10 ? "text-red-500" : "text-gray-600"
                     }`}
                   >
-                    {product.date}
-                  </TableCell>
-
-                  <TableCell
-                    className={`py-4 ${
-                      product.status === "Short Stock"
-                        ? "text-blue-600 font-medium"
-                        : "text-gray-500"
-                    }`}
-                  >
-                    {product.stock}
+                    {product.quantity}
                   </TableCell>
 
                   <TableCell className="py-4">
                     <Badge
-                      className={`rounded-sm px-3 py-1 font-normal border-0 shadow-none ${getStatusBadgeStyles(
+                      className={`rounded-md px-3 py-1 font-medium border shadow-none ${getStatusBadgeStyles(
                         product.status
                       )}`}
                     >
-                      {product.status}
+                      {formatStatusLabel(product.status)}
                     </Badge>
                   </TableCell>
 
                   <TableCell className="py-4">
-                    <div className="flex items-center justify-center gap-5">
+                    <div className="flex items-center justify-center gap-4">
                       <EditProductModal />
                       <button
-                        onClick={() => handleDelete()}
-                        className="cursor-pointer text-red-500 hover:text-red-900"
+                        onClick={() => handleDelete(product._id)}
+                        className="text-gray-400 hover:text-red-500 transition-colors"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
                   </TableCell>
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={9}
-                  className="text-center py-10 text-gray-500"
-                >
-                  No products found matching your search.
-                </TableCell>
-              </TableRow>
-            )}
+              ))}
           </TableBody>
         </Table>
       </div>
 
       {/* Pagination Controls */}
-      {totalPages > 1 && (
-        <div className="mt-10 flex items-center justify-center gap-4 text-sm font-medium text-gray-600">
-          {/* Previous */}
-          <button
+      {!isLoading && !isError && meta.totalPage > 1 && (
+        <div className="mt-8 flex items-center justify-center gap-2">
+          <Button
+            variant="outline"
+            size="icon"
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className="p-2 text-black cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+            className="h-9 w-9 border-gray-200 hover:bg-gray-100 hover:text-black"
           >
-            <ChevronLeft className="h-7 w-7" />
-          </button>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
 
-          {/* Page Numbers (Max 5) */}
-          {getVisiblePages().map((page) => (
-            <button
-              key={page}
-              onClick={() => handlePageChange(page)}
-              className={`flex h-8 w-8 items-center justify-center rounded transition-colors ${
-                currentPage === page
-                  ? "bg-gray-300 text-black cursor-default"
-                  : "cursor-pointer hover:bg-gray-200 hover:text-black"
-              }`}
-            >
-              {page}
-            </button>
-          ))}
+          <div className="flex gap-2 mx-2">
+            {getVisiblePages().map((page) => (
+              <button
+                key={page}
+                onClick={() => handlePageChange(page)}
+                className={`h-9 w-9 rounded-md text-sm font-medium transition-all
+                  ${
+                    currentPage === page
+                      ? "bg-black text-white shadow-md"
+                      : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
+                  }`}
+              >
+                {page}
+              </button>
+            ))}
+          </div>
 
-          <button
-            className={`flex h-8 w-8 items-center justify-center rounded transition-colors`}
-          >
-            ...{totalPages}
-          </button>
-
-          {/* Next */}
-          <button
+          <Button
+            variant="outline"
+            size="icon"
             onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="p-2 text-black disabled:opacity-30 disabled:cursor-not-allowed"
+            disabled={currentPage === meta.totalPage}
+            className="h-9 w-9 border-gray-200 hover:bg-gray-100 hover:text-black"
           >
-            <ChevronRight className="h-7 w-7" />
-          </button>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
       )}
     </div>
