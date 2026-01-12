@@ -39,16 +39,16 @@ import { useGetProductsQuery } from "@/redux/api/productApi";
 
 interface Product {
   _id: string;
-  id: string; // API returns both _id and id
+  id: string;
   name: string;
   images: string[];
   weight: number;
-  category: string; // Currently an ID based on your JSON
+  category: string;
   price: number;
   quantity: number;
-  status: string; // e.g., "in_stock"
+  status: string;
   createdAt: string;
-  isDateLate?: boolean; // Custom logic field if needed
+  isDateLate?: boolean;
 }
 
 interface Meta {
@@ -137,7 +137,6 @@ export default function ManageProductsPage() {
     totalPage: 1,
   };
 
-  // --- Effects ---
   useEffect(() => {
     setMounted(true);
     const interval = setInterval(() => {

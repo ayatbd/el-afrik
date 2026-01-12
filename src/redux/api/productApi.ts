@@ -12,7 +12,18 @@ export const productApi = baseApi.injectEndpoints({
             },
             providesTags: ['Product'],
         }),
+        addProducts: builder.mutation({
+            query: (data) => {
+                // console.log(data);
+                return {
+                    url: 'product/create-product',
+                    method: 'POST',
+                    body: data,
+                }
+            },
+            invalidatesTags: ['Product'],
+        })
     }),
 });
 
-export const { useGetProductsQuery } = productApi;
+export const { useGetProductsQuery, useAddProductMutation } = productApi;
