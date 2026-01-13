@@ -1,6 +1,6 @@
-import { baseApi } from "./baseApi";
+import { apiSlice } from "./apiSlice";
 
-export const productApi = baseApi.injectEndpoints({
+export const productApi = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
         getProducts: builder.query({
             query: () => {

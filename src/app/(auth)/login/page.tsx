@@ -3,25 +3,36 @@ import { useLoginMutation } from "@/redux/features/auth/authApi";
 import { setCredentials } from "@/redux/features/auth/authSlice";
 import { useAppDispatch } from "@/redux/hooks";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { HiOutlineEye, HiOutlineEyeOff } from "react-icons/hi";
 const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   // RTK Query hook
   const [login, { isLoading, error }] = useLoginMutation();
-
+  const router = useRouter();
   const dispatch = useAppDispatch();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const res = await login({ email, password });
-      dispatch(setCredentials(res.data));
-    } catch (err: any) {
-      console.log(err);
+      // 1. Trigger the mutation
+      const result = await login({ email, password }).unwrap();
+
+      // 2. Handle success based on your API structure
+      const { accessToken, refreshToken } = result.data;
+
+      // 3. Store in Redux and LocalStorage
+      dispatch(setCredentials({ accessToken }));
+      localStorage.setItem("refreshToken", refreshToken);
+
+      router.push("/");
+    } catch (err) {
+      console.error("Failed to login:", err);
+      alert("Login failed");
     }
   };
   return (

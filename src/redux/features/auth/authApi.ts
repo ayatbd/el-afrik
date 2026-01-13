@@ -1,19 +1,19 @@
-import { baseApi } from "@/redux/api/baseApi";
+import { apiSlice } from '../../api/apiSlice';
 
-
-export const authApi = baseApi.injectEndpoints({
+export const authApi = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
         login: builder.mutation({
-            query: (credentials: { email: string; password: string }) => {
-                console.log(credentials);
-                return {
-                    url: '/auth/login',
-                    method: 'POST',
-                    body: credentials,
-                }
-            },
+            query: (credentials) => ({
+                url: '/auth/login',
+                method: 'POST',
+                body: credentials,
+            }),
+        }),
+        // Example: Get User Profile (Protected Route)
+        getProfile: builder.query({
+            query: () => '/auth/me',
         }),
     }),
 });
 
-export const { useLoginMutation } = authApi;
+export const { useLoginMutation, useGetProfileQuery } = authApi;
