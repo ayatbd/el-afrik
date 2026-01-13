@@ -1,4 +1,5 @@
 import { apiSlice } from '../../api/apiSlice';
+import { setCredentials, logout } from './authSlice';
 
 export const authApi = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
@@ -9,11 +10,34 @@ export const authApi = apiSlice.injectEndpoints({
                 body: credentials,
             }),
         }),
-        // Example: Get User Profile (Protected Route)
-        getProfile: builder.query({
-            query: () => '/auth/me',
+        // Endpoint to manually refresh token on page load
+        refresh: builder.mutation({
+            query: (refreshToken) => ({
+                url: '/auth/refresh',
+                method: 'POST',
+                body: { refreshToken },
+            }),
+            // THIS PART IS CRITICAL
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+                try {
+                    const { data } = await queryFulfilled;
+
+                    // DEBUG: Uncomment this if still stuck
+                    // console.log("Refresh Successful, New Token:", data.data.accessToken);
+
+                    // Make sure the path to accessToken matches your actual API response!
+                    // Your API example: { data: { accessToken: "..." } }
+                    const newAccessToken = data.data.accessToken;
+
+                    if (newAccessToken) {
+                        dispatch(setCredentials({ accessToken: newAccessToken }));
+                    }
+                } catch (err) {
+                    console.error("Refresh failed in onQueryStarted");
+                }
+            },
         }),
     }),
 });
 
-export const { useLoginMutation, useGetProfileQuery } = authApi;
+export const { useLoginMutation, useRefreshMutation } = authApi;

@@ -12,9 +12,14 @@ const authSlice = createSlice({
         setCredentials: (state, action) => {
             const { accessToken } = action.payload;
             state.accessToken = accessToken;
+
             if (accessToken) {
-                state.user = jwtDecode(accessToken);
-                state.isAuthenticated = true;
+                try {
+                    state.user = jwtDecode(accessToken);
+                    state.isAuthenticated = true; // <--- MUST BE HERE
+                } catch (e) {
+                    state.isAuthenticated = false;
+                }
             }
         },
         logout: (state) => {
