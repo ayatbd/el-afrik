@@ -1,34 +1,34 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice } from '@reduxjs/toolkit';
+import { jwtDecode } from 'jwt-decode';
 
-interface AuthState {
-    token: string | null;
-    admin: any | null;
-}
-
-const initialState: AuthState = {
-    token: typeof window !== "undefined"
-        ? localStorage.getItem("token")
-        : null,
-    admin: null,
+const initialState = {
+    user: null, // Will contain { userId, role, ... }
+    accessToken: null,
+    isAuthenticated: false,
 };
 
 const authSlice = createSlice({
-    name: "auth",
+    name: 'auth',
     initialState,
     reducers: {
-        setCredentials: (
-            state,
-            action: PayloadAction<{ token: string; admin: any }>
-        ) => {
-            state.token = action.payload.token;
-            state.admin = action.payload.admin;
-            localStorage.setItem("token", action.payload.token);
-        },
+        setCredentials: (state, action) => {
+            const { accessToken } = action.payload;
+            state.accessToken = accessToken;
 
+            // Decode the token to get user info (role: superAdmin)
+            if (accessToken) {
+                state.user = jwtDecode(accessToken);
+                state.isAuthenticated = true;
+            }
+        },
         logout: (state) => {
-            state.token = null;
-            state.admin = null;
-            localStorage.removeItem("token");
+            state.user = null;
+            state.accessToken = null;
+            state.isAuthenticated = false;
+            // Remove refresh token from storage
+            if (typeof window !== 'undefined') {
+                localStorage.removeItem('refreshToken');
+            }
         },
     },
 });

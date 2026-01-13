@@ -120,22 +120,6 @@ export default function AddProductPage() {
       const finalValues = JSON.stringify(formData);
       data.append("body", finalValues);
 
-      // IMPORTANT: These keys must match the Backend Controller DTO exactly
-      // data.append("name", formData.name);
-      // data.append("price", formData.price);
-      // data.append("weight", formData.weight);
-      // data.append("category", formData.category);
-      // data.append("quantity", formData.quantity);
-      // data.append("deliveryFee", formData.deliveryFee);
-      // data.append("points", formData.points);
-      // data.append("description", formData.description);
-      // data.append("status", formData.status);
-
-      // Only append promo if it has a value, otherwise backend might reject empty string
-
-      // 3. Appending Images
-      // "Unexpected field" usually happens here.
-      // Ensure "images" matches your Multer config (e.g. upload.array('images'))
       imageFiles.forEach((file) => {
         data.append("image", file);
       });
