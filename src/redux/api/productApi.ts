@@ -4,7 +4,7 @@ export const productApi = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
         getProducts: builder.query({
             query: () => {
-                // console.log('getProducts');
+                console.log('getProducts');
                 return {
                     url: '/product/allProduct',
                     method: 'GET',

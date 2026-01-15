@@ -17,7 +17,7 @@ export default function Navbar() {
   };
   return (
     <header className="z-50 bg-[#081028] sticky top-0 min-h-25!">
-      <div className="flex items-center justify-between p-4">
+      <div className="flex items-center justify-between">
         <div></div>
         <button
           onClick={handleLogout}
