@@ -13,11 +13,26 @@ import { Proportions } from "lucide-react";
 import { SiFuturelearn } from "react-icons/si";
 import { CiSettings } from "react-icons/ci";
 import { IoTrophySharp } from "react-icons/io5";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { Button } from "../ui/button";
+import { useAppDispatch } from "@/redux/hooks";
+import { logout } from "@/redux/features/auth/authSlice";
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
+
+  // logout by using redux
+  const dispatch = useAppDispatch();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    // 1. Clear Redux + LocalStorage
+    dispatch(logout());
+
+    // 2. Redirect to Login
+    router.push("/login");
+  };
 
   const toggleSubmenu = (menuName: string) => {
     setOpenSubmenu(openSubmenu === menuName ? null : menuName);
@@ -188,6 +203,14 @@ export default function Sidebar() {
                     );
                   })}
                 </ul>
+              </li>
+              <li>
+                <Button
+                  onClick={handleLogout}
+                  className="menu-item w-full text-gray-300 text-[15px] font-medium flex items-center gap-3 cursor-pointer hover:bg-[#00C058] focus:bg-[#00C058] active:bg-[#00C058] focus:text-white hover:text-white rounded-md px-3 py-3 transition-all duration-300"
+                >
+                  <span>Logout</span>
+                </Button>
               </li>
             </ul>
           </div>

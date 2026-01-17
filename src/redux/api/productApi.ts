@@ -22,8 +22,19 @@ export const productApi = apiSlice.injectEndpoints({
                 }
             },
             invalidatesTags: ['Product'],
+        }),
+        editProduct: builder.mutation({
+            query: (data) => {
+                console.log(data);
+                return {
+                    url: 'product/update-product',
+                    method: 'PUT',
+                    body: data,
+                }
+            },
+            invalidatesTags: ['Product'],
         })
     }),
 });
 
-export const { useGetProductsQuery, useAddProductsMutation } = productApi;
+export const { useGetProductsQuery, useAddProductsMutation, useEditProductMutation } = productApi;
