@@ -1,9 +1,16 @@
 "use client";
-import AddQNAModal from "@/components/modules/faq/AddQNAModal";
+import AddFaqModal from "@/components/modules/faq/AddFaqModal";
 import { useGetFaqQuery } from "@/redux/api/faqApi";
 
+interface FAQ {
+  _id: string;
+  question?: string;
+  answer?: string;
+  [key: string]: string | undefined;
+}
+
 const FaqPage = () => {
-  // get faqs using rtk query
+  // get faqs
   const { data: faqs, isLoading, isError } = useGetFaqQuery(undefined);
   // console.log(faqs.data.result);
   const faqsData = faqs?.data?.result;
@@ -18,10 +25,10 @@ const FaqPage = () => {
             <h2 className="sm:text-3xl text-2xl font-semibold text-gray-800 mb-12">
               Frequently Asked Questions
             </h2>
-            <AddQNAModal />
+            <AddFaqModal />
           </div>
           <div className="space-y-8">
-            {faqsData?.map((faq: any) => (
+            {faqsData?.map((faq: FAQ) => (
               <div key={faq._id} className="flex items-start">
                 <div className="shrink-0">
                   <svg
