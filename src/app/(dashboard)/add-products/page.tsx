@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, X, Loader2 } from "lucide-react";
 import { useState, ChangeEvent, useEffect } from "react";
 import Swal from "sweetalert2";
+import { useForm, Controller, SubmitHandler } from "react-hook-form"; // 1. Import RHF
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -19,8 +20,8 @@ import {
 } from "@/components/ui/select";
 import { useAddProductsMutation } from "@/redux/api/productApi";
 
-// 1. Cleaned Interface to match your Sample Data exactly
-interface ProductFormState {
+// Interface matches RHF structure
+interface ProductFormValues {
   name: string;
   price: string;
   deliveryFee: string;
@@ -37,49 +38,38 @@ export default function AddProductPage() {
   const router = useRouter();
   const [addProduct, { isLoading }] = useAddProductsMutation();
 
-  // State for Images
+  // 2. Setup React Hook Form
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm<ProductFormValues>({
+    defaultValues: {
+      name: "",
+      price: "",
+      description: "",
+      promo: "",
+    },
+  });
+
+  // Keep Image state separate (easiest for file previews)
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
 
-  // State for Text Fields (Currency removed as it wasn't in sample data)
-  const [formData, setFormData] = useState<ProductFormState>({
-    name: "",
-    price: "",
-    deliveryFee: "",
-    category: "",
-    points: "",
-    quantity: "",
-    weight: "",
-    description: "",
-    status: "",
-    promo: "",
-  });
-
-  // Cleanup object URLs
   useEffect(() => {
-    return () => {
-      previews.forEach((url) => URL.revokeObjectURL(url));
-    };
+    return () => previews.forEach((url) => URL.revokeObjectURL(url));
   }, [previews]);
-
-  const handleInputChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { id, value } = e.target;
-    setFormData((prev) => ({ ...prev, [id]: value }));
-  };
-
-  const handleSelectChange = (key: keyof ProductFormState, value: string) => {
-    setFormData((prev) => ({ ...prev, [key]: value }));
-  };
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
       const newFiles = Array.from(files);
       setImageFiles((prev) => [...prev, ...newFiles]);
-      const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
-      setPreviews((prev) => [...prev, ...newPreviews]);
+      setPreviews((prev) => [
+        ...prev,
+        ...newFiles.map((file) => URL.createObjectURL(file)),
+      ]);
     }
   };
 
@@ -88,46 +78,31 @@ export default function AddProductPage() {
     setPreviews((prev) => prev.filter((_, index) => index !== indexToRemove));
   };
 
-  // --- SUBMIT HANDLER ---
-  const handleSubmit = async () => {
-    // 1. Validation
-    if (
-      !formData.name ||
-      !formData.price ||
-      !formData.category ||
-      !formData.status ||
-      imageFiles.length === 0
-    ) {
+  // 3. RHF Submit Handler
+  const onSubmit: SubmitHandler<ProductFormValues> = async (formData) => {
+    // Manual check for images since they are outside RHF
+    if (imageFiles.length === 0) {
       Swal.fire({
         icon: "warning",
-        title: "Missing Information",
-        text: "Please fill in Name, Price, Category, Status, and upload an image.",
+        title: "Missing Image",
+        text: "Please upload at least one product image.",
       });
       return;
     }
 
     try {
-      // 2. Prepare FormData
       const data = new FormData();
-      const { promo, ...rest } = formData;
-      const myObj: Record<string, unknown> = {
-        ...rest,
-      };
 
-      if (promo) {
-        myObj.promo = formData.promo;
-      }
-      const finalValues = JSON.stringify(formData);
-      data.append("body", finalValues);
+      // Serialize body exactly as backend expects
+      const { promo, ...rest } = formData;
+      const bodyObj: Record<string, unknown> = { ...rest };
+      if (promo) bodyObj.promo = promo;
+
+      data.append("body", JSON.stringify(bodyObj));
 
       imageFiles.forEach((file) => {
         data.append("image", file);
       });
-
-      // Debug: Log what we are sending
-      // for (let pair of data.entries()) {
-      //   console.log(pair[0] + ', ' + pair[1]);
-      // }
 
       const response = await addProduct(data).unwrap();
 
@@ -138,73 +113,42 @@ export default function AddProductPage() {
           text: "Your product has been added successfully.",
           timer: 2000,
           showConfirmButton: false,
-        }).then(() => {
-          router.push("/manage-products");
-        });
+        }).then(() => router.push("/manage-products"));
       }
     } catch (error: any) {
-      console.error("Failed to add product:", error);
       Swal.fire({
         icon: "error",
         title: "Error",
-        text:
-          error?.data?.message ||
-          "Unexpected field error usually implies image field name mismatch.",
+        text: error?.data?.message || "Something went wrong",
       });
     }
   };
 
   return (
     <div className="min-h-screen md:min-w-7xl mx-auto bg-white p-6 md:p-10 font-sans text-gray-800">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
-        <div className="flex items-center gap-3">
-          <Link
-            href="/manage-products"
-            className="p-1 -ml-2 hover:bg-gray-200 rounded-full transition-colors"
-          >
-            <ArrowLeft className="h-6 w-6 text-gray-900" />
-          </Link>
-          <h1 className="text-xl font-semibold text-gray-900">Add Product</h1>
-        </div>
+      <div className="flex items-center gap-3 mb-10">
+        <Link
+          href="/manage-products"
+          className="p-1 -ml-2 hover:bg-gray-200 rounded-full transition-colors"
+        >
+          <ArrowLeft className="h-6 w-6 text-gray-900" />
+        </Link>
+        <h1 className="text-xl font-semibold text-gray-900">Add Product</h1>
       </div>
 
-      <div className="space-y-8">
-        {/* --- Image Upload --- */}
+      {/* 4. Pass handleSubmit to the form */}
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+        {/* --- Image Upload (Kept manual for simpler UI control) --- */}
         <div className="space-y-4">
           <Label className="text-base font-normal text-gray-500">
             Upload Product Images <span className="text-red-500">*</span>
           </Label>
-
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <label
-              htmlFor="imageUpload"
-              className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50/50 hover:bg-gray-50 transition-colors cursor-pointer"
-            >
-              {/* SVG Icon */}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-12 w-12 text-gray-500 mb-3"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="1.5"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M3 5a2 2 0 012-2h4l2 2h8a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M8 13l2-2 3 3 3-3"
-                />
-              </svg>
-              <p className="text-green-500 font-medium text-lg text-center px-2">
+            <label className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50/50 hover:bg-gray-50 cursor-pointer">
+              <span className="text-green-500 font-medium text-lg">
                 Browse Images
-              </p>
+              </span>
               <input
-                id="imageUpload"
                 type="file"
                 accept="image/*"
                 multiple
@@ -212,7 +156,6 @@ export default function AddProductPage() {
                 onChange={handleImageChange}
               />
             </label>
-
             {previews.map((img, index) => (
               <div
                 key={index}
@@ -220,13 +163,13 @@ export default function AddProductPage() {
               >
                 <img
                   src={img}
-                  alt={`Preview ${index}`}
+                  alt="Preview"
                   className="h-full w-full object-cover"
                 />
                 <button
-                  onClick={() => removeImage(index)}
-                  className="absolute top-2 right-2 p-1 bg-white/80 hover:bg-white text-red-500 rounded-full shadow-sm transition-all opacity-0 group-hover:opacity-100"
                   type="button"
+                  onClick={() => removeImage(index)}
+                  className="absolute top-2 right-2 p-1 bg-white/80 text-red-500 rounded-full opacity-0 group-hover:opacity-100"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -236,180 +179,208 @@ export default function AddProductPage() {
         </div>
 
         {/* --- Form Fields --- */}
-        <div className="space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="space-y-3">
-              <Label htmlFor="name" className="text-gray-500 font-normal">
-                Product Name <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                placeholder="Fresh Strawberry"
-                className="h-12 border-gray-200 bg-white"
-              />
-            </div>
-
-            <div className="space-y-3">
-              <Label htmlFor="price" className="text-gray-500 font-normal">
-                Price <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="price"
-                type="number"
-                value={formData.price}
-                onChange={handleInputChange}
-                placeholder="100"
-                className="h-12 border-gray-200 bg-white"
-              />
-            </div>
-
-            <div className="space-y-3">
-              <Label
-                htmlFor="deliveryFee"
-                className="text-gray-500 font-normal"
-              >
-                Delivery Fee <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="deliveryFee"
-                type="number"
-                value={formData.deliveryFee}
-                onChange={handleInputChange}
-                placeholder="50"
-                className="h-12 border-gray-200 bg-white"
-              />
-            </div>
-
-            {/* Category */}
-            <div className="space-y-3">
-              <Label className="text-gray-500 font-normal">
-                Select Category <span className="text-red-500">*</span>
-              </Label>
-              <Select
-                value={formData.category}
-                onValueChange={(val) => handleSelectChange("category", val)}
-              >
-                <SelectTrigger className="h-12 border-gray-200 bg-white text-gray-500">
-                  <SelectValue placeholder="Select Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {/* Using IDs from your API sample */}
-                  <SelectItem value="60c72b2f9d1c3f5f5f5c7c10">
-                    Foods
-                  </SelectItem>
-                  <SelectItem value="drinks_id_placeholder">Drinks</SelectItem>
-                  <SelectItem value="snacks_id_placeholder">Snacks</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="space-y-3">
-              <Label className="text-gray-500 font-normal">
-                Points <span className="text-red-500">*</span>
-              </Label>
-              <Select
-                value={formData.points}
-                onValueChange={(val) => handleSelectChange("points", val)}
-              >
-                <SelectTrigger className="h-12 border-gray-200 bg-white text-gray-500">
-                  <SelectValue placeholder="Select Points" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="5">05 Points</SelectItem>
-                  <SelectItem value="10">10 Points</SelectItem>
-                  <SelectItem value="15">15 Points</SelectItem>
-                  <SelectItem value="20">20 Points</SelectItem>
-                  <SelectItem value="25">25 Points</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-3">
-              <Label htmlFor="quantity" className="text-gray-500 font-normal">
-                Quantity <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="quantity"
-                type="number"
-                value={formData.quantity}
-                onChange={handleInputChange}
-                placeholder="10"
-                className="h-12 border-gray-200 bg-white"
-              />
-            </div>
-
-            <div className="space-y-3">
-              <Label htmlFor="weight" className="text-gray-500 font-normal">
-                Weight (g) <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="weight"
-                type="number"
-                value={formData.weight}
-                onChange={handleInputChange}
-                placeholder="25"
-                className="h-12 border-gray-200 bg-white"
-              />
-            </div>
-
-            <div className="space-y-3">
-              <Label className="text-gray-500 font-normal">
-                Product Status <span className="text-red-500">*</span>
-              </Label>
-              <Select
-                value={formData.status}
-                onValueChange={(val) => handleSelectChange("status", val)}
-              >
-                <SelectTrigger className="h-12 border-gray-200 bg-white text-gray-500">
-                  <SelectValue placeholder="Select Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="in_stock">In Stock</SelectItem>
-                  <SelectItem value="out_of_stock">Out of Stock</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            <div className="space-y-3">
-              <Label htmlFor="promo" className="text-gray-500 font-normal">
-                Promo Code
-              </Label>
-              <Input
-                id="promo"
-                type="text"
-                value={formData.promo}
-                onChange={handleInputChange}
-                placeholder="e.g. NEWYEAR2026"
-                className="h-12 border-gray-200 bg-white"
-              />
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="space-y-3">
+            <Label className="text-gray-500">
+              Product Name <span className="text-red-500">*</span>
+            </Label>
+            {/* 5. Use register for simple inputs */}
+            <Input
+              {...register("name", { required: "Name is required" })}
+              placeholder="Fresh Strawberry"
+              className="h-12 border-gray-200 bg-white"
+            />
+            {errors.name && (
+              <span className="text-xs text-red-500">
+                {errors.name.message}
+              </span>
+            )}
           </div>
 
           <div className="space-y-3">
-            <Label htmlFor="description" className="text-gray-500 font-normal">
-              Description
+            <Label className="text-gray-500">
+              Price <span className="text-red-500">*</span>
             </Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={handleInputChange}
-              placeholder="Write product description here...."
-              className="min-h-32 border-gray-200 bg-white resize-none p-4"
+            <Input
+              type="number"
+              {...register("price", { required: "Price is required" })}
+              placeholder="100"
+              className="h-12 border-gray-200 bg-white"
+            />
+            {errors.price && (
+              <span className="text-xs text-red-500">
+                {errors.price.message}
+              </span>
+            )}
+          </div>
+
+          <div className="space-y-3">
+            <Label className="text-gray-500">
+              Delivery Fee <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              type="number"
+              {...register("deliveryFee", { required: "Fee is required" })}
+              placeholder="50"
+              className="h-12 border-gray-200 bg-white"
+            />
+            {errors.deliveryFee && (
+              <span className="text-xs text-red-500">
+                {errors.deliveryFee.message}
+              </span>
+            )}
+          </div>
+
+          {/* 6. Use Controller for UI Library Selects */}
+          <div className="space-y-3">
+            <Label className="text-gray-500">
+              Category <span className="text-red-500">*</span>
+            </Label>
+            <Controller
+              name="category"
+              control={control}
+              rules={{ required: "Category is required" }}
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger className="h-12 border-gray-200 bg-white text-gray-500">
+                    <SelectValue placeholder="Select Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="60c72b2f9d1c3f5f5f5c7c10">
+                      Foods
+                    </SelectItem>
+                    <SelectItem value="drinks_id">Drinks</SelectItem>
+                    <SelectItem value="snacks_id">Snacks</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.category && (
+              <span className="text-xs text-red-500">
+                {errors.category.message}
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="space-y-3">
+            <Label className="text-gray-500">
+              Points <span className="text-red-500">*</span>
+            </Label>
+            <Controller
+              name="points"
+              control={control}
+              rules={{ required: "Points required" }}
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger className="h-12 border-gray-200 bg-white text-gray-500">
+                    <SelectValue placeholder="Select Points" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[5, 10, 15, 20, 25].map((p) => (
+                      <SelectItem key={p} value={String(p)}>
+                        {p} Points
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.points && (
+              <span className="text-xs text-red-500">
+                {errors.points.message}
+              </span>
+            )}
+          </div>
+
+          <div className="space-y-3">
+            <Label className="text-gray-500">
+              Quantity <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              type="number"
+              {...register("quantity", { required: "Quantity is required" })}
+              placeholder="10"
+              className="h-12 border-gray-200 bg-white"
+            />
+            {errors.quantity && (
+              <span className="text-xs text-red-500">
+                {errors.quantity.message}
+              </span>
+            )}
+          </div>
+
+          <div className="space-y-3">
+            <Label className="text-gray-500">
+              Weight (g) <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              type="number"
+              {...register("weight", { required: "Weight is required" })}
+              placeholder="25"
+              className="h-12 border-gray-200 bg-white"
+            />
+            {errors.weight && (
+              <span className="text-xs text-red-500">
+                {errors.weight.message}
+              </span>
+            )}
+          </div>
+
+          <div className="space-y-3">
+            <Label className="text-gray-500">
+              Status <span className="text-red-500">*</span>
+            </Label>
+            <Controller
+              name="status"
+              control={control}
+              rules={{ required: "Status is required" }}
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger className="h-12 border-gray-200 bg-white text-gray-500">
+                    <SelectValue placeholder="Select Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="in_stock">In Stock</SelectItem>
+                    <SelectItem value="out_of_stock">Out of Stock</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.status && (
+              <span className="text-xs text-red-500">
+                {errors.status.message}
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="space-y-3">
+            <Label className="text-gray-500">Promo Code</Label>
+            <Input
+              {...register("promo")}
+              placeholder="e.g. NEWYEAR2026"
+              className="h-12 border-gray-200 bg-white"
             />
           </div>
         </div>
 
+        <div className="space-y-3">
+          <Label className="text-gray-500">Description</Label>
+          <Textarea
+            {...register("description")}
+            placeholder="Write product description here...."
+            className="min-h-32 border-gray-200 bg-white resize-none p-4"
+          />
+        </div>
+
         <div className="flex justify-center pt-8 pb-4">
           <Button
-            onClick={handleSubmit}
+            type="submit"
             disabled={isLoading}
-            className="w-full md:w-64 h-12 text-base font-medium bg-[#CF4F26] hover:bg-[#b54420] text-white shadow-md rounded-md disabled:opacity-50 cursor-pointer"
+            className="w-full md:w-64 h-12 text-base font-medium bg-[#CF4F26] hover:bg-[#b54420] text-white"
           >
             {isLoading ? (
               <>
@@ -420,7 +391,7 @@ export default function AddProductPage() {
             )}
           </Button>
         </div>
-      </div>
+      </form>
     </div>
   );
 }

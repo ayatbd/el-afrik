@@ -3,7 +3,6 @@ import authReducer from './features/auth/authSlice';
 import { apiSlice } from './api/apiSlice';
 import authTest from './features/auth/authSliceTest';
 
-
 export const store = configureStore({
   reducer: {
     auth: authReducer,
