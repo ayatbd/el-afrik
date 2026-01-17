@@ -24,17 +24,27 @@ export const faqApi = apiSlice.injectEndpoints({
             invalidatesTags: ['Faq'],
         }),
         editFaq: builder.mutation({
-            query: (data) => {
+            query: ({ id, data }) => {
                 console.log(data);
                 return {
-                    url: 'faq/update-faq',
-                    method: 'PUT',
+                    url: `/faq/update-faq/${id}`,
+                    method: 'PATCH',
                     body: data,
                 }
             },
             invalidatesTags: ['Faq'],
-        })
+        }),
+        deleteFaq: builder.mutation({
+            query: (id) => {
+                console.log(id);
+                return {
+                    url: `faq/delete-faq/${id}`,
+                    method: 'DELETE',
+                }
+            },
+            invalidatesTags: ['Faq'],
+        }),
     }),
 });
 
-export const { useGetFaqQuery, useAddFaqMutation, useEditFaqMutation } = faqApi;
+export const { useGetFaqQuery, useAddFaqMutation, useEditFaqMutation, useDeleteFaqMutation } = faqApi;

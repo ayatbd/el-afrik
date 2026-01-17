@@ -115,11 +115,14 @@ export default function AddProductPage() {
           showConfirmButton: false,
         }).then(() => router.push("/manage-products"));
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage =
+        (error as { data?: { message?: string } })?.data?.message ||
+        "Something went wrong";
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: error?.data?.message || "Something went wrong",
+        text: errorMessage,
       });
     }
   };

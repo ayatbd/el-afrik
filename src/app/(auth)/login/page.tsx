@@ -13,8 +13,8 @@ const AdminLogin = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("saciyof997@feanzier.com");
+  const [password, setPassword] = useState("Admin@1234");
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -81,6 +81,7 @@ const AdminLogin = () => {
               <div className="mt-1 relative">
                 <input
                   type={showPassword ? "text" : "password"}
+                  value={password}
                   id="password"
                   onChange={(e) => setPassword(e.target.value)}
                   className="block w-full px-3 py-2 sm:px-4 sm:py-3 border border-[#FFE0A7] rounded-lg focus:ring-2 focus:ring-[#ddbe85] focus:border-[#ddbe85] focus:outline-none"

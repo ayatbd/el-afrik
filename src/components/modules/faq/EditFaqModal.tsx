@@ -1,81 +1,103 @@
 "use client";
 
-import { useState } from "react";
-import { Plus, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Pencil, Loader2 } from "lucide-react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { toast } from "react-toastify";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { useAddFaqMutation } from "@/redux/api/faqApi";
+import { useEditFaqMutation } from "@/redux/api/faqApi";
 
-// Define the form structure
+// Interface for the FAQ Item (adjust 'id' or '_id' based on your DB)
+interface FaqItem {
+  _id: string;
+  question?: string;
+  answer?: string;
+  Ques?: string;
+  Answere?: string;
+}
+
+interface EditFaqModalProps {
+  faqData: FaqItem;
+}
+
 interface FaqFormValues {
   Ques: string;
   Answere: string;
 }
 
-export default function AddFaqModal() {
+export default function EditFaqModal({ faqData }: EditFaqModalProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [addFaq, { isLoading }] = useAddFaqMutation();
+  const [editFaq, { isLoading }] = useEditFaqMutation();
 
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<FaqFormValues>();
+  } = useForm<FaqFormValues>({
+    defaultValues: {
+      Ques: faqData.Ques,
+      Answere: faqData.Answere,
+    },
+  });
+
+  // Reset form values if faqData changes or modal opens
+  useEffect(() => {
+    if (isOpen) {
+      reset({
+        Ques: faqData.Ques,
+        Answere: faqData.Answere,
+      });
+    }
+  }, [isOpen, faqData, reset]);
 
   const onSubmit: SubmitHandler<FaqFormValues> = async (data) => {
     try {
-      console.log("Form Data:", data);
-      // await addFaq(data).unwrap();
-      toast.success("FAQ added successfully!");
+      // Assuming your API expects { id, data }
+      await editFaq({ id: faqData._id, data }).unwrap();
+
+      toast.success("FAQ updated successfully!");
       setIsOpen(false);
-      reset();
-    } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message);
-      } else {
-        toast.error("Something went wrong");
-      }
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Object &&
+        "data" in error &&
+        error.data instanceof Object &&
+        "message" in error.data
+          ? (error.data.message as string)
+          : "Failed to update FAQ";
+      toast.error(errorMessage);
     }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="cursor-pointer bg-[#00B25D] hover:bg-[#009e52] text-white px-6 h-11">
-          <Plus className="h-4 w-4 mr-2" />
-          Add A FAQ
+        {/* Trigger Button - Styled typically as an icon button for Edit */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="hover:bg-green-50 text-gray-500 hover:text-[#00B25D]"
+        >
+          <Pencil className="h-4 w-4" />
         </Button>
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-125 bg-white p-6 md:p-8 gap-6">
-        <DialogHeader className="mb-2">
-          <DialogTitle className="text-xl font-semibold text-gray-800">
-            Add FAQ
-          </DialogTitle>
-        </DialogHeader>
-
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="flex flex-col gap-5">
             {/* Question Field */}
             <div className="space-y-3">
-              <Label htmlFor="Ques" className="text-gray-500 font-normal">
+              <Label htmlFor="edit-Ques" className="text-gray-500 font-normal">
                 Question <span className="text-red-500">*</span>
               </Label>
               <Input
-                id="Ques"
+                id="edit-Ques"
                 {...register("Ques", { required: "Question is required" })}
                 placeholder="What is your question?"
                 className="h-12 border-gray-200 bg-white placeholder:text-gray-400 focus-visible:ring-[#4BD37B]"
@@ -87,13 +109,16 @@ export default function AddFaqModal() {
               )}
             </div>
 
-            {/* Description Field */}
+            {/* Answer Field */}
             <div className="space-y-3">
-              <Label htmlFor="Answere" className="text-gray-500 font-normal">
+              <Label
+                htmlFor="edit-Answere"
+                className="text-gray-500 font-normal"
+              >
                 Description <span className="text-red-500">*</span>
               </Label>
               <Textarea
-                id="Answere"
+                id="edit-Answere"
                 {...register("Answere", {
                   required: "Description is required",
                 })}
@@ -109,7 +134,6 @@ export default function AddFaqModal() {
           </div>
 
           <div className="flex justify-center mt-6">
-            {/* Removed DialogClose wrapper. Use state to close instead. */}
             <Button
               type="submit"
               disabled={isLoading}
@@ -118,7 +142,7 @@ export default function AddFaqModal() {
               {isLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                "Submit"
+                "Save Changes"
               )}
             </Button>
           </div>
