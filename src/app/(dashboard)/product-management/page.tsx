@@ -33,7 +33,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import EditProductModal from "@/components/modules/product-management/EditProductModal";
-import { useGetProductsQuery } from "@/redux/api/productApi";
+import {
+  useDeleteProductMutation,
+  useGetProductsQuery,
+} from "@/redux/api/productApi";
 
 // --- TYPES BASED ON YOUR API RESPONSE ---
 
@@ -58,15 +61,15 @@ interface Meta {
   totalPage: number;
 }
 
-interface ApiResponse {
-  success: boolean;
-  message: string;
-  statusCode: number;
-  data: {
-    meta: Meta;
-    result: Product[];
-  };
-}
+// interface ApiResponse {
+//   success: boolean;
+//   message: string;
+//   statusCode: number;
+//   data: {
+//     meta: Meta;
+//     result: Product[];
+//   };
+// }
 
 // --- HELPER FUNCTIONS ---
 
@@ -108,6 +111,7 @@ export default function ManageProductsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [mounted, setMounted] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [deleteProduct, { isLoading: isDeleting }] = useDeleteProductMutation();
 
   // --- RTK Query ---
   // We pass query params here assuming your backend handles filtering/pagination
@@ -162,7 +166,7 @@ export default function ManageProductsPage() {
     }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     Swal.fire({
       title: "Are you sure?",
       text: "You won't be able to revert this!",
@@ -171,11 +175,12 @@ export default function ManageProductsPage() {
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
       confirmButtonText: "Yes, delete it!",
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        console.log("Deleting ID:", id);
         // Add your delete mutation trigger here
-        Swal.fire("Deleted!", "Product has been deleted.", "success");
+        if (await deleteProduct(id).unwrap()) {
+          return Swal.fire("Deleted!", "Product has been deleted.", "success");
+        }
       }
     });
   };
@@ -395,7 +400,7 @@ export default function ManageProductsPage() {
                   <TableCell className="py-4">
                     <Badge
                       className={`rounded-md px-3 py-1 font-medium border shadow-none ${getStatusBadgeStyles(
-                        product.status
+                        product.status,
                       )}`}
                     >
                       {formatStatusLabel(product.status)}

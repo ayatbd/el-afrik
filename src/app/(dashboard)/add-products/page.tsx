@@ -5,12 +5,13 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, X, Loader2 } from "lucide-react";
 import { useState, ChangeEvent, useEffect } from "react";
 import Swal from "sweetalert2";
-import { useForm, Controller, SubmitHandler } from "react-hook-form"; // 1. Import RHF
+import { useForm, Controller, SubmitHandler } from "react-hook-form";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox"; // Ensure you have this component or use <input type="checkbox">
 import {
   Select,
   SelectContent,
@@ -20,25 +21,31 @@ import {
 } from "@/components/ui/select";
 import { useAddProductsMutation } from "@/redux/api/productApi";
 
-// Interface matches RHF structure
+// Updated Interface matching your JSON exactly
 interface ProductFormValues {
   name: string;
-  price: string;
-  deliveryFee: string;
+  weight: number;
   category: string;
-  points: string;
-  quantity: string;
-  weight: string;
-  description: string;
+  price: number;
+  // We handle discount fields separately in the form, then merge on submit
+  discount_type: string;
+  discount_amount: number;
+  quantity: number;
+  calories: string;
+  readyTime: string;
   status: string;
+  deliveryFee: number;
+  points: string; // Select returns string, we convert to number on submit
+  description: string;
   promo: string;
+  isFavourite: boolean;
+  isFeatured: boolean;
 }
 
 export default function AddProductPage() {
   const router = useRouter();
   const [addProduct, { isLoading }] = useAddProductsMutation();
 
-  // 2. Setup React Hook Form
   const {
     register,
     handleSubmit,
@@ -47,13 +54,14 @@ export default function AddProductPage() {
   } = useForm<ProductFormValues>({
     defaultValues: {
       name: "",
-      price: "",
-      description: "",
-      promo: "",
+      discount_type: "percentage", // Default value
+      discount_amount: 0,
+      isFavourite: false,
+      isFeatured: false,
     },
   });
 
-  // Keep Image state separate (easiest for file previews)
+  // Image State
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
 
@@ -78,9 +86,8 @@ export default function AddProductPage() {
     setPreviews((prev) => prev.filter((_, index) => index !== indexToRemove));
   };
 
-  // 3. RHF Submit Handler
   const onSubmit: SubmitHandler<ProductFormValues> = async (formData) => {
-    // Manual check for images since they are outside RHF
+    // 1. Image Validation
     if (imageFiles.length === 0) {
       Swal.fire({
         icon: "warning",
@@ -93,10 +100,26 @@ export default function AddProductPage() {
     try {
       const data = new FormData();
 
-      // Serialize body exactly as backend expects
-      const { promo, ...rest } = formData;
-      const bodyObj: Record<string, unknown> = { ...rest };
-      if (promo) bodyObj.promo = promo;
+      // 2. Data Transformation (Matching your JSON structure)
+      // Extract flattened discount fields to create the object
+      const { discount_type, discount_amount, points, promo, ...rest } =
+        formData;
+
+      const bodyObj = {
+        ...rest,
+        // Ensure numbers are actually numbers (Input type="number" can sometimes return strings in edge cases)
+        price: Number(formData.price),
+        weight: Number(formData.weight),
+        quantity: Number(formData.quantity),
+        deliveryFee: Number(formData.deliveryFee),
+        points: Number(points), // Convert Select string to Number
+        discount: {
+          discount_type,
+          discount_amount: Number(discount_amount),
+        },
+        // Include promo only if it has a value
+        ...(promo && { promo }),
+      };
 
       data.append("body", JSON.stringify(bodyObj));
 
@@ -115,10 +138,8 @@ export default function AddProductPage() {
           showConfirmButton: false,
         }).then(() => router.push("/manage-products"));
       }
-    } catch (error: unknown) {
-      const errorMessage =
-        (error as { data?: { message?: string } })?.data?.message ||
-        "Something went wrong";
+    } catch (error: any) {
+      const errorMessage = error?.data?.message || "Something went wrong";
       Swal.fire({
         icon: "error",
         title: "Error",
@@ -139,9 +160,8 @@ export default function AddProductPage() {
         <h1 className="text-xl font-semibold text-gray-900">Add Product</h1>
       </div>
 
-      {/* 4. Pass handleSubmit to the form */}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-        {/* --- Image Upload (Kept manual for simpler UI control) --- */}
+        {/* --- Image Upload --- */}
         <div className="space-y-4">
           <Label className="text-base font-normal text-gray-500">
             Upload Product Images <span className="text-red-500">*</span>
@@ -172,7 +192,7 @@ export default function AddProductPage() {
                 <button
                   type="button"
                   onClick={() => removeImage(index)}
-                  className="absolute top-2 right-2 p-1 bg-white/80 text-red-500 rounded-full opacity-0 group-hover:opacity-100"
+                  className="absolute top-2 right-2 p-1 bg-white/80 text-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -181,13 +201,12 @@ export default function AddProductPage() {
           </div>
         </div>
 
-        {/* --- Form Fields --- */}
+        {/* --- Basic Details --- */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="space-y-3">
             <Label className="text-gray-500">
               Product Name <span className="text-red-500">*</span>
             </Label>
-            {/* 5. Use register for simple inputs */}
             <Input
               {...register("name", { required: "Name is required" })}
               placeholder="Fresh Strawberry"
@@ -195,7 +214,38 @@ export default function AddProductPage() {
             />
             {errors.name && (
               <span className="text-xs text-red-500">
-                {errors.name.message}
+                {errors?.name?.message}
+              </span>
+            )}
+          </div>
+
+          <div className="space-y-3">
+            <Label className="text-gray-500">
+              Category <span className="text-red-500">*</span>
+            </Label>
+            <Controller
+              name="category"
+              control={control}
+              rules={{ required: "Category is required" }}
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger className="h-12 border-gray-200 bg-white text-gray-500">
+                    <SelectValue placeholder="Select Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {/* In a real app, map these from a GetCategories query */}
+                    <SelectItem value="69675bee9851504951afe88c">
+                      Foods
+                    </SelectItem>
+                    <SelectItem value="drinks_id">Drinks</SelectItem>
+                    <SelectItem value="snacks_id">Snacks</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.category && (
+              <span className="text-xs text-red-500">
+                {errors.category.message}
               </span>
             )}
           </div>
@@ -206,8 +256,12 @@ export default function AddProductPage() {
             </Label>
             <Input
               type="number"
-              {...register("price", { required: "Price is required" })}
-              placeholder="100"
+              step="0.01" // Allow decimals
+              {...register("price", {
+                required: "Price is required",
+                valueAsNumber: true,
+              })}
+              placeholder="199.99"
               className="h-12 border-gray-200 bg-white"
             />
             {errors.price && (
@@ -223,7 +277,10 @@ export default function AddProductPage() {
             </Label>
             <Input
               type="number"
-              {...register("deliveryFee", { required: "Fee is required" })}
+              {...register("deliveryFee", {
+                required: "Fee is required",
+                valueAsNumber: true,
+              })}
               placeholder="50"
               className="h-12 border-gray-200 bg-white"
             />
@@ -233,77 +290,84 @@ export default function AddProductPage() {
               </span>
             )}
           </div>
+        </div>
 
-          {/* 6. Use Controller for UI Library Selects */}
+        {/* --- Discount & Nutrition --- */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="space-y-3">
-            <Label className="text-gray-500">
-              Category <span className="text-red-500">*</span>
-            </Label>
+            <Label className="text-gray-500">Discount Type</Label>
             <Controller
-              name="category"
+              name="discount_type"
               control={control}
-              rules={{ required: "Category is required" }}
               render={({ field }) => (
                 <Select onValueChange={field.onChange} value={field.value}>
                   <SelectTrigger className="h-12 border-gray-200 bg-white text-gray-500">
-                    <SelectValue placeholder="Select Category" />
+                    <SelectValue placeholder="Type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="60c72b2f9d1c3f5f5f5c7c10">
-                      Foods
-                    </SelectItem>
-                    <SelectItem value="drinks_id">Drinks</SelectItem>
-                    <SelectItem value="snacks_id">Snacks</SelectItem>
+                    <SelectItem value="percentage">Percentage (%)</SelectItem>
+                    <SelectItem value="flat">Flat Amount</SelectItem>
                   </SelectContent>
                 </Select>
               )}
             />
-            {errors.category && (
+          </div>
+
+          <div className="space-y-3">
+            <Label className="text-gray-500">Discount Amount</Label>
+            <Input
+              type="number"
+              {...register("discount_amount", { valueAsNumber: true })}
+              placeholder="0"
+              className="h-12 border-gray-200 bg-white"
+            />
+          </div>
+
+          <div className="space-y-3">
+            <Label className="text-gray-500">
+              Calories (e.g. &quot;50 kcal&quot;)
+            </Label>
+            <Input
+              {...register("calories", {
+                required: "Calories info is required",
+              })}
+              placeholder="50"
+              className="h-12 border-gray-200 bg-white"
+            />
+            {errors.calories && (
               <span className="text-xs text-red-500">
-                {errors.category.message}
+                {errors.calories.message}
+              </span>
+            )}
+          </div>
+
+          <div className="space-y-3">
+            <Label className="text-gray-500">Ready Time</Label>
+            <Input
+              {...register("readyTime", { required: "Ready time is required" })}
+              placeholder="10-15 min"
+              className="h-12 border-gray-200 bg-white"
+            />
+            {errors.readyTime && (
+              <span className="text-xs text-red-500">
+                {errors.readyTime.message}
               </span>
             )}
           </div>
         </div>
 
+        {/* --- Inventory & Status --- */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="space-y-3">
-            <Label className="text-gray-500">
-              Points <span className="text-red-500">*</span>
-            </Label>
-            <Controller
-              name="points"
-              control={control}
-              rules={{ required: "Points required" }}
-              render={({ field }) => (
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger className="h-12 border-gray-200 bg-white text-gray-500">
-                    <SelectValue placeholder="Select Points" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[5, 10, 15, 20, 25].map((p) => (
-                      <SelectItem key={p} value={String(p)}>
-                        {p} Points
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            {errors.points && (
-              <span className="text-xs text-red-500">
-                {errors.points.message}
-              </span>
-            )}
-          </div>
-
           <div className="space-y-3">
             <Label className="text-gray-500">
               Quantity <span className="text-red-500">*</span>
             </Label>
             <Input
               type="number"
-              {...register("quantity", { required: "Quantity is required" })}
+              {...register("quantity", {
+                required: "Quantity is required",
+                valueAsNumber: true,
+              })}
               placeholder="10"
               className="h-12 border-gray-200 bg-white"
             />
@@ -320,7 +384,10 @@ export default function AddProductPage() {
             </Label>
             <Input
               type="number"
-              {...register("weight", { required: "Weight is required" })}
+              {...register("weight", {
+                required: "Weight is required",
+                valueAsNumber: true,
+              })}
               placeholder="25"
               className="h-12 border-gray-200 bg-white"
             />
@@ -357,15 +424,94 @@ export default function AddProductPage() {
               </span>
             )}
           </div>
+
+          <div className="space-y-3">
+            <Label className="text-gray-500">
+              Points Awarded <span className="text-red-500">*</span>
+            </Label>
+            <Controller
+              name="points"
+              control={control}
+              rules={{ required: "Points required" }}
+              render={({ field }) => (
+                <Select
+                  onValueChange={field.onChange}
+                  value={String(field.value || "")}
+                >
+                  <SelectTrigger className="h-12 border-gray-200 bg-white text-gray-500">
+                    <SelectValue placeholder="Select Points" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[5, 10, 15, 20, 25].map((p) => (
+                      <SelectItem key={p} value={String(p)}>
+                        {p} Points
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.points && (
+              <span className="text-xs text-red-500">
+                {errors.points.message}
+              </span>
+            )}
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <div className="space-y-3">
+        {/* --- Extra Options --- */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-end">
+          <div className="space-y-3 lg:col-span-2">
             <Label className="text-gray-500">Promo Code</Label>
             <Input
               {...register("promo")}
               placeholder="e.g. NEWYEAR2026"
               className="h-12 border-gray-200 bg-white"
+            />
+          </div>
+
+          {/* Checkboxes for Features */}
+          <div className="flex items-center space-x-2 h-12 pb-2">
+            <Controller
+              name="isFeatured"
+              control={control}
+              render={({ field }) => (
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="isFeatured"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                  <label
+                    htmlFor="isFeatured"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-gray-600"
+                  >
+                    Mark as Featured
+                  </label>
+                </div>
+              )}
+            />
+          </div>
+
+          <div className="flex items-center space-x-2 h-12 pb-2">
+            <Controller
+              name="isFavourite"
+              control={control}
+              render={({ field }) => (
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="isFavourite"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                  <label
+                    htmlFor="isFavourite"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-gray-600"
+                  >
+                    Mark as Favourite
+                  </label>
+                </div>
+              )}
             />
           </div>
         </div>
