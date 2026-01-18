@@ -28,7 +28,10 @@ import AddCategoryModal from "@/components/modules/categories/AddCategoryModal";
 import EditCategoryModal from "@/components/modules/categories/EditCategoryModal";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
-import { useGetCategoriesQuery } from "@/redux/api/categoriesApi";
+import {
+  useDeleteCategoryMutation,
+  useGetCategoriesQuery,
+} from "@/redux/api/categoriesApi";
 
 type Category = {
   _id: string;
@@ -43,12 +46,11 @@ export default function CategoryPage() {
   const [categoryFilter, setCategoryFilter] = useState("all");
 
   // --- 2. RTK Query with Parameters ---
-  // We pass the page and limit to the server.
-  // If your API supports filtering by type, pass categoryFilter here too.
   const { data, isLoading, isFetching } = useGetCategoriesQuery({
     page: currentPage,
     limit: itemsPerPage,
   });
+  const [deleteCategory] = useDeleteCategoryMutation();
 
   // --- 3. Safe Data Extraction ---
   const categories = data?.data?.result || [];
@@ -88,10 +90,14 @@ export default function CategoryPage() {
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
       confirmButtonText: "Yes, delete it!",
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        // Call your delete mutation here
-        Swal.fire("Deleted!", "Category has been deleted.", "success");
+        try {
+          await deleteCategory(id).unwrap();
+          Swal.fire("Deleted!", "Category has been deleted.", "success");
+        } catch (error) {
+          Swal.fire("Error!", "Failed to delete category.", "error");
+        }
       }
     });
   };
