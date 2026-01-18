@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, Search, ChevronLeft, ChevronRight } from "lucide-react";
-
 import {
   Table,
   TableBody,
@@ -17,47 +16,53 @@ import { FaUserCircle } from "react-icons/fa";
 import { GoBlocked } from "react-icons/go";
 import Link from "next/link";
 import Swal from "sweetalert2";
+import { useGetUserQuery } from "@/redux/api/userApi";
 
-// --- Mock Data (If you use your import, delete this array and uncomment the import above) ---
-const users = Array.from({ length: 50 }, (_, i) => ({
-  id: i + 1,
-  name: `User ${i + 1}`,
-  mobile: `+1 555 000 ${i + 10}`,
-  email: `user${i + 1}@example.com`,
-  dateJoined: "2024-01-01",
-  userType: i % 3 === 0 ? "Admin" : "Customer",
-  avatar: "",
-}));
-// -----------------------------------------------------------------------------------------
+// Helper hook for debouncing search input
+function useDebounce(value: string, delay: number) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+
+  return debouncedValue;
+}
 
 export default function UserManagementPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8; // Change this number to show more/less rows
+  const itemsPerPage = 8;
+
+  // 1. Debounce the search term to avoid hitting the API on every keystroke
+  const debouncedTerm = useDebounce(searchTerm, 500);
+
+  // 2. RTK Query Hook
+  // We pass the current page, limit, and the *debounced* search term
+  const { data, isLoading, isFetching, isError } = useGetUserQuery({
+    page: currentPage,
+    limit: itemsPerPage,
+    searchTerm: debouncedTerm,
+  });
+  // console.log(data.data.result);
+
+  // 3. Extract Data safely (Adjust 'data?.data' based on your actual API response structure)
+  // Assuming API response structure: { data: User[], meta: { total: number } }
+  const users = data?.data?.result || [];
+  const meta = data?.meta || {};
+  const totalDocs = meta.total || 0; // Total count of users from DB
 
   const handleBlock = () => {
     Swal.fire("Are you sure?", "You want to block this user!", "warning");
   };
 
-  // 1. Filter Logic
-  const filteredUsers = users.filter((user) => {
-    const term = searchTerm.toLowerCase();
-    return (
-      user.name.toLowerCase().includes(term) ||
-      user.email.toLowerCase().includes(term) ||
-      user.mobile.includes(term)
-    );
-  });
+  // 4. Pagination Math (Server-side)
+  const totalPages = Math.ceil(totalDocs / itemsPerPage);
 
-  // 2. Pagination Math
-  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentData = filteredUsers.slice(
-    startIndex,
-    startIndex + itemsPerPage
-  );
-
-  // 3. Handlers
+  // 5. Handlers
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
@@ -69,7 +74,7 @@ export default function UserManagementPage() {
     setCurrentPage(1); // Reset to page 1 when searching
   };
 
-  // 4. Generate visible page numbers (max 5)
+  // 6. Generate visible page numbers
   const getVisiblePages = () => {
     const pages = [];
     const maxVisible = 5;
@@ -84,7 +89,6 @@ export default function UserManagementPage() {
     for (let i = startPage; i <= endPage; i++) {
       pages.push(i);
     }
-
     return pages;
   };
 
@@ -140,17 +144,40 @@ export default function UserManagementPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {currentData.length > 0 ? (
-              currentData.map((user) => (
+            {/* LOADING STATE */}
+            {isLoading || isFetching ? (
+              // Simple Skeleton Loading Rows
+              Array.from({ length: 5 }).map((_, idx) => (
+                <TableRow key={idx} className="animate-pulse">
+                  <TableCell colSpan={6} className="py-4">
+                    <div className="h-10 bg-gray-200 rounded w-full"></div>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : isError ? (
+              // ERROR STATE
+              <TableRow>
+                <TableCell
+                  colSpan={6}
+                  className="text-center py-10 text-red-500"
+                >
+                  Something went wrong fetching users.
+                </TableCell>
+              </TableRow>
+            ) : users.length > 0 ? (
+              // DATA STATE
+              users.map((user: any) => (
                 <TableRow
-                  key={user.id}
+                  key={user.id || user._id}
                   className="border-b-0 hover:bg-gray-100/50"
                 >
                   <TableCell className="py-4 pl-0">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10">
                         <AvatarImage src={user.avatar} alt={user.name} />
-                        <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                        <AvatarFallback>
+                          {user.name?.charAt(0) || "U"}
+                        </AvatarFallback>
                       </Avatar>
                       <span className="font-medium text-gray-700">
                         {user.name}
@@ -158,21 +185,21 @@ export default function UserManagementPage() {
                     </div>
                   </TableCell>
                   <TableCell className="py-4 text-gray-600">
-                    {user.mobile}
+                    {user.contact}
                   </TableCell>
                   <TableCell className="py-4 text-gray-600">
                     {user.email}
                   </TableCell>
                   <TableCell className="py-4 text-gray-600">
-                    {user.dateJoined}
+                    {user.createdAt}
                   </TableCell>
                   <TableCell className="py-4 text-gray-600">
-                    {user.userType}
+                    {user.role}
                   </TableCell>
                   <TableCell className="py-4">
                     <div className="flex items-center justify-center gap-3">
                       <Link
-                        href={`/user-management/${user.id}`}
+                        href={`/user-management/${user.id || user._id}`}
                         className="p-0.5 rounded-sm border border-gray-800 text-gray-700 bg-gray-900 hover:bg-gray-800 transition-colors"
                       >
                         <FaUserCircle fill="white" className="h-4 w-4" />
@@ -189,6 +216,7 @@ export default function UserManagementPage() {
                 </TableRow>
               ))
             ) : (
+              // EMPTY STATE
               <TableRow>
                 <TableCell
                   colSpan={6}
@@ -203,9 +231,8 @@ export default function UserManagementPage() {
       </div>
 
       {/* Pagination Controls */}
-      {totalPages > 1 && (
+      {!isLoading && totalPages > 1 && (
         <div className="mt-10 flex items-center justify-center gap-4 text-sm font-medium text-gray-600">
-          {/* Previous */}
           <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
@@ -214,7 +241,6 @@ export default function UserManagementPage() {
             <ChevronLeft className="h-7 w-7" />
           </button>
 
-          {/* Page Numbers (Max 5) */}
           {getVisiblePages().map((page) => (
             <button
               key={page}
@@ -229,13 +255,12 @@ export default function UserManagementPage() {
             </button>
           ))}
 
-          <button
-            className={`flex h-8 w-8 items-center justify-center rounded transition-colors`}
-          >
-            ...{totalPages}
-          </button>
+          {totalPages > 5 && currentPage < totalPages - 2 && (
+            <span className="flex h-8 w-8 items-center justify-center">
+              ...
+            </span>
+          )}
 
-          {/* Next */}
           <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}

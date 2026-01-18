@@ -8,16 +8,16 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AuthGuard>
-      <div className="relative bg-white h-full min-h-screen font-[sans-serif]">
-        <div className="">
-          <Navbar />
-          <main className="w-full lg:flex">
-            <Sidebar />
-            {children}
-          </main>
-        </div>
+    // <AuthGuard>
+    <div className="relative bg-white h-full min-h-screen font-[sans-serif]">
+      <div className="">
+        <Navbar />
+        <main className="w-full lg:flex">
+          <Sidebar />
+          {children}
+        </main>
       </div>
-    </AuthGuard>
+    </div>
+    // </AuthGuard>
   );
 }

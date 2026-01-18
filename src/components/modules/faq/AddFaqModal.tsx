@@ -38,7 +38,7 @@ export default function AddFaqModal() {
   const onSubmit: SubmitHandler<FaqFormValues> = async (data) => {
     try {
       console.log("Form Data:", data);
-      // await addFaq(data).unwrap();
+      await addFaq(data).unwrap();
       toast.success("FAQ added successfully!");
       setIsOpen(false);
       reset();

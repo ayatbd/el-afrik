@@ -3,8 +3,9 @@ import AddFaqModal from "@/components/modules/faq/AddFaqModal";
 import EditFaqModal from "@/components/modules/faq/EditFaqModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useGetFaqQuery } from "@/redux/api/faqApi";
-import { Search, Trash2 } from "lucide-react";
+import { useDeleteFaqMutation, useGetFaqQuery } from "@/redux/api/faqApi";
+import { Loader2, Search, Trash2 } from "lucide-react";
+import { toast } from "react-toastify";
 
 interface FAQ {
   _id: string;
@@ -17,6 +18,7 @@ interface FAQ {
 const FaqPage = () => {
   // 1. Get query result
   const { data: faqs, isLoading, isError } = useGetFaqQuery(undefined);
+  const [deleteFaq, { isLoading: isDeleting }] = useDeleteFaqMutation();
 
   // 2. Handle Loading State FIRST
   if (isLoading) {
@@ -40,8 +42,21 @@ const FaqPage = () => {
 
   console.log("Faq Data:", faqsData);
 
+  // delete handler
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteFaq(id).unwrap();
+      toast.success("FAQ deleted successfully!");
+    } catch (error: unknown) {
+      const errorMessage =
+        (((error as Record<string, unknown>)?.data as Record<string, unknown>)
+          ?.message as string | undefined) || "Failed to delete FAQ";
+      toast.error(errorMessage);
+    }
+  };
+
   return (
-    <div className="p-6 md:p-10 max-w-6xl mx-auto min-h-screen bg-gray-50/50">
+    <div className="p-6 md:p-10 max-w-6xl mx-auto min-h-screen">
       {/* --- Header --- */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
@@ -84,12 +99,18 @@ const FaqPage = () => {
               <div className="flex items-start gap-2 min-w-fit">
                 <EditFaqModal faqData={faq} />
                 <Button
+                  onClick={() => handleDelete(faq._id)}
                   type="button"
                   variant="outline"
                   size="sm"
                   className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
                 >
-                  <Trash2 className="h-4 w-4 mr-1" /> Delete
+                  <Trash2 className="h-4 w-4 mr-1" />{" "}
+                  {isDeleting ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    "Delete"
+                  )}
                 </Button>
               </div>
             </div>

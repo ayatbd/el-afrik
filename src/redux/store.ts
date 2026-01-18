@@ -2,6 +2,8 @@ import { configureStore } from '@reduxjs/toolkit';
 import authReducer from './features/auth/authSlice';
 import { apiSlice } from './api/apiSlice';
 import authTest from './features/auth/authSliceTest';
+import { persistReducer, persistStore } from 'redux-persist';
+import storage from 'redux-persist/lib/storage';
 
 export const store = configureStore({
   reducer: {
