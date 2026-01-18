@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAddProductsMutation } from "@/redux/api/productApi";
+import { useGetCategoriesQuery } from "@/redux/api/categoriesApi";
 
 // Updated Interface matching your JSON exactly
 interface ProductFormValues {
@@ -42,9 +43,18 @@ interface ProductFormValues {
   isFeatured: boolean;
 }
 
+type Category = {
+  _id: string;
+  categoryName: string;
+};
+
 export default function AddProductPage() {
   const router = useRouter();
   const [addProduct, { isLoading }] = useAddProductsMutation();
+  const { data: categories, isLoading: categoriesLoading } =
+    useGetCategoriesQuery(undefined);
+  // console.log(categories.data.result);
+  const categoriesData = categories?.data?.result || [];
 
   const {
     register,
@@ -136,7 +146,7 @@ export default function AddProductPage() {
           text: "Your product has been added successfully.",
           timer: 2000,
           showConfirmButton: false,
-        }).then(() => router.push("/manage-products"));
+        }).then(() => router.push("/product-management"));
       }
     } catch (error: any) {
       const errorMessage = error?.data?.message || "Something went wrong";
@@ -147,6 +157,14 @@ export default function AddProductPage() {
       });
     }
   };
+
+  if (categoriesLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen md:min-w-7xl mx-auto bg-white p-6 md:p-10 font-sans text-gray-800">
@@ -233,12 +251,20 @@ export default function AddProductPage() {
                     <SelectValue placeholder="Select Category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {/* In a real app, map these from a GetCategories query */}
-                    <SelectItem value="69675bee9851504951afe88c">
-                      Foods
+                    {categoriesData?.map((category: Category) => (
+                      <SelectItem
+                        key={category._id}
+                        value={category._id}
+                        className="capitalize"
+                      >
+                        {category.categoryName}
+                      </SelectItem>
+                    ))}
+                    {/* <SelectItem value="69675bee9851504951afe88c">
+                      Beef
                     </SelectItem>
-                    <SelectItem value="drinks_id">Drinks</SelectItem>
-                    <SelectItem value="snacks_id">Snacks</SelectItem>
+                    <SelectItem value="drinks_id">Kebab</SelectItem>
+                    <SelectItem value="snacks_id">Pizza</SelectItem> */}
                   </SelectContent>
                 </Select>
               )}
@@ -306,7 +332,7 @@ export default function AddProductPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="percentage">Percentage (%)</SelectItem>
-                    <SelectItem value="flat">Flat Amount</SelectItem>
+                    <SelectItem value="discount_amount">Flat Amount</SelectItem>
                   </SelectContent>
                 </Select>
               )}
