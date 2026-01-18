@@ -17,7 +17,7 @@ import { toast } from "react-toastify";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { ChangeEvent, useState } from "react";
 
-export default function AddCategoryModal() {
+export default function AddCategoryModal({ category }) {
   const [images, setImages] = useState<string[]>([]);
 
   // Handle File Selection
@@ -26,7 +26,7 @@ export default function AddCategoryModal() {
     if (files) {
       // Convert FileList to Array and create object URLs for preview
       const newImages = Array.from(files).map((file) =>
-        URL.createObjectURL(file)
+        URL.createObjectURL(file),
       );
       // Append new images to existing ones
       setImages((prev) => [...prev, ...newImages]);

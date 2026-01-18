@@ -141,6 +141,8 @@ export default function ManageProductsPage() {
     totalPage: 1,
   };
 
+  console.log(meta);
+
   useEffect(() => {
     setMounted(true);
     const interval = setInterval(() => {

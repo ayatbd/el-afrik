@@ -148,8 +148,8 @@ export default function AddProductPage() {
           showConfirmButton: false,
         }).then(() => router.push("/product-management"));
       }
-    } catch (error: any) {
-      const errorMessage = error?.data?.message || "Something went wrong";
+    } catch (error: unknown) {
+      const errorMessage = (error as { data?: { message?: string } })?.data?.message || "Something went wrong";
       Swal.fire({
         icon: "error",
         title: "Error",
