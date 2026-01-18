@@ -166,7 +166,7 @@ export default function UserManagementPage() {
               </TableRow>
             ) : users.length > 0 ? (
               // DATA STATE
-              users.map((user: any) => (
+              users?.map((user: any) => (
                 <TableRow
                   key={user.id || user._id}
                   className="border-b-0 hover:bg-gray-100/50"
