@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox"; // Ensure you have this component or use <input type="checkbox">
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -22,13 +22,11 @@ import {
 import { useAddProductsMutation } from "@/redux/api/productApi";
 import { useGetCategoriesQuery } from "@/redux/api/categoriesApi";
 
-// Updated Interface matching your JSON exactly
 interface ProductFormValues {
   name: string;
   weight: number;
   category: string;
   price: number;
-  // We handle discount fields separately in the form, then merge on submit
   discount_type: string;
   discount_amount: number;
   quantity: number;
@@ -36,7 +34,7 @@ interface ProductFormValues {
   readyTime: string;
   status: string;
   deliveryFee: number;
-  points: string; // Select returns string, we convert to number on submit
+  points: string;
   description: string;
   promo: string;
   isFavourite: boolean;
@@ -149,7 +147,9 @@ export default function AddProductPage() {
         }).then(() => router.push("/product-management"));
       }
     } catch (error: unknown) {
-      const errorMessage = (error as { data?: { message?: string } })?.data?.message || "Something went wrong";
+      const errorMessage =
+        (error as { data?: { message?: string } })?.data?.message ||
+        "Something went wrong";
       Swal.fire({
         icon: "error",
         title: "Error",
