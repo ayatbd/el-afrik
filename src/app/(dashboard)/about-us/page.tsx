@@ -91,7 +91,7 @@ export default function AboutUs() {
   return (
     <div className="min-h-screen w-full bg-[#F9FAFB] p-6 md:p-10 font-sans">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Terms & Conditions</h1>
+        <h1 className="text-2xl font-bold text-gray-900">About Us</h1>
         <Button
           onClick={handleSave}
           disabled={isUpdating || isFetching}

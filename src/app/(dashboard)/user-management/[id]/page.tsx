@@ -14,6 +14,7 @@ import {
   Clock,
   User,
   Copy,
+  Ban,
 } from "lucide-react";
 import { toast } from "react-toastify";
 
@@ -21,8 +22,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"; // Used Shadcn Avatar
 
-// --- 1. Define Interface based on your JSON ---
+// --- Interface ---
 interface UserData {
   _id: string;
   firstName: string;
@@ -44,17 +46,56 @@ interface UserData {
   image: string;
 }
 
-// --- 2. Mock RTK Query Hook (Replace with your actual import) ---
+// Mock Import
 import { useGetSingleUserQuery } from "@/redux/api/userApi";
+import Swal from "sweetalert2";
 
 export default function UserDetailsPage() {
   const router = useRouter();
   const params = useParams();
-
-  // Fetch data (using the ID from URL or hardcoded for demo)
   const id = params?.id as string;
-  const { data: user, isLoading, error } = useGetSingleUserQuery(id);
-  console.log(user);
+
+  // Fetch data
+  const { data: response, isLoading, error } = useGetSingleUserQuery(id);
+
+  if (isLoading) {
+    return (
+      <div className="h-[80vh] flex items-center justify-center">
+        <div className="animate-spin h-8 w-8 border-4 border-[#00B25D] border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
+
+  // --- 2. HANDLE ERROR / EMPTY STATE SECOND ---
+  const userData = response?.data as UserData;
+
+  if (error || !userData) {
+    return (
+      <div className="h-[80vh] flex flex-col items-center justify-center gap-4">
+        <h2 className="text-xl font-semibold text-red-500">User not found</h2>
+        <Button onClick={() => router.back()}>Go Back</Button>
+      </div>
+    );
+  }
+
+  // --- 3. DESTRUCTURE DATA SAFELY ---
+  const {
+    fullName,
+    email,
+    contact,
+    location,
+    dob,
+    refercode,
+    status,
+    role,
+    point,
+    loyalityTier,
+    isOtpVerified,
+    createdAt,
+    updatedAt,
+    image,
+    _id,
+  } = userData;
 
   // --- Helpers ---
   const copyToClipboard = (text: string) => {
@@ -73,29 +114,27 @@ export default function UserDetailsPage() {
     });
   };
 
-  // --- Loading / Error States ---
-  if (isLoading) {
-    return (
-      <div className="h-[80vh] flex items-center justify-center">
-        <div className="animate-spin h-8 w-8 border-4 border-[#00B25D] border-t-transparent rounded-full"></div>
-      </div>
-    );
-  }
-
-  if (error || !user) {
-    return (
-      <div className="h-[80vh] flex flex-col items-center justify-center gap-4">
-        <h2 className="text-xl font-semibold text-red-500">User not found</h2>
-        <Button onClick={() => router.back()}>Go Back</Button>
-      </div>
-    );
-  }
+  const handleBlockUser = () => {
+    Swal.fire({
+      title: "Block User?",
+      text: "This user will lose access to their account.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      confirmButtonText: "Yes, Block",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Call Block Mutation Here
+        toast.success("User blocked successfully");
+      }
+    });
+  };
 
   // --- Main Render ---
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6 animate-in fade-in duration-500">
-      {/* 1. Top Navigation Bar */}
-      <div className="flex items-center justify-between">
+      {/* Top Navigation Bar */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Button
             variant="outline"
@@ -106,21 +145,20 @@ export default function UserDetailsPage() {
             <ArrowLeft className="h-5 w-5 text-gray-600" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              {user.fullName}
-            </h1>
-            <p className="text-sm text-gray-500">
-              {user.role} - {user.status}
+            <h1 className="text-2xl font-bold text-gray-900">{fullName}</h1>
+            <p className="text-sm text-gray-500 capitalize">
+              {role} Account • {status}
             </p>
           </div>
         </div>
 
         <div className="flex gap-2">
-          {/* Action buttons (Edit/Block) could go here */}
           <Button
             variant="outline"
-            className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+            onClick={handleBlockUser}
+            className="text-red-600 hover:text-white hover:bg-red-600 border-red-200 transition-colors"
           >
+            <Ban className="mr-2 h-4 w-4" />
             Block User
           </Button>
         </div>
@@ -130,22 +168,17 @@ export default function UserDetailsPage() {
         {/* --- LEFT COLUMN: Identity Card --- */}
         <Card className="xl:col-span-1 border-gray-200 shadow-sm h-fit">
           <CardContent className="pt-8 pb-8 flex flex-col items-center">
-            {/* Avatar Section */}
+            {/* Avatar Section using Shadcn Avatar */}
             <div className="relative group">
-              <div className="h-32 w-32 rounded-full border-4 border-white shadow-lg overflow-hidden bg-gray-100 relative">
-                {/* Fallback image handler for local IPs */}
-                <img
-                  src={user.image}
-                  alt={user.fullName}
-                  className="h-full w-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src =
-                      `https://ui-avatars.com/api/?name=${user.fullName}&background=e2e8f0&color=64748b&size=128`;
-                  }}
-                />
-              </div>
+              <Avatar className="h-32 w-32 border-4 border-white shadow-lg bg-gray-100">
+                <AvatarImage src={image} className="object-cover" />
+                <AvatarFallback className="text-3xl font-bold text-gray-400">
+                  {fullName?.charAt(0) || "U"}
+                </AvatarFallback>
+              </Avatar>
+
               {/* OTP Verified Badge */}
-              {user.isOtpVerified && (
+              {isOtpVerified && (
                 <div
                   className="absolute bottom-1 right-1 bg-[#00B25D] text-white p-1.5 rounded-full border-2 border-white shadow-sm"
                   title="OTP Verified"
@@ -157,24 +190,18 @@ export default function UserDetailsPage() {
 
             {/* Name & Role */}
             <div className="mt-4 text-center">
-              <h2 className="text-xl font-bold text-gray-900">
-                {user.fullName}
-              </h2>
-              <div className="flex items-center justify-center gap-2 mt-1">
-                <span className="text-sm text-gray-500 capitalize">
-                  {user.role}
-                </span>
-                <span className="text-gray-300">•</span>
+              <h2 className="text-xl font-bold text-gray-900">{fullName}</h2>
+              <div className="flex items-center justify-center gap-2 mt-2">
                 <Badge
-                  className={`capitalize shadow-none ${
-                    user.status === "active"
+                  className={`capitalize shadow-none px-3 py-1 ${
+                    status === "active"
                       ? "bg-green-100 text-green-700 hover:bg-green-100"
-                      : user.status === "in-progress"
+                      : status === "in-progress"
                         ? "bg-amber-100 text-amber-700 hover:bg-amber-100"
                         : "bg-red-100 text-red-700 hover:bg-red-100"
                   }`}
                 >
-                  {user.status}
+                  {status}
                 </Badge>
               </div>
             </div>
@@ -189,9 +216,9 @@ export default function UserDetailsPage() {
                     <Coins className="h-4 w-4" />
                   </div>
                 </div>
-                <p className="text-2xl font-bold text-gray-900">{user.point}</p>
+                <p className="text-2xl font-bold text-gray-900">{point}</p>
                 <p className="text-xs font-medium text-gray-500 uppercase">
-                  Total Points
+                  Points
                 </p>
               </div>
 
@@ -201,11 +228,11 @@ export default function UserDetailsPage() {
                     <Award className="h-4 w-4" />
                   </div>
                 </div>
-                <p className="text-2xl font-bold text-gray-900">
-                  {user.loyalityTier}
+                <p className="text-xl font-bold text-gray-900 truncate px-1">
+                  {loyalityTier || "Bronze"}
                 </p>
                 <p className="text-xs font-medium text-gray-500 uppercase">
-                  Loyalty Tier
+                  Tier
                 </p>
               </div>
             </div>
@@ -214,7 +241,7 @@ export default function UserDetailsPage() {
 
         {/* --- RIGHT COLUMN: Detailed Info --- */}
         <div className="xl:col-span-2 space-y-6">
-          {/* Section 1: Contact & Personal Info */}
+          {/* Section 1: Personal Info */}
           <Card className="border-gray-200 shadow-sm">
             <CardHeader className="pb-3 border-b border-gray-100">
               <div className="flex items-center gap-2">
@@ -226,28 +253,24 @@ export default function UserDetailsPage() {
               <InfoItem
                 icon={Mail}
                 label="Email Address"
-                value={user.email}
+                value={email}
                 copyable
-                onCopy={() => copyToClipboard(user.email)}
+                onCopy={() => copyToClipboard(email)}
               />
 
-              <InfoItem
-                icon={Phone}
-                label="Phone Number"
-                value={user.contact}
-              />
+              <InfoItem icon={Phone} label="Phone Number" value={contact} />
 
               <InfoItem
                 icon={Calendar}
                 label="Date of Birth"
-                value={new Date(user.dob).toLocaleDateString()}
+                value={dob ? formatDate(dob) : "N/A"}
               />
 
-              <InfoItem icon={MapPin} label="Location" value={user.location} />
+              <InfoItem icon={MapPin} label="Location" value={location} />
             </CardContent>
           </Card>
 
-          {/* Section 2: Account & System Data */}
+          {/* Section 2: Account Details */}
           <Card className="border-gray-200 shadow-sm">
             <CardHeader className="pb-3 border-b border-gray-100">
               <div className="flex items-center gap-2">
@@ -260,7 +283,7 @@ export default function UserDetailsPage() {
                 <InfoItem
                   icon={Hash}
                   label="Referral Code"
-                  value={user.refercode}
+                  value={refercode}
                   isCode
                 />
 
@@ -269,11 +292,11 @@ export default function UserDetailsPage() {
                     User ID
                   </label>
                   <div
-                    className="flex items-center gap-2 group cursor-pointer"
-                    onClick={() => copyToClipboard(user._id)}
+                    className="flex items-center gap-2 group cursor-pointer w-fit"
+                    onClick={() => copyToClipboard(_id)}
                   >
-                    <p className="text-sm font-mono text-gray-600 bg-gray-100 px-2 py-1 rounded w-fit">
-                      {user._id}
+                    <p className="text-sm font-mono text-gray-600 bg-gray-100 px-2 py-1 rounded border border-gray-200">
+                      {_id}
                     </p>
                     <Copy className="h-3 w-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
@@ -282,13 +305,13 @@ export default function UserDetailsPage() {
                 <InfoItem
                   icon={Clock}
                   label="Joined On"
-                  value={formatDate(user.createdAt)}
+                  value={formatDate(createdAt)}
                 />
 
                 <InfoItem
                   icon={Clock}
                   label="Last Updated"
-                  value={formatDate(user.updatedAt)}
+                  value={formatDate(updatedAt)}
                 />
               </div>
             </CardContent>
@@ -299,7 +322,7 @@ export default function UserDetailsPage() {
   );
 }
 
-// --- Sub-Component for consistent data display ---
+// Sub-Component
 interface InfoItemProps {
   icon: any;
   label: string;
@@ -328,13 +351,13 @@ function InfoItem({
       <div className="flex items-center gap-2">
         {isCode ? (
           <span className="text-sm font-bold text-gray-800 bg-gray-100 px-2 py-0.5 rounded border border-gray-200">
-            {value}
+            {value || "N/A"}
           </span>
         ) : (
           <p className="text-sm font-medium text-gray-900">{value || "N/A"}</p>
         )}
 
-        {copyable && (
+        {copyable && value && (
           <button
             onClick={onCopy}
             className="text-gray-400 hover:text-[#00B25D] transition-colors"
