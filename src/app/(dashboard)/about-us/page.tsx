@@ -6,9 +6,9 @@ import { Loader2, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Swal from "sweetalert2";
 import {
-  useGetTermsConditionQuery,
-  useUpdateTermsConditionMutation,
-} from "@/redux/api/termsConditionApi";
+  useGetAboutUsQuery,
+  useUpdateAboutUsMutation,
+} from "@/redux/api/aboutUs";
 
 const JoditEditor = dynamic(() => import("jodit-react"), {
   ssr: false,
@@ -17,24 +17,23 @@ const JoditEditor = dynamic(() => import("jodit-react"), {
   ),
 });
 
-export default function TermsAndCondition() {
+export default function AboutUs() {
   const editor = useRef(null);
   const [content, setContent] = useState<string>("");
 
-  const { data: tncData, isLoading: isFetching } =
-    useGetTermsConditionQuery(undefined);
-  const [updateTermsCondition, { isLoading: isUpdating }] =
-    useUpdateTermsConditionMutation();
+  const { data: aboutUsData, isLoading: isFetching } =
+    useGetAboutUsQuery(undefined);
+  const [updateAboutUs, { isLoading: isUpdating }] = useUpdateAboutUsMutation();
 
   useEffect(() => {
     // Check if data exists
-    if (tncData?.data) {
-      const backendHtml = tncData.data.termsCondition;
+    if (aboutUsData?.data) {
+      const backendHtml = aboutUsData.data.aboutUs;
 
       // Ensure we set a string (fallback to "" if null/undefined)
       setContent(backendHtml || "");
     }
-  }, [tncData]);
+  }, [aboutUsData]);
 
   const config = useMemo(
     () => ({
@@ -72,8 +71,8 @@ export default function TermsAndCondition() {
     try {
       // 3. UPDATED: Send the data with the key 'privacyPolicy' to match your backend structure
       // (If your API explicitly expects "content", change this back to "content")
-      const response = await updateTermsCondition({
-        termsCondition: content,
+      const response = await updateAboutUs({
+        aboutUs: content,
       }).unwrap();
 
       if (response.success) {

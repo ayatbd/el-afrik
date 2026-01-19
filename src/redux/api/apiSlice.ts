@@ -1,15 +1,27 @@
-import { createApi, fetchBaseQuery, BaseQueryApi } from '@reduxjs/toolkit/query/react';
+import { createApi, fetchBaseQuery, BaseQueryApi, FetchArgs } from '@reduxjs/toolkit/query/react';
 import { setCredentials, logout } from '../features/auth/authSlice';
 import { Mutex } from 'async-mutex';
 
 // Create a mutex to prevent multiple refresh calls when multiple requests fail simultaneously
 const mutex = new Mutex();
 
+interface RefreshTokenResponse {
+    data: {
+        accessToken: string;
+    };
+}
+
+interface RootState {
+    auth: {
+        accessToken: string | null;
+    };
+}
+
 const baseQuery = fetchBaseQuery({
     baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api',
     prepareHeaders: (headers, { getState }) => {
         // 1. Attach Access Token from Redux Store
-        const token = (getState() as any).auth.accessToken;
+        const token = (getState() as RootState).auth.accessToken;
         if (token) {
             headers.set('authorization', `Bearer ${token}`);
         }
@@ -17,7 +29,7 @@ const baseQuery = fetchBaseQuery({
     },
 });
 
-const baseQueryWithReauth = async (args: any, api: BaseQueryApi, extraOptions: any) => {
+const baseQueryWithReauth = async (args: string | FetchArgs, api: BaseQueryApi, extraOptions: Record<string, unknown>) => {
     // 2. Wait until the mutex is available (if a refresh is already happening)
     await mutex.waitForUnlock();
 
@@ -48,7 +60,7 @@ const baseQueryWithReauth = async (args: any, api: BaseQueryApi, extraOptions: a
                     if (refreshResult.data) {
                         // 5. Success! Update Redux with new Access Token
                         // Assuming backend response: { data: { accessToken: "..." } }
-                        const newAccessToken = refreshResult.data.data.accessToken;
+                        const newAccessToken = (refreshResult.data as RefreshTokenResponse).data.accessToken;
 
                         api.dispatch(setCredentials({ accessToken: newAccessToken }));
 
@@ -79,6 +91,6 @@ const baseQueryWithReauth = async (args: any, api: BaseQueryApi, extraOptions: a
 export const apiSlice = createApi({
     reducerPath: 'api',
     baseQuery: baseQueryWithReauth,
-    tagTypes: ['Product', 'Dashboard', "Category", "Faq", "User", "PrivacyPolicy", "TermsCondition"],
+    tagTypes: ['Product', 'Dashboard', "Category", "Faq", "User", "PrivacyPolicy", "TermsCondition", "AboutUs"],
     endpoints: () => ({}),
 });
