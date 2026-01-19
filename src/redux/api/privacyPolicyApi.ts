@@ -17,26 +17,10 @@ export const privacyPolicyApi = apiSlice.injectEndpoints({
             }),
             invalidatesTags: ["PrivacyPolicy"],
         }),
-        deletePrivacyPolicy: builder.mutation({
-            query: () => ({
-                url: "/privacy/create-or-update",
-                method: "DELETE",
-            }),
-            invalidatesTags: ["PrivacyPolicy"],
-        }),
-        publishPrivacyPolicy: builder.mutation({
-            query: () => ({
-                url: "/privacy/create-or-update",
-                method: "POST",
-            }),
-            invalidatesTags: ["PrivacyPolicy"],
-        }),
     }),
 });
 
 export const {
     useGetPrivacyPolicyQuery,
     useUpdatePrivacyPolicyMutation,
-    useDeletePrivacyPolicyMutation,
-    usePublishPrivacyPolicyMutation,
 } = privacyPolicyApi;

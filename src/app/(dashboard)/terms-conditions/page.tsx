@@ -1,70 +1,128 @@
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
+"use client";
 
-const PrivacyAndPolicy = () => {
+import { useState, useEffect, useRef, useMemo } from "react";
+import dynamic from "next/dynamic";
+import { Loader2, Save } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import Swal from "sweetalert2";
+import {
+  useGetTermsConditionQuery,
+  useUpdateTermsConditionMutation,
+} from "@/redux/api/termsConditionApi";
+
+const JoditEditor = dynamic(() => import("jodit-react"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-125 w-full bg-gray-100 animate-pulse rounded-md" />
+  ),
+});
+
+export default function TermsAndCondition() {
+  const editor = useRef(null);
+  const [content, setContent] = useState<string>("");
+
+  const { data: tncData, isLoading: isFetching } =
+    useGetTermsConditionQuery(undefined);
+  const [updateTermsCondition, { isLoading: isUpdating }] =
+    useUpdateTermsConditionMutation();
+
+  useEffect(() => {
+    // Check if data exists
+    if (tncData?.data) {
+      const backendHtml = tncData.data.termsCondition;
+
+      // Ensure we set a string (fallback to "" if null/undefined)
+      setContent(backendHtml || "");
+    }
+  }, [tncData]);
+
+  const config = useMemo(
+    () => ({
+      readonly: false,
+      placeholder: "Start typing...",
+      height: 500,
+      width: "100%",
+      enableDragAndDropFileToEditor: true,
+      uploader: {
+        insertImageAsBase64URI: true,
+      },
+      buttons: [
+        "bold",
+        "italic",
+        "underline",
+        "|",
+        "fontsize",
+        "paragraph",
+        "|",
+        "ul",
+        "ol",
+        "|",
+        "link",
+        "image",
+        "|",
+        "undo",
+        "redo",
+        "source",
+      ],
+    }),
+    [],
+  );
+
+  const handleSave = async () => {
+    try {
+      // 3. UPDATED: Send the data with the key 'privacyPolicy' to match your backend structure
+      // (If your API explicitly expects "content", change this back to "content")
+      const response = await updateTermsCondition({
+        termsCondition: content,
+      }).unwrap();
+
+      if (response.success) {
+        Swal.fire({
+          icon: "success",
+          title: "Updated!",
+          timer: 2000,
+          showConfirmButton: false,
+        });
+      }
+    } catch (error: any) {
+      Swal.fire("Error", "Failed to update policy", "error");
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-[#FAFAFA] md:py-10 md:px-40 sm:p-6 font-sans text-gray-800">
-      <div>
-        <div className="flex items-center gap-3">
-          <Link
-            href="/"
-            className="p-1 -ml-2 hover:bg-gray-200 rounded-full transition-colors"
-          >
-            <ArrowLeft className="h-6 w-6 text-gray-900" />
-          </Link>
-          <h1 className="text-xl font-medium text-gray-900">Catering</h1>
-        </div>
-        <div className="text-[#555555] space-y-5 leading-relaxed mt-12">
-          <p>
-            There are many variations of passages of Lorem Ipsum available, but
-            the majority have suffered alteration in some form, by injected
-            humour, or randomised words which don&apos;t look even slightly
-            believable. If you are going to use a passage of Lorem Ipsum, you
-            need to be sure there isn&apos;t anything embarrassing hidden in the
-            middle of text. All the Lorem Ipsum generators on the Internet tend
-            to repeat predefined chunks as necessary, making this the first true
-            generator on the Internet. It uses a dictionary of over 200 Latin
-            words, combined with a handful of model sentence structures, to
-            generate Lorem Ipsum which looks reasonable. The generated Lorem
-            Ipsum is therefore always free from repetition, injected humour, or
-            non-characteristic words etc.
-          </p>
-          <p>
-            There are many variations of passages of Lorem Ipsum available, but
-            the majority have suffered alteration in some form, by injected
-            humour, or randomised words which don&apos;t look even slightly
-            believable. All the Lorem Ipsum generators on the Internet tend to
-            repeat predefined chunks as necessary, making this the first true
-            generator on the Internet. It uses a dictionary of over 200 Latin
-            words, combined with a handful of model sentence structures, to
-            generate Lorem Ipsum which looks reasonable. The generated Lorem
-            Ipsum is therefore always free from repetition, injected humour, or
-            non-characteristic words etc.
-          </p>
-          <p>
-            There are many variations of passages of Lorem Ipsum available, but
-            the majority have suffered alteration in some form, by injected
-            humour, or randomised words which don&apos;t look even slightly
-            believable. If you are going to use a passage of Lorem Ipsum, you
-            need to be sure there isn&apos;t anything embarrassing hidden in the
-            middle of text. All the Lorem Ipsum generators on the Internet tend
-            to repeat predefined chunks as necessary, making this the first true
-            generator on the Internet. It uses a dictionary of over 200 Latin
-            words, combined with a handful of model sentence structures, to
-            generate Lorem Ipsum which looks reasonable. The generated Lorem
-            Ipsum is therefore always free from repetition, injected humour, or
-            non-characteristic words etc.
-          </p>
-          <p>
-            There are many variations of passages of Lorem Ipsum available, but
-            the majority have suffered alteration in some form, by injected
-            humour, or randomised words which don&apos;t look even slightly
-            believable.
-          </p>
-        </div>
+    <div className="min-h-screen w-full bg-[#F9FAFB] p-6 md:p-10 font-sans">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-2xl font-bold text-gray-900">Privacy Policy</h1>
+        <Button
+          onClick={handleSave}
+          disabled={isUpdating || isFetching}
+          className="bg-[#00B25D] hover:bg-[#009e52] text-white px-6"
+        >
+          {isUpdating ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Save className="mr-2 h-4 w-4" />
+          )}
+          Save Changes
+        </Button>
+      </div>
+
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        {isFetching ? (
+          <div className="h-125 flex items-center justify-center">
+            <Loader2 className="h-10 w-10 animate-spin text-gray-400" />
+          </div>
+        ) : (
+          <JoditEditor
+            ref={editor}
+            // 4. Safety Check: Ensure value is always a string
+            value={content}
+            config={config as any}
+            tabIndex={1}
+            onBlur={(newContent) => setContent(newContent)}
+          />
+        )}
       </div>
     </div>
   );
-};
-
-export default PrivacyAndPolicy;
+}
