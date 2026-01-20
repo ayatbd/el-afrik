@@ -1,376 +1,347 @@
 "use client";
 
-import Link from "next/link";
-import { ArrowLeft, Pencil, Image as ImageIcon, Loader2 } from "lucide-react";
-import { useState, useRef, ChangeEvent } from "react";
-
+import { useState, useEffect, ChangeEvent } from "react";
+import {
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
+  Camera,
+  Save,
+  Loader2,
+  Award,
+  ShieldCheck,
+} from "lucide-react";
+import { toast } from "sonner"; // or react-toastify
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Swal from "sweetalert2"; // Optional: for nice alerts
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 
-export default function ProfilePage() {
-  // --- States ---
-  const [isEditing, setIsEditing] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+// Import your hooks
+import {
+  useGetProfileQuery,
+  useUpdateProfileMutation,
+} from "@/redux/api/profileApi";
 
-  // Form Data State
+// Helper to format Date for Input (YYYY-MM-DD)
+const formatDateForInput = (isoString: string | null) => {
+  if (!isoString) return "";
+  return new Date(isoString).toISOString().split("T")[0];
+};
+
+export default function MyProfilePage() {
+  // 1. Fetch Data
+  const { data: response, isLoading, isError } = useGetProfileQuery(undefined);
+  const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
+
+  const profileData = response?.data;
+  console.log(response);
+
+  // 2. Form State
   const [formData, setFormData] = useState({
-    fullName: "Giring Furqon",
-    displayName: "EL AFRIK LOUNGE", // Added for the big header name
-    email: "alma.lawson@example.com",
-    phone: "(+33)7 00 55 57 60",
-    dob: "1990-01-01",
-    location: "312 3rd St. Albany, New York 12206, USA",
+    firstName: "",
+    lastName: "",
+    contact: "",
+    location: "",
+    dob: "",
   });
 
-  // Image States
-  const [avatarPreview, setAvatarPreview] = useState(
-    "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&h=200&fit=crop"
-  );
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  // Image State
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>("");
 
-  // --- Handlers ---
-
-  // 1. Toggle Edit Mode
-  const toggleEdit = () => {
-    setIsEditing(!isEditing);
-  };
-
-  // 2. Handle Text Input Changes
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target;
-    setFormData((prev) => ({ ...prev, [id]: value }));
-  };
-
-  // 3. Trigger File Input (Only if editing)
-  const handleImageClick = () => {
-    if (isEditing && fileInputRef.current) {
-      fileInputRef.current.click();
+  // 3. Populate State on Data Fetch
+  useEffect(() => {
+    if (profileData) {
+      setFormData({
+        firstName: profileData.firstName || "",
+        lastName: profileData.lastName || "",
+        contact: profileData.contact || "",
+        location: profileData.location || "",
+        dob: formatDateForInput(profileData.dob),
+      });
+      setImagePreview(profileData.image || "");
     }
+  }, [profileData]);
+
+  // 4. Handlers
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // 4. Handle File Selection & Preview
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setSelectedFile(file);
-      // Create preview URL
-      const objectUrl = URL.createObjectURL(file);
-      setAvatarPreview(objectUrl);
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
     }
   };
 
-  // 5. Submit / Integration Process
-  const handleUpdate = async () => {
-    setIsLoading(true);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
     try {
-      // --- INTEGRATION PROCESS START ---
-
-      // A. Prepare FormData (Required for sending files + text)
       const data = new FormData();
-      data.append("fullName", formData.fullName);
-      data.append("displayName", formData.displayName);
-      data.append("email", formData.email);
-      data.append("phone", formData.phone);
-      data.append("location", formData.location);
 
-      // B. Append the file only if one was chosen
-      if (selectedFile) {
-        data.append("avatar", selectedFile);
+      // Append text data as JSON string (common pattern) or individual fields
+      // Option A: If backend expects a "data" string field
+      data.append("data", JSON.stringify(formData));
+
+      // Option B: If backend expects individual fields (Uncomment if needed)
+      // Object.entries(formData).forEach(([key, value]) => data.append(key, value));
+
+      // Append Image if changed
+      if (imageFile) {
+        data.append("image", imageFile);
       }
 
-      // C. Make the API Call (Simulated here)
-      // const response = await fetch('/api/user/profile', {
-      //   method: 'PUT',
-      //   body: data,
-      //   // Note: Do not set Content-Type header when using FormData,
-      //   // the browser sets it automatically with the boundary.
-      // });
+      const res = await updateProfile(data).unwrap();
 
-      // Simulate network delay
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // --- INTEGRATION PROCESS END ---
-
-      Swal.fire({
-        icon: "success",
-        title: "Profile Updated",
-        text: "Your changes have been saved successfully.",
-        timer: 2000,
-        showConfirmButton: false,
-      });
-
-      setIsEditing(false); // Lock fields again
-    } catch (error) {
-      console.error("Upload failed", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Something went wrong while updating.",
-      });
-    } finally {
-      setIsLoading(false);
+      if (res.success) {
+        toast.success("Profile updated successfully!");
+      }
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Failed to update profile");
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex h-[80vh] w-full items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-[#00B25D]" />
+      </div>
+    );
+  }
+
+  if (isError || !profileData) {
+    return (
+      <div className="w-full mx-auto">
+        <div className="flex h-[80vh] flex-col items-center justify-center text-red-500">
+          <p>Failed to load profile data.</p>
+          <Button
+            variant="outline"
+            className="mt-4"
+            onClick={() => window.location.reload()}
+          >
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen w-full bg-white p-6 md:p-10 font-sans text-gray-900">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center gap-3 mb-8">
-          <Link
-            href="/"
-            className="p-1 -ml-2 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <ArrowLeft className="h-6 w-6 text-gray-800" />
-          </Link>
-          <h1 className="text-xl font-medium text-gray-900">Profile</h1>
-        </div>
+    <div className="min-h-screen w-full bg-[#F9FAFB] p-6 md:p-10 font-sans text-gray-800">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-900">My Profile</h1>
+        <p className="text-gray-500">
+          Manage your account settings and preferences.
+        </p>
+      </div>
 
-        {/* --- Profile Header Card --- */}
-        <div className="relative bg-[#F4F5F7] rounded-xl flex flex-col items-center justify-center py-10 mb-10 transition-all">
-          {/* Pen Button (Toggle) */}
-          <button
-            onClick={toggleEdit}
-            className={`absolute top-4 right-4 p-2 rounded-full transition-colors ${
-              isEditing
-                ? "bg-[#D85C2F] text-white shadow-lg"
-                : "text-gray-400 hover:text-gray-600 hover:bg-white"
-            }`}
-            title={isEditing ? "Cancel Editing" : "Edit Profile"}
-          >
-            <Pencil className="h-5 w-5" />
-          </button>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* --- LEFT COLUMN: Profile Card --- */}
+        <Card className="lg:col-span-1 h-fit shadow-sm border-gray-200">
+          <CardContent className="pt-8 flex flex-col items-center text-center">
+            {/* Avatar Upload */}
+            <div className="relative group mb-4">
+              <Avatar className="h-32 w-32 border-4 border-white shadow-lg">
+                <AvatarImage src={imagePreview} className="object-cover" />
+                <AvatarFallback className="text-4xl bg-gray-100 text-gray-400">
+                  {formData.firstName?.[0]}
+                </AvatarFallback>
+              </Avatar>
 
-          <div className="relative mb-4">
-            <Avatar className="h-28 w-28 border-4 border-white shadow-sm">
-              <AvatarImage
-                src={avatarPreview}
-                alt="Profile"
-                className="object-cover"
-              />
-              <AvatarFallback>EL</AvatarFallback>
-            </Avatar>
-
-            {/* Hidden File Input */}
-            <input
-              type="file"
-              ref={fileInputRef}
-              className="hidden"
-              accept="image/*"
-              onChange={handleFileChange}
-            />
-
-            {/* Camera Icon - Clickable only when isEditing is true */}
-            <div
-              onClick={handleImageClick}
-              className={`absolute bottom-0 right-0 p-1.5 rounded-full shadow-md border border-gray-100 transition-all duration-300
-                ${
-                  isEditing
-                    ? "bg-white cursor-pointer hover:bg-gray-50 text-[#D85C2F] scale-110"
-                    : "bg-gray-200 cursor-not-allowed text-gray-400 grayscale"
-                }
-              `}
-            >
-              <ImageIcon className="h-4 w-4" />
+              <label
+                htmlFor="imageUpload"
+                className="absolute bottom-0 right-0 bg-[#00B25D] text-white p-2 rounded-full cursor-pointer hover:bg-[#009e52] transition-all shadow-md"
+              >
+                <Camera className="h-5 w-5" />
+                <input
+                  id="imageUpload"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageChange}
+                />
+              </label>
             </div>
-          </div>
 
-          {/* Editable Display Name */}
-          {isEditing ? (
-            <input
-              id="displayName"
-              value={formData.displayName}
-              onChange={handleInputChange}
-              className="text-2xl font-semibold text-center bg-transparent border-b border-gray-400 focus:border-[#D85C2F] outline-none text-gray-800 uppercase tracking-wide w-1/2"
-            />
-          ) : (
-            <h2 className="text-2xl font-semibold text-gray-400 uppercase tracking-wide">
-              {formData.displayName}
+            {/* Name & Role */}
+            <h2 className="text-xl font-bold text-gray-900">
+              {profileData.firstName} {profileData.lastName}
             </h2>
-          )}
-        </div>
+            <div className="flex items-center gap-2 mt-2 mb-6">
+              <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100 px-3 capitalize">
+                {profileData.role}
+              </Badge>
+              {profileData.isOtpVerified && (
+                <Badge className="bg-green-100 text-green-700 hover:bg-green-100 px-2 gap-1">
+                  <ShieldCheck className="h-3 w-3" /> Verified
+                </Badge>
+              )}
+            </div>
 
-        <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="w-full justify-start h-auto p-0 bg-transparent border-b border-gray-100 rounded-none mb-8">
-            <TabsTrigger
-              value="profile"
-              className="rounded-none border-b-4 border-transparent px-4 pb-3 pt-2 font-semibold text-gray-500 data-[state=active]:border-[#D85C2F] data-[state=active]:text-gray-900 data-[state=active]:bg-transparent data-[state=active]:shadow-none text-base transition-all"
-            >
-              Profile
-            </TabsTrigger>
-            <TabsTrigger
-              value="password"
-              className="rounded-none border-b-4 border-transparent px-4 pb-3 pt-2 font-semibold text-gray-500 data-[state=active]:border-[#D85C2F] data-[state=active]:text-gray-900 data-[state=active]:bg-transparent data-[state=active]:shadow-none text-base transition-all"
-            >
-              Change Password
-            </TabsTrigger>
-          </TabsList>
+            <Separator className="mb-6" />
 
-          <TabsContent
-            value="profile"
-            className="space-y-8 animate-in fade-in-50 duration-300"
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-              <div className="space-y-3">
-                <Label htmlFor="fullName" className="text-gray-700 font-normal">
-                  Full Name
-                </Label>
-                <Input
-                  id="fullName"
-                  value={formData.fullName}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  className={`h-12 border-gray-200 focus-visible:ring-[#D85C2F] ${
-                    !isEditing && "bg-gray-50 text-gray-500"
-                  }`}
-                />
+            {/* Stats */}
+            <div className="w-full grid grid-cols-2 gap-4">
+              <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                <p className="text-xs text-gray-500 uppercase font-semibold">
+                  Points
+                </p>
+                <p className="text-xl font-bold text-[#00B25D]">
+                  {profileData.point}
+                </p>
+              </div>
+              <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                <p className="text-xs text-gray-500 uppercase font-semibold">
+                  Tier
+                </p>
+                <div className="flex items-center justify-center gap-1 text-amber-600 font-bold text-lg">
+                  <Award className="h-4 w-4" />
+                  {profileData.loyalityTier}
+                </div>
+              </div>
+            </div>
+
+            <div className="w-full mt-6 bg-blue-50 p-4 rounded-lg border border-blue-100 text-left">
+              <p className="text-xs text-blue-500 uppercase font-bold mb-1">
+                Referral Code
+              </p>
+              <p className="text-lg font-mono font-semibold text-blue-900 tracking-wider">
+                {profileData.refercode}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* --- RIGHT COLUMN: Edit Form --- */}
+        <Card className="lg:col-span-2 shadow-sm border-gray-200">
+          <CardHeader className="border-b border-gray-100">
+            <CardTitle className="text-lg font-semibold flex items-center gap-2">
+              <User className="h-5 w-5 text-[#00B25D]" />
+              Personal Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* First Name */}
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">First Name</Label>
+                  <Input
+                    id="firstName"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleInputChange}
+                    className="h-11 bg-gray-50/50"
+                  />
+                </div>
+
+                {/* Last Name */}
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Last Name</Label>
+                  <Input
+                    id="lastName"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleInputChange}
+                    className="h-11 bg-gray-50/50"
+                  />
+                </div>
               </div>
 
-              <div className="space-y-3">
-                <Label htmlFor="email" className="text-gray-700 font-normal">
-                  Email
-                </Label>
-                <Input
-                  id="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  className={`h-12 border-gray-200 focus-visible:ring-[#D85C2F] ${
-                    !isEditing && "bg-gray-50 text-gray-500"
-                  }`}
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Contact */}
+                <div className="space-y-2">
+                  <Label htmlFor="contact" className="flex items-center gap-2">
+                    <Phone className="h-3.5 w-3.5 text-gray-500" /> Contact
+                    Number
+                  </Label>
+                  <Input
+                    id="contact"
+                    name="contact"
+                    value={formData.contact}
+                    onChange={handleInputChange}
+                    className="h-11 bg-gray-50/50"
+                  />
+                </div>
+
+                {/* DOB */}
+                <div className="space-y-2">
+                  <Label htmlFor="dob" className="flex items-center gap-2">
+                    <Calendar className="h-3.5 w-3.5 text-gray-500" /> Date of
+                    Birth
+                  </Label>
+                  <Input
+                    id="dob"
+                    name="dob"
+                    type="date"
+                    value={formData.dob}
+                    onChange={handleInputChange}
+                    className="h-11 bg-gray-50/50"
+                  />
+                </div>
               </div>
 
-              <div className="space-y-3">
-                <Label htmlFor="phone" className="text-gray-700 font-normal">
-                  Phone Number
-                </Label>
-                <Input
-                  id="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  className={`h-12 border-gray-200 focus-visible:ring-[#D85C2F] ${
-                    !isEditing && "bg-gray-50 text-gray-500"
-                  }`}
-                />
-              </div>
-
-              <div className="space-y-3">
-                <Label htmlFor="dob" className="text-gray-700 font-normal">
-                  Date of birth
-                </Label>
-                <Input
-                  id="dob"
-                  value={formData.dob}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  type="date"
-                  className={`h-12 border-gray-200 focus-visible:ring-[#D85C2F] ${
-                    !isEditing && "bg-gray-50 text-gray-500"
-                  }`}
-                />
-              </div>
-
-              <div className="space-y-3 md:col-span-2">
-                <Label htmlFor="location" className="text-gray-700 font-normal">
-                  Location
+              {/* Location */}
+              <div className="space-y-2">
+                <Label htmlFor="location" className="flex items-center gap-2">
+                  <MapPin className="h-3.5 w-3.5 text-gray-500" /> Location
                 </Label>
                 <Input
                   id="location"
+                  name="location"
                   value={formData.location}
                   onChange={handleInputChange}
-                  disabled={!isEditing}
-                  className={`h-12 border-gray-200 focus-visible:ring-[#D85C2F] ${
-                    !isEditing && "bg-gray-50 text-gray-500"
-                  }`}
+                  className="h-11 bg-gray-50/50"
                 />
               </div>
-            </div>
-            <div className="pt-4 animate-in slide-in-from-bottom-5 fade-in duration-300">
-              <Button
-                onClick={handleUpdate}
-                disabled={isLoading || !isEditing}
-                className="bg-[#D85C2F] hover:bg-[#b04b26] text-white h-12 px-8 rounded-md text-base font-medium min-w-37.5"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  "Update Profile"
-                )}
-              </Button>
-            </div>
-          </TabsContent>
 
-          {/* Password Tab Content (Simplified) */}
-          <TabsContent value="password">
-            <form className="w-1/2 space-y-8">
-              <div className="space-y-3">
-                <Label htmlFor="fullName" className="text-gray-700 font-normal">
-                  Curren Password
-                </Label>
-                <Input
-                  id="currentPassword"
-                  type="password"
-                  placeholder="Input your password"
-                  className={`h-12 border-gray-200 focus-visible:ring-[#D85C2F] ${
-                    !isEditing && "bg-gray-50 text-gray-500"
-                  }`}
-                />
-              </div>
-              <div className="space-y-3">
-                <Label htmlFor="fullName" className="text-gray-700 font-normal">
-                  New Password
-                </Label>
-                <Input
-                  id="newPassword"
-                  type="password"
-                  placeholder="Input your password"
-                  className={`h-12 border-gray-200 focus-visible:ring-[#D85C2F] ${
-                    !isEditing && "bg-gray-50 text-gray-500"
-                  }`}
-                />
-              </div>
-              <div className="space-y-3">
-                <Label htmlFor="fullName" className="text-gray-700 font-normal">
-                  Confirm New Password
-                </Label>
-                <Input
-                  id="confirmNewPassword"
-                  type="password"
-                  placeholder="Input your password"
-                  className={`h-12 border-gray-200 focus-visible:ring-[#D85C2F] ${
-                    !isEditing && "bg-gray-50 text-gray-500"
-                  }`}
-                />
-              </div>
-              <div className="pt-4 animate-in slide-in-from-bottom-5 fade-in duration-300">
-                <Button
-                  onClick={handleUpdate}
-                  disabled={isLoading}
-                  className="bg-[#D85C2F] hover:bg-[#b04b26] text-white h-12 px-8 rounded-md text-base font-medium min-w-37.5"
+              {/* Email (Read Only) */}
+              <div className="space-y-2">
+                <Label
+                  htmlFor="email"
+                  className="flex items-center gap-2 text-gray-500"
                 >
-                  {isLoading ? (
+                  <Mail className="h-3.5 w-3.5" /> Email Address (Read-only)
+                </Label>
+                <Input
+                  id="email"
+                  value={profileData.email}
+                  disabled
+                  className="h-11 bg-gray-100 text-gray-500 border-gray-200 cursor-not-allowed"
+                />
+              </div>
+
+              <div className="pt-4 flex justify-end">
+                <Button
+                  type="submit"
+                  disabled={isUpdating}
+                  className="bg-[#00B25D] hover:bg-[#009e52] text-white px-8 h-11 text-base font-medium"
+                >
+                  {isUpdating ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />{" "}
                       Saving...
                     </>
                   ) : (
-                    "Update Profile"
+                    <>
+                      <Save className="mr-2 h-4 w-4" /> Save Changes
+                    </>
                   )}
                 </Button>
               </div>
             </form>
-          </TabsContent>
-        </Tabs>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

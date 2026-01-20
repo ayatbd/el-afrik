@@ -14,7 +14,6 @@ import {
   Clock,
   User,
   Copy,
-  Ban,
 } from "lucide-react";
 import { toast } from "react-toastify";
 
@@ -48,7 +47,6 @@ interface UserData {
 
 // Mock Import
 import { useGetSingleUserQuery } from "@/redux/api/userApi";
-import Swal from "sweetalert2";
 
 export default function UserDetailsPage() {
   const router = useRouter();
@@ -114,22 +112,6 @@ export default function UserDetailsPage() {
     });
   };
 
-  const handleBlockUser = () => {
-    Swal.fire({
-      title: "Block User?",
-      text: "This user will lose access to their account.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      confirmButtonText: "Yes, Block",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        // Call Block Mutation Here
-        toast.success("User blocked successfully");
-      }
-    });
-  };
-
   // --- Main Render ---
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6 animate-in fade-in duration-500">
@@ -152,7 +134,7 @@ export default function UserDetailsPage() {
           </div>
         </div>
 
-        <div className="flex gap-2">
+        {/* <div className="flex gap-2">
           <Button
             variant="outline"
             onClick={handleBlockUser}
@@ -161,7 +143,7 @@ export default function UserDetailsPage() {
             <Ban className="mr-2 h-4 w-4" />
             Block User
           </Button>
-        </div>
+        </div> */}
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
