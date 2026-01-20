@@ -19,65 +19,6 @@ const rewardsData = [
   { name: "Silver", value: 12, percent: "28.6%", color: "#FCA5A5" },
 ];
 
-const foodItems = [
-  {
-    id: 1,
-    name: "Jollof Rice",
-    img: "/images/dashboard/content/home/Mask.png",
-    revenue: "$1,560",
-    rating: 4.6,
-    category: "Fast Food",
-    status: "Top Selling",
-  },
-  {
-    id: 2,
-    name: "Fried Rice",
-    img: "/images/dashboard/content/home/Mask.png",
-    revenue: "$1,560",
-    rating: 4.6,
-    category: "Fast Food",
-    status: "Top Selling",
-  },
-  {
-    id: 3,
-    name: "Meat Pie",
-    img: "/images/dashboard/content/home/Mask.png",
-    revenue: "$1,560",
-    rating: 4.6,
-    category: "Fast Food",
-    status: "Top Selling",
-  },
-  {
-    id: 4,
-    name: "Fish Roll",
-    img: "/images/dashboard/content/home/Mask.png",
-    revenue: "$1,560",
-    rating: 4.6,
-    category: "Fast Food",
-    status: "Top Selling",
-  },
-  {
-    id: 5,
-    name: "Puff Puff",
-    img: "/images/dashboard/content/home/Mask.png",
-    revenue: "$1,560",
-    rating: 4.6,
-    category: "Fast Food",
-    status: "Top Selling",
-  },
-  {
-    id: 6,
-    name: "Fried Rice",
-    img: "/images/dashboard/content/home/Mask.png",
-    revenue: "$1,560",
-    rating: 4.6,
-    category: "Fast Food",
-    status: "Top Selling",
-  },
-];
-
-// --- components ---
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
@@ -100,23 +41,16 @@ import {
   TableRow,
 } from "../ui/table";
 import { useState } from "react";
-import Link from "next/link";
-
-// --- Mock Data (If you use your import, delete this array and uncomment the import above) ---
-const items = Array.from({ length: 100 }, (_, i) => ({
-  id: i + 1,
-  name: `Item ${i + 1}`,
-  img: "/images/dashboard/content/home/Mask.png",
-  revenue: "$1,560",
-  rating: 4.6,
-  category: "Fast Food",
-  status: "Top Selling",
-}));
-// -----------------------------------------------------------------------------------------
+import { useGetProductsQuery } from "@/redux/api/productApi";
 
 export default function Main() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+  const { data: initialData, isLoading } = useGetProductsQuery(undefined);
+
+  const items = initialData?.data.result || [];
+  // console.log(items);
+
   const itemsPerPage = 8;
 
   const totalPages = Math.ceil(items.length / itemsPerPage);
@@ -421,7 +355,7 @@ export default function Main() {
                 <TableCell className="py-4">
                   <Avatar className="h-14 w-14 border border-gray-100">
                     <AvatarImage
-                      src={item.img}
+                      src={item.images}
                       alt={item.name}
                       className="object-cover"
                     />
@@ -438,7 +372,8 @@ export default function Main() {
 
                 {/* Revenue Column */}
                 <TableCell className="py-4 text-base text-gray-700">
-                  {item.revenue}
+                  {/* {item.revenue} */}
+                  Data Loading...
                 </TableCell>
 
                 {/* Rating Column */}

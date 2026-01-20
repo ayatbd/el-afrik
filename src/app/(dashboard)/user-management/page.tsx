@@ -124,7 +124,7 @@ export default function UserManagementPage() {
           <TableHeader>
             <TableRow className="border-b-0 hover:bg-transparent">
               <TableHead className="text-black font-semibold text-base pl-0">
-                User Name
+                User Image
               </TableHead>
               <TableHead className="text-black font-semibold text-base">
                 Mobile Number
@@ -174,7 +174,7 @@ export default function UserManagementPage() {
                   <TableCell className="py-4 pl-0">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10">
-                        <AvatarImage src={user.avatar} alt={user.name} />
+                        <AvatarImage src={user.image} alt={user.name} />
                         <AvatarFallback>
                           {user.name?.charAt(0) || "U"}
                         </AvatarFallback>

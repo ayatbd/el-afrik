@@ -45,7 +45,7 @@ export function FullScreenLoader() {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-[2px]">
       <div className="flex flex-col items-center gap-2">
-        <loading size="xl" variant="primary" />
+        {/* <loading size="xl" variant="primary" /> */}
         <p className="text-sm font-medium text-gray-500 animate-pulse">
           Loading...
         </p>
@@ -58,7 +58,7 @@ export function FullScreenLoader() {
 export function TableLoader() {
   return (
     <div className="w-full h-64 flex flex-col items-center justify-center gap-3 text-gray-400">
-      <loading size="lg" variant="primary" />
+      {/* <loading size="lg" variant="primary" /> */}
       <span className="text-sm">Fetching records...</span>
     </div>
   );

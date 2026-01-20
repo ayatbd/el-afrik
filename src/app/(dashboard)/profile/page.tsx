@@ -40,7 +40,7 @@ export default function MyProfilePage() {
   const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
 
   const profileData = response?.data;
-  console.log(response);
+  // console.log(response);
 
   // 2. Form State
   const [formData, setFormData] = useState({

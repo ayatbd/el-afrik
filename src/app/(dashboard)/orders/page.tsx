@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useGetOrdersQuery } from "@/redux/api/ordersApi";
 
 // mock data
 
@@ -39,114 +40,23 @@ const foodImages = [
   "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=100&h=100&fit=crop",
   "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=100&h=100&fit=crop",
 ];
-
-// array of data
-const orders: Order[] = [
-  {
-    id: 1,
-    itemCount: 3,
-    productImages: foodImages,
-    price: "$121",
-    deliveryFee: "$121",
-    rewardPoints: 17,
-    date: "05/12/2024",
-    receiverName: "Foysal Rahman",
-    receiverPhone: "+1 (239) 555-0108",
-    receiverAvatar:
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop",
-    status: "Completed",
-  },
-  {
-    id: 2,
-    itemCount: 4,
-    productImages: foodImages,
-    price: "$121",
-    deliveryFee: "$121",
-    rewardPoints: 12,
-    date: "05/12/2024",
-    receiverName: "Jawwad Hossain",
-    receiverPhone: "+1 (239) 555-0108",
-    receiverAvatar:
-      "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop",
-    status: "Completed",
-  },
-  {
-    id: 3,
-    itemCount: 3,
-    productImages: foodImages,
-    price: "$121",
-    deliveryFee: "$121",
-    rewardPoints: 21,
-    date: "05/12/2024",
-    receiverName: "Al-Amin",
-    receiverPhone: "+1 (239) 555-0108",
-    receiverAvatar:
-      "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=100&h=100&fit=crop",
-    status: "Completed",
-  },
-  {
-    id: 4,
-    itemCount: 3,
-    productImages: foodImages,
-    price: "$121",
-    deliveryFee: "$121",
-    rewardPoints: 21,
-    date: "05/12/2024",
-    receiverName: "Alamgir Kabir",
-    receiverPhone: "+1 (239) 555-0108",
-    receiverAvatar:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop",
-    status: "Canceled",
-  },
-  {
-    id: 5,
-    itemCount: 3,
-    productImages: foodImages,
-    price: "$121",
-    deliveryFee: "$121",
-    rewardPoints: 21,
-    date: "05/12/2024",
-    receiverName: "Ashiqur Rahman",
-    receiverPhone: "+1 (239) 555-0108",
-    receiverAvatar:
-      "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=100&h=100&fit=crop",
-    status: "Completed",
-  },
-  {
-    id: 6,
-    itemCount: 3,
-    productImages: foodImages,
-    price: "$121",
-    deliveryFee: "$121",
-    rewardPoints: 21,
-    date: "05/12/2024",
-    receiverName: "Fahim Ahmed",
-    receiverPhone: "+1 (239) 555-0108",
-    receiverAvatar:
-      "https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?w=100&h=100&fit=crop",
-    status: "Completed",
-  },
-  {
-    id: 7,
-    itemCount: 3,
-    productImages: foodImages,
-    price: "$121",
-    deliveryFee: "$121",
-    rewardPoints: 21,
-    date: "05/12/2024",
-    receiverName: "Banedict Fring Dron",
-    receiverPhone: "+1 (239) 555-0108",
-    receiverAvatar:
-      "https://images.unsplash.com/photo-1513956589380-bad6acb9b9d4?w=100&h=100&fit=crop",
-    status: "Completed",
-  },
-];
-
 export default function OrdersPage() {
+  const { data: orders, isLoading } = useGetOrdersQuery(undefined);
+  const allOrders = orders?.data?.orders || [];
+  console.log(allOrders);
   const ITEMS_PER_LOAD = 5;
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_LOAD);
 
-  const visibleOrders = orders.slice(0, visibleCount);
+  const visibleOrders = allOrders.slice(0, visibleCount);
+
+  // error handling
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Loading...
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen w-full bg-[#F8F9FA] p-6 md:p-10 font-sans text-gray-900">
       <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
@@ -169,7 +79,7 @@ export default function OrdersPage() {
                 S no.
               </TableHead>
               <TableHead className="text-gray-900 font-medium text-base py-5">
-                Product Item
+                Total Items
               </TableHead>
               <TableHead className="text-gray-900 font-medium text-base py-5">
                 Price
@@ -193,42 +103,48 @@ export default function OrdersPage() {
           </TableHeader>
 
           <TableBody>
-            {visibleOrders.map((order) => (
+            {visibleOrders?.map((order, index) => (
               <TableRow
-                key={order.id}
+                key={order._id}
                 className="border-b-0 hover:bg-white bg-transparent"
               >
                 <TableCell className="py-6 pl-4 text-gray-700 font-normal align-middle">
-                  {order.id}.
+                  {index + 1}.
                 </TableCell>
 
                 <TableCell className="py-6 align-middle">
                   <div className="flex items-center gap-3">
                     <div className="flex items-center">
-                      {order.productImages.map((img, i) => (
+                      {order?.items.map((item, index) => (
                         <Avatar
-                          key={i}
-                          className={`h-10 w-10 border-2 border-white shadow-sm ${
-                            i > 0 ? "-ml-4" : ""
-                          }`}
+                          key={index}
+                          className="h-10 w-10 border-2 border-white shadow-sm"
                         >
                           <AvatarImage
-                            src={img}
+                            src={item.image}
                             alt="Product"
                             className="object-cover"
                           />
-                          <AvatarFallback>Food</AvatarFallback>
+                          {/* <AvatarFallback>{}</AvatarFallback> */}
                         </Avatar>
                       ))}
+                      {/* <Avatar className="h-10 w-10 border-2 border-white shadow-sm">
+                        <AvatarImage
+                          src={order.image}
+                          alt="Product"
+                          className="object-cover"
+                        />
+                        <AvatarFallback>Food</AvatarFallback>
+                      </Avatar> */}
                     </div>
                     <span className="text-gray-600 font-normal">
-                      {order.itemCount} items
+                      {order.items?.length}
                     </span>
                   </div>
                 </TableCell>
 
                 <TableCell className="py-6 text-gray-700 font-normal align-middle">
-                  {order.price}
+                  {order.subtotal}
                 </TableCell>
 
                 <TableCell className="py-6 text-gray-700 font-normal text-center align-middle">
@@ -236,11 +152,11 @@ export default function OrdersPage() {
                 </TableCell>
 
                 <TableCell className="py-6 text-gray-700 font-normal text-center align-middle">
-                  {order.rewardPoints}
+                  {order.totalPoints}
                 </TableCell>
 
                 <TableCell className="py-6 text-gray-700 font-normal align-middle">
-                  {order.date}
+                  {order.createdAt}
                 </TableCell>
 
                 <TableCell className="py-6 align-middle">
@@ -251,16 +167,14 @@ export default function OrdersPage() {
                         alt={order.receiverName}
                         className="object-cover"
                       />
-                      <AvatarFallback>
-                        {order.receiverName.charAt(0)}
-                      </AvatarFallback>
+                      <AvatarFallback>{order.user.image}</AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col">
                       <span className="text-gray-800 text-sm font-normal">
-                        {order.receiverName}
+                        {order.user.firstName}
                       </span>
-                      <span className="text-gray-400 text-xs">
-                        {order.receiverPhone}
+                      <span className="text-gray-800 text-xs">
+                        {order.customerPhone}
                       </span>
                     </div>
                   </div>
@@ -269,12 +183,12 @@ export default function OrdersPage() {
                 <TableCell className="py-6 text-right pr-4 align-middle">
                   <Button
                     className={`w-27.5 h-9 text-sm font-normal shadow-none hover:opacity-90 transition-opacity ${
-                      order.status === "Completed"
+                      order.orderStatus === "delivered"
                         ? "bg-[#00C058] hover:bg-[#00a84d] text-white"
                         : "bg-[#FF4D4F] hover:bg-[#e04143] text-white"
                     }`}
                   >
-                    {order.status}
+                    {order.orderStatus}
                   </Button>
                 </TableCell>
               </TableRow>
