@@ -1,6 +1,5 @@
 "use client";
 import { ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 
 const rewardsData = [
   { name: "Gold", value: 12, percent: "28.6%", color: "#FCD34D" },
@@ -17,72 +16,33 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import UserOverview from "../modules/dashboard-home/UserOverview";
 import SalesMatricData from "../modules/dashboard-home/SalesMatricData";
 import LoginReviewsData from "../modules/dashboard-home/LoginReviewsData";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../ui/table";
-import { useState } from "react";
-import { useGetProductsQuery } from "@/redux/api/productApi";
 import { useGetUserQuery } from "@/redux/api/userApi";
+import { useOrderStatsQuery } from "@/redux/api/ordersApi";
+import Items from "../modules/dashboard-home/Items";
 
 export default function Main() {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState("");
-  const { data: initialData, isLoading } = useGetProductsQuery(undefined);
-
-  const items = initialData?.data.result || [];
   // console.log(items);
-
-  const itemsPerPage = 8;
-
-  const totalPages = Math.ceil(items.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentData = items.slice(startIndex, startIndex + itemsPerPage);
 
   // total users from DB
   const { data: userData } = useGetUserQuery(undefined);
+  // orders stats
+  const { data: orderData } = useOrderStatsQuery(undefined);
+  const orders = orderData?.data || [];
+  // console.log(orders.revenue.total);
 
   const totalUsers = userData?.data.result.length || 0;
-
-  // 3. Handlers
-  const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
-  };
-
-  // Function to get visible page numbers (max 5)
-  const getVisiblePages = () => {
-    const maxVisible = 5;
-    let start = Math.max(1, currentPage - 2);
-    let end = start + maxVisible - 1;
-
-    if (end > totalPages) {
-      end = totalPages;
-      start = Math.max(1, end - maxVisible + 1);
-    }
-
-    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
-  };
 
   // top stats
   const topStats = [
     { label: "Total Users", value: totalUsers },
-    { label: "Active Today", value: "250" },
-    { label: "New Signups", value: "300" },
-    { label: "Total Points Issued", value: "200" },
-    { label: "Rewards Redeemed Today", value: "200" },
+    { label: "Total Orders", value: orders?.totalOrders },
+    { label: "Today's Orders", value: orders?.todayOrders },
+    { label: "Total Awarded Points", value: orders?.points?.totalAwarded },
+    { label: "Total Revenue", value: orders?.revenue?.total?.toFixed(2) },
   ];
-
   return (
     <div className="p-6 bg-white min-h-screen space-y-6 w-full">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-12">
@@ -208,7 +168,7 @@ export default function Main() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-14">
         <Card className="shadow-sm border-gray-100">
           <CardHeader>
             <CardTitle className="text-lg font-medium text-gray-800">
@@ -327,94 +287,12 @@ export default function Main() {
         </Card>
       </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow className="border-b-0 hover:bg-transparent">
-            <TableHead className="w-25 text-base font-semibold text-black">
-              Item Image
-            </TableHead>
-            <TableHead className="text-base font-semibold text-black">
-              Item Name
-            </TableHead>
-            <TableHead className="text-base font-semibold text-black">
-              Revenue Generated
-            </TableHead>
-            <TableHead className="text-base font-semibold text-black">
-              Avg.Rating
-            </TableHead>
-            <TableHead className="text-base font-semibold text-black">
-              Category
-            </TableHead>
-            <TableHead className="text-base font-semibold text-black text-right pr-6">
-              Status
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {currentData?.length > 0 ? (
-            currentData?.map((item) => (
-              <TableRow
-                key={item?.id}
-                className="border-b-0 hover:bg-gray-50/50 transition-colors"
-              >
-                {/* Image Column */}
-                <TableCell className="py-4">
-                  <Avatar className="h-14 w-14 border border-gray-100">
-                    <AvatarImage
-                      src={item?.images}
-                      alt={item?.name}
-                      className="object-cover"
-                    />
-                    <AvatarFallback className="bg-orange-100 text-orange-600">
-                      {item?.name?.substring(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                </TableCell>
-
-                {/* Name Column */}
-                <TableCell className="py-4 text-base font-medium text-gray-700">
-                  {item?.name}
-                </TableCell>
-
-                {/* Revenue Column */}
-                <TableCell className="py-4 text-base text-gray-700">
-                  {/* {item.revenue} */}
-                  Data Loading...
-                </TableCell>
-
-                {/* Rating Column */}
-                <TableCell className="py-4">
-                  <div className="flex items-center gap-1.5 text-base text-gray-700">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span>{item?.rating}</span>
-                  </div>
-                </TableCell>
-
-                {/* Category Column */}
-                <TableCell className="py-4 text-base text-gray-700">
-                  {item?.category?.categoryName}
-                </TableCell>
-
-                {/* Status Column */}
-                <TableCell className="py-4 text-right pr-6">
-                  <Badge className="bg-[#E6F8EB] text-[#00B25D] hover:bg-[#d8f5df] border-0 rounded-md px-3 py-1 text-sm font-normal shadow-none">
-                    {item?.status}
-                  </Badge>
-                </TableCell>
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell
-                colSpan={6}
-                className="text-center py-10 text-gray-500"
-              >
-                No users found matching &quot;{searchTerm}&quot;
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+      <div>
+        <h1 className="text-3xl font-semibold text-gray-900">
+          Last Update Items
+        </h1>
+      </div>
+      <Items />
     </div>
   );
 }

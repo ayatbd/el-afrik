@@ -103,7 +103,7 @@ export default function OrdersPage() {
           </TableHeader>
 
           <TableBody>
-            {visibleOrders?.map((order, index) => (
+            {visibleOrders?.map((order: any, index: number) => (
               <TableRow
                 key={order._id}
                 className="border-b-0 hover:bg-white bg-transparent"

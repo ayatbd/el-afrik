@@ -8,8 +8,12 @@ export const ordersApi = apiSlice.injectEndpoints({
         }),
         getSingleOrder: builder.query({
             query: (id) => `/order/admin/${id}`,
+        }),
+        orderStats: builder.query({
+            query: () => "/order/admin/stats",
+            providesTags: ["Stats"],
         })
     }),
 });
 
-export const { useGetOrdersQuery, useGetSingleOrderQuery } = ordersApi;
+export const { useGetOrdersQuery, useGetSingleOrderQuery, useOrderStatsQuery } = ordersApi;

@@ -15,7 +15,35 @@ import {
   Package,
   Award,
 } from "lucide-react";
+import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
+
+type History = {
+  status: string;
+  date: string;
+  time: string;
+  location: string;
+  description: string;
+  image: string;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  card: string;
+  printer: string;
+  reward: string;
+  points: string;
+  delivery: string;
+  discount: string;
+  total: string;
+  id: string;
+  _id: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+  timestamp: string;
+  note: string;
+};
 
 const OrderDetails = () => {
   const router = useRouter();
@@ -38,7 +66,7 @@ const OrderDetails = () => {
   // console.log(order);
 
   // Helper to format date
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString("en-US", {
       month: "short",
       day: "numeric",
@@ -49,7 +77,7 @@ const OrderDetails = () => {
   };
 
   // Helper for Status Badge Colors
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case "ongoing":
         return "bg-blue-100 text-blue-700 border-blue-200";
@@ -133,11 +161,13 @@ const OrderDetails = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {order.items.map((item, index) => (
+                    {order.items.map((item: any, index: number) => (
                       <tr key={index} className="hover:bg-gray-50">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-4">
-                            <img
+                            <Image
+                              width={48}
+                              height={48}
                               src={item.image}
                               alt={item.name}
                               className="h-12 w-12 rounded-lg object-cover border border-gray-200"
@@ -174,10 +204,10 @@ const OrderDetails = () => {
                 Order History
               </h2>
               <div className="relative border-l-2 border-gray-200 ml-3 space-y-8">
-                {order.statusHistory.map((history, idx) => (
+                {order.statusHistory.map((history: History, idx: number) => (
                   <div key={idx} className="relative pl-8">
                     <span
-                      className={`absolute -left-[9px] top-0 h-4 w-4 rounded-full border-2 border-white ${idx === order.statusHistory.length - 1 ? "bg-green-500 ring-4 ring-green-100" : "bg-gray-300"}`}
+                      className={`absolute -left-2.25 top-0 h-4 w-4 rounded-full border-2 border-white ${idx === order.statusHistory.length - 1 ? "bg-green-500 ring-4 ring-green-100" : "bg-gray-300"}`}
                     ></span>
                     <p className="text-sm font-semibold text-gray-900 capitalize">
                       {history.status}
@@ -241,7 +271,9 @@ const OrderDetails = () => {
                   Linked User Account
                 </p>
                 <div className="flex items-center gap-3">
-                  <img
+                  <Image
+                    width={40}
+                    height={40}
                     src={order.user.image}
                     alt="User"
                     className="w-8 h-8 rounded-full border"
