@@ -46,6 +46,8 @@ export default function CategoryPage() {
   const [categoryFilter, setCategoryFilter] = useState("all");
 
   // --- 2. RTK Query with Parameters ---
+  // Note: To make the filter work server-side, you usually need to pass
+  // the 'categoryFilter' state to this query (e.g., searchTerm: categoryFilter).
   const { data, isLoading, isFetching } = useGetCategoriesQuery({
     page: currentPage,
     limit: itemsPerPage,
@@ -61,7 +63,7 @@ export default function CategoryPage() {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
 
   useEffect(() => {
-    setCurrentTime(new Date()); // Set initial time on client
+    setCurrentTime(new Date());
     const interval = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
@@ -110,7 +112,7 @@ export default function CategoryPage() {
 
   const handleCategoryChange = (value: string) => {
     setCategoryFilter(value);
-    setCurrentPage(1); // Reset to page 1 on filter change
+    setCurrentPage(1);
   };
 
   // --- Pagination Logic (Visible Numbers) ---
@@ -153,17 +155,20 @@ export default function CategoryPage() {
 
       <div className="flex flex-col md:flex-row justify-between md:items-center mb-6 gap-4">
         <div className="flex items-center gap-4 w-full md:w-auto">
-          {/* Note: Client-side filtering only works on the current page data. 
-              Ideally, pass this filter value to useGetCategoriesQuery */}
           <Select value={categoryFilter} onValueChange={handleCategoryChange}>
             <SelectTrigger className="w-45 h-11 border-gray-300 bg-white text-gray-500">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent>
+              {/* Static option for resetting the filter */}
               <SelectItem value="all">All Categories</SelectItem>
-              <SelectItem value="foods">Foods</SelectItem>
-              <SelectItem value="drinks">Drinks</SelectItem>
-              <SelectItem value="snacks">Snacks</SelectItem>
+
+              {/* Dynamic mapping of categories */}
+              {categories?.map((category: Category) => (
+                <SelectItem key={category._id} value={category.categoryName}>
+                  {category.categoryName}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -189,7 +194,6 @@ export default function CategoryPage() {
           </TableHeader>
           <TableBody>
             {isLoading || isFetching ? (
-              // Loading State
               <TableRow>
                 <TableCell colSpan={4} className="h-24 text-center">
                   <div className="flex justify-center items-center gap-2 text-gray-500">
@@ -198,14 +202,12 @@ export default function CategoryPage() {
                 </TableCell>
               </TableRow>
             ) : categories.length > 0 ? (
-              // Data Mapping
               categories?.map((category: Category, index: number) => (
                 <TableRow
                   key={category._id}
                   className="border-b border-gray-100 hover:bg-white/50"
                 >
                   <TableCell className="py-4 text-gray-500">
-                    {/* Calculate Serial Number based on Page */}
                     {(currentPage - 1) * itemsPerPage + index + 1}.
                   </TableCell>
 
@@ -228,7 +230,6 @@ export default function CategoryPage() {
 
                   <TableCell className="py-4">
                     <div className="flex items-center justify-center gap-5">
-                      {/* Pass category data to Edit Modal if needed */}
                       <EditCategoryModal category={category} />
                       <button
                         onClick={() => handleDelete(category._id)}
@@ -241,7 +242,6 @@ export default function CategoryPage() {
                 </TableRow>
               ))
             ) : (
-              // Empty State
               <TableRow>
                 <TableCell
                   colSpan={4}
@@ -254,7 +254,6 @@ export default function CategoryPage() {
           </TableBody>
         </Table>
 
-        {/* Pagination Controls */}
         {!isLoading && totalPages > 1 && (
           <div className="mt-10 flex items-center justify-center gap-4 text-sm font-medium text-gray-600">
             <button
@@ -279,7 +278,6 @@ export default function CategoryPage() {
               </button>
             ))}
 
-            {/* Ellipsis if needed */}
             {totalPages > 5 && currentPage < totalPages - 2 && (
               <span className="flex h-8 w-8 items-center justify-center">
                 ...
