@@ -7,11 +7,15 @@ export const profileApi = apiSlice.injectEndpoints({
             providesTags: ["Profile"],
         }),
         updateProfile: builder.mutation({
-            query: (data) => ({
-                url: "/user/edit-profile",
-                method: "PATCH",
-                body: data,
-            }),
+
+            query: (data) => {
+                console.log(data);
+                return {
+                    url: "/user/edit-profile",
+                    method: "PATCH",
+                    body: data,
+                };
+            },
             invalidatesTags: ["Profile"],
         }),
     }),

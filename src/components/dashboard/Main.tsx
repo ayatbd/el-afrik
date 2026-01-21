@@ -2,16 +2,6 @@
 import { ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 
-// mock data
-
-const topStats = [
-  { label: "Total Users", value: "125" },
-  { label: "Active Today", value: "250" },
-  { label: "New Signups", value: "300" },
-  { label: "Total Points Issued", value: "200" },
-  { label: "Rewards Redeemed Today", value: "200" },
-];
-
 const rewardsData = [
   { name: "Gold", value: 12, percent: "28.6%", color: "#FCD34D" },
   { name: "Platinum", value: 22, percent: "42.9%", color: "#FDE68A" },
@@ -42,6 +32,7 @@ import {
 } from "../ui/table";
 import { useState } from "react";
 import { useGetProductsQuery } from "@/redux/api/productApi";
+import { useGetUserQuery } from "@/redux/api/userApi";
 
 export default function Main() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -57,7 +48,10 @@ export default function Main() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentData = items.slice(startIndex, startIndex + itemsPerPage);
 
-  console.log(currentData);
+  // total users from DB
+  const { data: userData } = useGetUserQuery(undefined);
+
+  const totalUsers = userData?.data.result.length || 0;
 
   // 3. Handlers
   const handlePageChange = (page: number) => {
@@ -79,10 +73,20 @@ export default function Main() {
 
     return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   };
+
+  // top stats
+  const topStats = [
+    { label: "Total Users", value: totalUsers },
+    { label: "Active Today", value: "250" },
+    { label: "New Signups", value: "300" },
+    { label: "Total Points Issued", value: "200" },
+    { label: "Rewards Redeemed Today", value: "200" },
+  ];
+
   return (
     <div className="p-6 bg-white min-h-screen space-y-6 w-full">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-12">
-        {topStats.map((stat, idx) => (
+        {topStats?.map((stat, idx) => (
           <Card key={idx} className="shadow-sm border-gray-100">
             <CardContent className="flex flex-col items-center justify-center py-6 text-center">
               <span className="text-gray-500 text-sm font-medium mb-2">
@@ -411,48 +415,6 @@ export default function Main() {
           )}
         </TableBody>
       </Table>
-      {totalPages > 1 && (
-        <div className="mt-10 flex items-center justify-center gap-4 text-sm font-medium text-gray-600">
-          {/* Previous */}
-          <button
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="p-2 text-black cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
-          >
-            <ChevronLeft className="h-7 w-7" />
-          </button>
-
-          {/* Page Numbers (Max 5) */}
-          {getVisiblePages()?.map((page) => (
-            <button
-              key={page}
-              onClick={() => handlePageChange(page)}
-              className={`flex h-8 w-8 items-center justify-center rounded transition-colors ${
-                currentPage === page
-                  ? "bg-gray-300 text-black cursor-default"
-                  : "cursor-pointer hover:bg-gray-200 hover:text-black"
-              }`}
-            >
-              {page}
-            </button>
-          ))}
-
-          <button
-            className={`flex h-8 w-8 items-center justify-center rounded transition-colors`}
-          >
-            ...{totalPages}
-          </button>
-
-          {/* Next */}
-          <button
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="p-2 text-black disabled:opacity-30 disabled:cursor-not-allowed"
-          >
-            <ChevronRight className="h-7 w-7" />
-          </button>
-        </div>
-      )}
     </div>
   );
 }

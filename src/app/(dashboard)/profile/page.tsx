@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useEffect, ChangeEvent } from "react";
@@ -91,7 +93,7 @@ export default function MyProfilePage() {
 
       // Append text data as JSON string (common pattern) or individual fields
       // Option A: If backend expects a "data" string field
-      data.append("data", JSON.stringify(formData));
+      data.append("body", JSON.stringify(formData));
 
       // Option B: If backend expects individual fields (Uncomment if needed)
       // Object.entries(formData).forEach(([key, value]) => data.append(key, value));
