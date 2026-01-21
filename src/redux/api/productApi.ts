@@ -6,7 +6,7 @@ export const productApi = apiSlice.injectEndpoints({
             query: () => {
                 console.log('getProducts');
                 return {
-                    url: '/product/allProduct',
+                    url: '/product/allProduct?page=1&limit=50000000000000',
                     method: 'GET',
                 }
             },

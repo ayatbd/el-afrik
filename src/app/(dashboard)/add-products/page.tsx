@@ -452,36 +452,25 @@ export default function AddProductPage() {
           </div>
 
           <div className="space-y-3">
-            <Label className="text-gray-500">
-              Points Awarded <span className="text-red-500">*</span>
-            </Label>
-            <Controller
-              name="points"
-              control={control}
-              rules={{ required: "Points required" }}
-              render={({ field }) => (
-                <Select
-                  onValueChange={field.onChange}
-                  value={String(field.value || "")}
-                >
-                  <SelectTrigger className="h-12 border-gray-200 bg-white text-gray-500">
-                    <SelectValue placeholder="Select Points" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[5, 10, 15, 20, 25].map((p) => (
-                      <SelectItem key={p} value={String(p)}>
-                        {p} Points
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            <div className="space-y-3">
+              <Label className="text-gray-500">
+                Points Awarded <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                type="number"
+                {...register("deliveryFee", {
+                  required: "Fee is required",
+                  valueAsNumber: true,
+                })}
+                placeholder="50"
+                className="h-12 border-gray-200 bg-white"
+              />
+              {errors.deliveryFee && (
+                <span className="text-xs text-red-500">
+                  {errors.deliveryFee.message}
+                </span>
               )}
-            />
-            {errors.points && (
-              <span className="text-xs text-red-500">
-                {errors.points.message}
-              </span>
-            )}
+            </div>
           </div>
         </div>
 

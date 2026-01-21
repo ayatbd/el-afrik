@@ -1,5 +1,5 @@
 import { apiSlice } from '../../api/apiSlice';
-import { setCredentials, logout } from './authSlice';
+import { setCredentials } from './authSlice';
 
 export const authApi = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
@@ -9,35 +9,20 @@ export const authApi = apiSlice.injectEndpoints({
                 method: 'POST',
                 body: credentials,
             }),
-        }),
-        // Endpoint to manually refresh token on page load
-        refresh: builder.mutation({
-            query: (refreshToken) => ({
-                url: '/auth/refresh',
-                method: 'POST',
-                body: { refreshToken },
-            }),
-            // THIS PART IS CRITICAL
+            // Automate token storage on successful login
             async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
                     const { data } = await queryFulfilled;
+                    // data = { success: true, data: { accessToken: "...", refreshToken: "..." } }
 
-                    // DEBUG: Uncomment this if still stuck
-                    // console.log("Refresh Successful, New Token:", data.data.accessToken);
-
-                    // Make sure the path to accessToken matches your actual API response!
-                    // Your API example: { data: { accessToken: "..." } }
-                    const newAccessToken = data.data.accessToken;
-
-                    if (newAccessToken) {
-                        dispatch(setCredentials({ accessToken: newAccessToken }));
-                    }
+                    // Dispatch the INNER data object
+                    dispatch(setCredentials(data.data));
                 } catch (err) {
-                    console.error("Refresh failed in onQueryStarted");
+                    console.error("Login failed", err);
                 }
             },
         }),
     }),
 });
 
-export const { useLoginMutation, useRefreshMutation } = authApi;
+export const { useLoginMutation } = authApi;

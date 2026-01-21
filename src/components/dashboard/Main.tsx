@@ -57,6 +57,8 @@ export default function Main() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentData = items.slice(startIndex, startIndex + itemsPerPage);
 
+  console.log(currentData);
+
   // 3. Handlers
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -345,29 +347,29 @@ export default function Main() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {currentData.length > 0 ? (
-            currentData.map((item) => (
+          {currentData?.length > 0 ? (
+            currentData?.map((item) => (
               <TableRow
-                key={item.id}
+                key={item?.id}
                 className="border-b-0 hover:bg-gray-50/50 transition-colors"
               >
                 {/* Image Column */}
                 <TableCell className="py-4">
                   <Avatar className="h-14 w-14 border border-gray-100">
                     <AvatarImage
-                      src={item.images}
-                      alt={item.name}
+                      src={item?.images}
+                      alt={item?.name}
                       className="object-cover"
                     />
                     <AvatarFallback className="bg-orange-100 text-orange-600">
-                      {item.name.substring(0, 2).toUpperCase()}
+                      {item?.name?.substring(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                 </TableCell>
 
                 {/* Name Column */}
                 <TableCell className="py-4 text-base font-medium text-gray-700">
-                  {item.name}
+                  {item?.name}
                 </TableCell>
 
                 {/* Revenue Column */}
@@ -380,19 +382,19 @@ export default function Main() {
                 <TableCell className="py-4">
                   <div className="flex items-center gap-1.5 text-base text-gray-700">
                     <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span>{item.rating}</span>
+                    <span>{item?.rating}</span>
                   </div>
                 </TableCell>
 
                 {/* Category Column */}
                 <TableCell className="py-4 text-base text-gray-700">
-                  {item.category}
+                  {item?.category?.categoryName}
                 </TableCell>
 
                 {/* Status Column */}
                 <TableCell className="py-4 text-right pr-6">
                   <Badge className="bg-[#E6F8EB] text-[#00B25D] hover:bg-[#d8f5df] border-0 rounded-md px-3 py-1 text-sm font-normal shadow-none">
-                    {item.status}
+                    {item?.status}
                   </Badge>
                 </TableCell>
               </TableRow>
@@ -421,7 +423,7 @@ export default function Main() {
           </button>
 
           {/* Page Numbers (Max 5) */}
-          {getVisiblePages().map((page) => (
+          {getVisiblePages()?.map((page) => (
             <button
               key={page}
               onClick={() => handlePageChange(page)}

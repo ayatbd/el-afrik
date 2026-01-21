@@ -1,13 +1,16 @@
 import { createApi, fetchBaseQuery, BaseQueryApi, FetchArgs } from '@reduxjs/toolkit/query/react';
 import { setCredentials, logout } from '../features/auth/authSlice';
 import { Mutex } from 'async-mutex';
+import Cookies from 'js-cookie';
 
-// Create a mutex to prevent multiple refresh calls when multiple requests fail simultaneously
 const mutex = new Mutex();
 
-interface RefreshTokenResponse {
+// Helper interface based on your JSON response
+interface ApiResponse {
+    success: boolean;
     data: {
         accessToken: string;
+        refreshToken: string;
     };
 }
 
@@ -20,8 +23,14 @@ interface RootState {
 const baseQuery = fetchBaseQuery({
     baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api',
     prepareHeaders: (headers, { getState }) => {
-        // 1. Attach Access Token from Redux Store
-        const token = (getState() as RootState).auth.accessToken;
+        const state = getState() as RootState;
+        let token = state.auth.accessToken;
+
+        // Fallback: If Redux is empty, check LocalStorage directly
+        if (!token && typeof window !== 'undefined') {
+            token = localStorage.getItem('accessToken');
+        }
+
         if (token) {
             headers.set('authorization', `Bearer ${token}`);
         }
@@ -30,23 +39,16 @@ const baseQuery = fetchBaseQuery({
 });
 
 const baseQueryWithReauth = async (args: string | FetchArgs, api: BaseQueryApi, extraOptions: Record<string, unknown>) => {
-    // 2. Wait until the mutex is available (if a refresh is already happening)
     await mutex.waitForUnlock();
-
     let result = await baseQuery(args, api, extraOptions);
 
-    // 3. If 401 Unauthorized, try to refresh
     if (result.error && result.error.status === 401) {
         if (!mutex.isLocked()) {
             const release = await mutex.acquire();
-
             try {
-                // Get Refresh Token from LocalStorage
                 const refreshToken = localStorage.getItem('refreshToken');
 
                 if (refreshToken) {
-                    // 4. Call Refresh Endpoint
-                    // Note: We use baseQuery directly to avoid infinite loops
                     const refreshResult = await baseQuery(
                         {
                             url: '/auth/refresh',
@@ -57,30 +59,35 @@ const baseQueryWithReauth = async (args: string | FetchArgs, api: BaseQueryApi, 
                         extraOptions
                     );
 
-                    if (refreshResult.data) {
-                        // 5. Success! Update Redux with new Access Token
-                        // Assuming backend response: { data: { accessToken: "..." } }
-                        const newAccessToken = (refreshResult.data as RefreshTokenResponse).data.accessToken;
+                    const responseData = refreshResult.data as ApiResponse;
 
-                        api.dispatch(setCredentials({ accessToken: newAccessToken }));
+                    // FIX: Access nested data properly based on your JSON
+                    const newAccessToken = responseData?.data?.accessToken;
+                    const newRefreshToken = responseData?.data?.refreshToken;
 
-                        // 6. Retry the initial request with the new token
+                    if (newAccessToken) {
+                        // Store both tokens (Update refresh token if the API rotates it)
+                        api.dispatch(setCredentials({
+                            accessToken: newAccessToken,
+                            refreshToken: newRefreshToken || refreshToken
+                        }));
+
+                        // Retry the original request
                         result = await baseQuery(args, api, extraOptions);
                     } else {
-                        // Refresh failed (token expired completely)
                         api.dispatch(logout());
-                        window.location.href = '/login';
+                        // Use window.location only if you are not using Next.js router, 
+                        // otherwise use router.push('/login') if accessible or handle in UI
+                        if (typeof window !== 'undefined') window.location.href = '/login';
                     }
                 } else {
-                    // No refresh token available
                     api.dispatch(logout());
-                    window.location.href = '/login';
+                    if (typeof window !== 'undefined') window.location.href = '/login';
                 }
             } finally {
-                release(); // Release the lock
+                release();
             }
         } else {
-            // If mutex was locked, wait for it to unlock and retry the request
             await mutex.waitForUnlock();
             result = await baseQuery(args, api, extraOptions);
         }
