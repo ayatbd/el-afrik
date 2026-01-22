@@ -1,10 +1,8 @@
 "use client";
 import { FullScreenLoader } from "@/app/loading";
 import { useForgotPasswordMutation } from "@/redux/features/auth/authApi";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { require } from "./../../../../node_modules/next/dist/compiled/webpack/bundle5";
 
 const SendOtp = () => {
   const [email, setEmail] = useState("");
