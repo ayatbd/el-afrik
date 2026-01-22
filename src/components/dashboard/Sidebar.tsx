@@ -9,7 +9,7 @@ import { AiFillProduct, AiOutlineOrderedList } from "react-icons/ai";
 import { TbCategoryPlus } from "react-icons/tb";
 import { IoIosAdd, IoIosBicycle } from "react-icons/io";
 import { PiCoffeeDuotone } from "react-icons/pi";
-import { Proportions } from "lucide-react";
+import { Plus, Proportions } from "lucide-react";
 import { SiFuturelearn } from "react-icons/si";
 import { CiSettings } from "react-icons/ci";
 import { IoTrophySharp } from "react-icons/io5";
@@ -77,11 +77,11 @@ export default function Sidebar() {
     {
       name: "Add Catering",
       href: "/add-catering",
-      icon: <PiCoffeeDuotone size={20} />,
+      icon: <IoIosAdd size={20} />,
     },
     {
       name: "All Caterings",
-      href: "/catering",
+      href: "/allCatering",
       icon: <PiCoffeeDuotone size={20} />,
     },
     {

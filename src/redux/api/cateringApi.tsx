@@ -2,9 +2,9 @@ import { apiSlice } from "./apiSlice";
 
 export const cateringApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getCategories: builder.query({
-      query: () => `/catering/categories`,
-      providesTags: ["Categories"],
+    getAllCatering: builder.query({
+      query: () => `/catering/packages`,
+      providesTags: ["Caterings"],
     }),
     addCatering: builder.mutation({
       query: (data) => ({
@@ -12,9 +12,9 @@ export const cateringApi = apiSlice.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      invalidatesTags: ["Categories"],
+      invalidatesTags: ["Caterings"],
     }),
   }),
 });
 
-export const { useGetCategoriesQuery, useAddCateringMutation } = cateringApi;
+export const { useGetAllCateringQuery, useAddCateringMutation } = cateringApi;
