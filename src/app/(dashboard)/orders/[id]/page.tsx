@@ -106,20 +106,20 @@ const OrderDetails = () => {
           <div>
             <div className="flex items-center gap-3 mb-1">
               <h1 className="text-2xl font-bold text-gray-900">
-                Order #{order.orderNumber}
+                Order #{order?.orderNumber}
               </h1>
               <span
-                className={`px-3 py-1 rounded-full text-xs font-semibold uppercase border ${getStatusColor(order.orderStatus)}`}
+                className={`px-3 py-1 rounded-full text-xs font-semibold uppercase border ${getStatusColor(order?.orderStatus)}`}
               >
-                {order.orderStatus}
+                {order?.orderStatus}
               </span>
             </div>
             <div className="flex items-center gap-4 text-sm text-gray-500">
               <span className="flex items-center gap-1">
-                <Calendar size={14} /> {formatDate(order.createdAt)}
+                <Calendar size={14} /> {formatDate(order?.createdAt)}
               </span>
               <span className="flex items-center gap-1">
-                <Package size={14} /> {order.items.length} Items
+                <Package size={14} /> {order?.items?.length} Items
               </span>
             </div>
           </div>
@@ -147,7 +147,7 @@ const OrderDetails = () => {
                   Order Items
                 </h2>
                 <span className="text-sm bg-purple-100 text-purple-700 px-2 py-1 rounded border border-purple-200 font-medium">
-                  {order.pointsAdded ? "Points Added" : "No Points"}
+                  {order?.pointsAdded ? "Points Added" : "No Points"}
                 </span>
               </div>
               <div className="overflow-x-auto">
@@ -161,35 +161,35 @@ const OrderDetails = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {order.items.map((item: any, index: number) => (
+                    {order?.items?.map((item: any, index: number) => (
                       <tr key={index} className="hover:bg-gray-50">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-4">
                             <Image
                               width={48}
                               height={48}
-                              src={item.image}
-                              alt={item.name}
+                              src={item?.image}
+                              alt={item?.name}
                               className="h-12 w-12 rounded-lg object-cover border border-gray-200"
                             />
                             <div>
                               <p className="font-medium text-gray-900">
-                                {item.name}
+                                {item?.name}
                               </p>
                               <p className="text-xs text-indigo-600 flex items-center gap-1 mt-1">
-                                <Award size={12} /> +{item.points} Points
+                                <Award size={12} /> +{item?.points} Points
                               </p>
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4 text-center text-gray-600">
-                          ${item.price.toFixed(2)}
+                          ${item?.price?.toFixed(2)}
                         </td>
                         <td className="px-6 py-4 text-center text-gray-900 font-medium">
-                          {item.quantity}
+                          {item?.quantity}
                         </td>
                         <td className="px-6 py-4 text-right text-gray-900 font-bold">
-                          ${item.total.toFixed(2)}
+                          ${item?.total?.toFixed(2)}
                         </td>
                       </tr>
                     ))}
@@ -204,19 +204,19 @@ const OrderDetails = () => {
                 Order History
               </h2>
               <div className="relative border-l-2 border-gray-200 ml-3 space-y-8">
-                {order.statusHistory.map((history: History, idx: number) => (
+                {order?.statusHistory?.map((history: History, idx: number) => (
                   <div key={idx} className="relative pl-8">
                     <span
-                      className={`absolute -left-2.25 top-0 h-4 w-4 rounded-full border-2 border-white ${idx === order.statusHistory.length - 1 ? "bg-green-500 ring-4 ring-green-100" : "bg-gray-300"}`}
+                      className={`absolute -left-2.25 top-0 h-4 w-4 rounded-full border-2 border-white ${idx === order.statusHistory?.length - 1 ? "bg-green-500 ring-4 ring-green-100" : "bg-gray-300"}`}
                     ></span>
                     <p className="text-sm font-semibold text-gray-900 capitalize">
-                      {history.status}
+                      {history?.status}
                     </p>
                     <p className="text-xs text-gray-500 mt-1">
-                      {formatDate(history.timestamp)}
+                      {formatDate(history?.timestamp)}
                     </p>
                     <p className="text-sm text-gray-600 mt-1 bg-gray-50 p-2 rounded border border-gray-100 inline-block">
-                      {history.note}
+                      {history?.note}
                     </p>
                   </div>
                 ))}
@@ -234,11 +234,11 @@ const OrderDetails = () => {
 
               <div className="flex items-center gap-3 mb-6">
                 <div className="h-12 w-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xl">
-                  {order.customerName.charAt(0)}
+                  {order?.customerName?.charAt(0)}
                 </div>
                 <div>
                   <h3 className="font-bold text-gray-900">
-                    {order.customerName}
+                    {order?.customerName}
                   </h3>
                   <p className="text-xs text-gray-500">Customer</p>
                 </div>
@@ -248,19 +248,19 @@ const OrderDetails = () => {
                 <div className="flex items-center gap-3 text-sm text-gray-600">
                   <Mail size={16} className="text-gray-400" />
                   <a
-                    href={`mailto:${order.customerEmail}`}
+                    href={`mailto:${order?.customerEmail}`}
                     className="hover:text-indigo-600"
                   >
-                    {order.customerEmail}
+                    {order?.customerEmail}
                   </a>
                 </div>
                 <div className="flex items-center gap-3 text-sm text-gray-600">
                   <Phone size={16} className="text-gray-400" />
                   <a
-                    href={`tel:${order.customerPhone}`}
+                    href={`tel:${order?.customerPhone}`}
                     className="hover:text-indigo-600"
                   >
-                    {order.customerPhone}
+                    {order?.customerPhone}
                   </a>
                 </div>
               </div>
@@ -274,15 +274,17 @@ const OrderDetails = () => {
                   <Image
                     width={40}
                     height={40}
-                    src={order.user.image}
+                    src={order?.user?.image}
                     alt="User"
                     className="w-8 h-8 rounded-full border"
                   />
                   <div className="text-sm">
                     <p className="font-medium">
-                      {order.user.firstName} {order.user.lastName}
+                      {order?.user?.firstName} {order?.user?.lastName}
                     </p>
-                    <p className="text-xs text-gray-500">{order.user.email}</p>
+                    <p className="text-xs text-gray-500">
+                      {order?.user?.email}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -295,7 +297,7 @@ const OrderDetails = () => {
                   Logistics
                 </h2>
                 <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs font-bold uppercase border border-blue-100">
-                  {order.orderType}
+                  {order?.orderType}
                 </span>
               </div>
 
@@ -307,7 +309,7 @@ const OrderDetails = () => {
                       Scheduled Pickup
                     </p>
                     <p className="text-sm font-semibold text-gray-900">
-                      {formatDate(order.pickupTime)}
+                      {formatDate(order?.pickupTime)}
                     </p>
                   </div>
                 </div>
@@ -318,7 +320,7 @@ const OrderDetails = () => {
                       Customer Note:
                     </p>
                     <p className="text-sm text-yellow-900 italic">
-                      {order.notes}
+                      {order?.notes}
                     </p>
                   </div>
                 )}
@@ -334,24 +336,24 @@ const OrderDetails = () => {
               <div className="space-y-3 mb-4">
                 <div className="flex justify-between text-sm text-gray-600">
                   <span>Subtotal</span>
-                  <span>${order.subtotal.toFixed(2)}</span>
+                  <span>${order?.subtotal?.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm text-gray-600">
                   <span>Discount</span>
                   <span className="text-red-500">
-                    -${order.discount.toFixed(2)}
+                    -${order?.discount?.toFixed(2)}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm text-gray-600">
                   <span>Delivery Fee</span>
-                  <span>${order.deliveryFee.toFixed(2)}</span>
+                  <span>${order?.deliveryFee?.toFixed(2)}</span>
                 </div>
               </div>
 
               <div className="border-t border-gray-100 pt-3 flex justify-between items-center mb-4">
                 <span className="font-bold text-gray-900">Total Amount</span>
                 <span className="font-bold text-xl text-indigo-600">
-                  ${order.totalAmount.toFixed(2)}
+                  ${order?.totalAmount?.toFixed(2)}
                 </span>
               </div>
 
@@ -364,12 +366,12 @@ const OrderDetails = () => {
                     Payment Status
                   </p>
                   <p className="text-sm font-medium text-green-700 capitalize">
-                    {order.paymentStatus} via Stripe
+                    {order?.paymentStatus} via Stripe
                   </p>
                 </div>
               </div>
               <p className="text-[10px] text-gray-400 mt-2 text-center break-all font-mono">
-                ID: {order.stripePaymentIntentId}
+                ID: {order?.stripePaymentIntentId}
               </p>
             </div>
           </div>

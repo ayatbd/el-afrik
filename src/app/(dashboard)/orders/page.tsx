@@ -115,7 +115,7 @@ export default function OrdersPage() {
                 <TableCell className="py-6 align-middle">
                   <div className="flex items-center gap-3">
                     <div className="flex items-center">
-                      {order?.items.map((item, index) => (
+                      {order?.items.map((item: any, index: number) => (
                         <Avatar
                           key={index}
                           className="h-10 w-10 border-2 border-white shadow-sm"

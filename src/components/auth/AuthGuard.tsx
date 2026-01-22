@@ -3,70 +3,41 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
-import { useAppDispatch } from "@/redux/hooks";
-import { useRefreshMutation } from "@/redux/features/auth/authApi";
-import { logout } from "@/redux/features/auth/authSlice";
 
-export default function AuthGuard({ children }) {
+export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const dispatch = useAppDispatch();
-  const { isAuthenticated } = useSelector((state) => state.auth);
-
-  const [refresh, { isLoading }] = useRefreshMutation();
-  const [hasTriedRefresh, setHasTriedRefresh] = useState(false);
+  const { accessToken } = useSelector((state: any) => state.auth);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // 1. If already authenticated, do nothing.
-    if (isAuthenticated) return;
+    // 1. Check Redux State
+    if (accessToken) {
+      setIsLoading(false);
+      return;
+    }
 
-    // 2. Prevent running this logic multiple times if we already tried
-    if (hasTriedRefresh) return;
+    // 2. Fallback: Check LocalStorage manually
+    // (Just in case Redux hasn't hydrated yet)
+    const storedToken = localStorage.getItem("accessToken");
 
-    const checkAuth = async () => {
-      const persistedRefreshToken =
-        typeof window !== "undefined"
-          ? localStorage.getItem("refreshToken")
-          : null;
+    if (storedToken) {
+      // Token exists, allow access
+      setIsLoading(false);
+    } else {
+      // No token found anywhere -> Redirect
+      router.replace("/login");
+    }
+  }, [accessToken, router]);
 
-      // 3. No token? Redirect immediately
-      if (!persistedRefreshToken) {
-        router.push("/login");
-        return;
-      }
-
-      try {
-        setHasTriedRefresh(true); // Mark that we are attempting
-        // 4. Attempt refresh
-        await refresh(persistedRefreshToken).unwrap();
-        // If successful, Redux updates automatically, triggering a re-render
-      } catch (error) {
-        // 5. Failed? Logout and Redirect
-        console.error("Session restore failed", error);
-        dispatch(logout());
-        router.push("/login");
-      }
-    };
-
-    checkAuth();
-  }, [isAuthenticated, hasTriedRefresh, refresh, router, dispatch]);
-
-  // --- RENDERING LOGIC ---
-
-  // A. Happy Path: User is authenticated. Show Dashboard.
-  if (isAuthenticated) {
-    return <>{children}</>;
-  }
-
-  // B. Loading Path: We are currently calling the API or haven't checked yet.
-  if (isLoading || !hasTriedRefresh) {
+  // Show a loading spinner while checking to prevent "Flash of Content"
+  if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        Loading Dashboard...
+      <div className="flex items-center justify-center h-screen bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
       </div>
     );
   }
 
-  // C. Error/Redirect Path: We tried, failed, and are waiting for router.push to finish.
-  // We return null to render nothing while redirecting.
-  return null;
+  // If authenticated, render the protected page
+  return <>{children}</>;
 }

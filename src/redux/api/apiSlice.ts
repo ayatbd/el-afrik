@@ -21,7 +21,7 @@ interface RootState {
 }
 
 const baseQuery = fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api',
+    baseUrl: process.env.NEXT_PUBLIC_API_URL || 'https://el-afrik-seven.vercel.app/api/v1',
     prepareHeaders: (headers, { getState }) => {
         const state = getState() as RootState;
         let token = state.auth.accessToken;

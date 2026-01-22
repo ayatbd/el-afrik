@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { HiOutlineEye, HiOutlineEyeOff } from "react-icons/hi";
+import { toast } from "react-toastify";
 const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   // RTK Query hook
@@ -32,7 +33,8 @@ const AdminLogin = () => {
       router.push("/");
     } catch (err) {
       console.error("Failed to login:", err);
-      alert("Login failed");
+      // alert("Login failed");
+      toast.error("Login failed");
     }
   };
   return (
@@ -120,7 +122,7 @@ const AdminLogin = () => {
               </div>
 
               <Link
-                href="/get-otp"
+                href="/send-otp"
                 className="text-[18px] text-[#8C7B5C] hover:text-[#776a52]"
               >
                 Forgot password?

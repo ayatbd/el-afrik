@@ -22,7 +22,31 @@ export const authApi = apiSlice.injectEndpoints({
                 }
             },
         }),
+        // 1. Send OTP to Email
+        forgotPassword: builder.mutation({
+            query: (data) => ({
+                url: '/auth/forgotPass',
+                method: 'POST',
+                body: data, // { email: "admin@example.com" }
+            }),
+        }),
+        // 2. Verify OTP
+        verifyOtp: builder.mutation({
+            query: (data) => ({
+                url: '/auth/verify-otp',
+                method: 'POST',
+                body: data, // { email: "...", otp: "123456" }
+            }),
+        }),
+        // 3. Reset Password
+        resetPassword: builder.mutation({
+            query: (data) => ({
+                url: '/auth/reset-password',
+                method: 'POST',
+                body: data, // { email: "...", otp: "...", newPassword: "..." }
+            }),
+        }),
     }),
 });
 
-export const { useLoginMutation } = authApi;
+export const { useLoginMutation, useForgotPasswordMutation, useVerifyOtpMutation, useResetPasswordMutation } = authApi;
