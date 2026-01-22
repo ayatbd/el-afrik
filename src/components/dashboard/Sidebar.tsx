@@ -70,12 +70,17 @@ export default function Sidebar() {
       icon: <AiOutlineOrderedList size={20} />,
     },
     {
-      name: "Add Products",
+      name: "Add Product",
       href: "/add-products",
       icon: <IoIosAdd size={20} />,
     },
     {
-      name: "Catering",
+      name: "Add Catering",
+      href: "/add-catering",
+      icon: <PiCoffeeDuotone size={20} />,
+    },
+    {
+      name: "All Caterings",
       href: "/catering",
       icon: <PiCoffeeDuotone size={20} />,
     },
