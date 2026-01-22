@@ -6,8 +6,8 @@ import { useResetPasswordMutation } from "@/redux/features/auth/authApi";
 
 export default function PasswordReset() {
   const router = useRouter();
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const [email, setEmail] = useState("");
@@ -30,10 +30,10 @@ export default function PasswordReset() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password !== confirmPassword) return alert("Passwords don't match");
+    if (oldPassword !== newPassword) return alert("Passwords don't match");
 
     try {
-      await resetPassword({ email, otp, newPassword: password }).unwrap();
+      await resetPassword({ newPassword, oldPassword }).unwrap();
       setSuccess(true);
       sessionStorage.clear(); // Clear temp data
       setTimeout(() => router.push("/login"), 2000); // Redirect after success
@@ -82,15 +82,16 @@ export default function PasswordReset() {
             <input
               type={showPassword ? "text" : "password"}
               required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+              value={oldPassword}
+              onChange={(e) => setOldPassword(e.target.value)}
+              className="w-full px-4 py-3 border border-[#FFE0A7] rounded-lg focus:ring-2 focus:ring-[#ddbe85] focus:border-[#ddbe85] focus:outline-none"
+              // className="w-12 h-14 text-center text-xl font-bold border border-[#FFE0A7] rounded-lg focus:ring-2 focus:ring-[#ddbe85] focus:border-[#ddbe85] focus:outline-none"
               placeholder="••••••••"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-[38px] text-gray-400"
+              className="absolute right-3 top-9.5 text-gray-400"
             >
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
@@ -104,16 +105,16 @@ export default function PasswordReset() {
             <input
               type="password"
               required
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
               className={`w-full px-4 py-3 border rounded-lg focus:ring-2 outline-none transition ${
-                password && confirmPassword && password !== confirmPassword
-                  ? "border-red-300 focus:ring-red-200"
-                  : "border-gray-300 focus:ring-indigo-500"
+                oldPassword && newPassword && oldPassword !== newPassword
+                  ? "border-red-300 focus:ring-[#ddbe85]"
+                  : "border-[#FFE0A7] focus:ring-[#ddbe85] focus:border-[#ddbe85] focus:outline-none"
               }`}
               placeholder="••••••••"
             />
-            {password && confirmPassword && password !== confirmPassword && (
+            {oldPassword && newPassword && oldPassword !== newPassword && (
               <p className="text-xs text-red-500 mt-1">
                 Passwords do not match
               </p>
@@ -123,7 +124,7 @@ export default function PasswordReset() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition mt-4"
+            className="w-full py-3 rounded-lg font-semibold transition mt-4 text-[#181818] bg-[#FFE0A7] hover:bg-[#e9cc96] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#e9cc96] cursor-pointer"
           >
             {isLoading ? "Resetting..." : "Reset Password"}
           </button>

@@ -156,7 +156,7 @@ export default function VerifyOtp() {
           <button
             type="submit"
             disabled={isVerifying || otp.join("").length !== 6}
-            className="w-full py-3 rounded-lg font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed shadow-sm text-[#181818] bg-[#FFE0A7] hover:bg-[#e9cc96]focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#e9cc96]"
+            className="w-full py-3 rounded-lg font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed shadow-sm text-[#181818] bg-[#FFE0A7] hover:bg-[#e9cc96] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#e9cc96]"
             // className="w-full flex justify-center py-2 px-4 sm:py-3 border border-transparent rounded-lg shadow-sm text-[20px]  font-bold text-[#181818] bg-[#FFE0A7] hover:bg-[#e9cc96]focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#e9cc96]"
           >
             {isVerifying ? "Verifying..." : "Verify Code"}
