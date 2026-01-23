@@ -1,165 +1,243 @@
 "use client";
 import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Users, Utensils, DollarSign, ArrowRight } from "lucide-react";
+import { MoreHorizontal, FileEdit, Trash2, Eye } from "lucide-react";
 import { useGetAllCateringQuery } from "@/redux/api/cateringApi";
 
-const AllCatering = () => {
+const CateringTable = () => {
   // 1. Fetch Data
   const {
     data: responseData,
     isLoading,
     isError,
   } = useGetAllCateringQuery(undefined);
-
-  // Adjust this based on whether your backend returns { data: [...] } or just [...]
   const caterings = responseData?.data?.result || [];
 
-  // --- Loading State (Skeleton) ---
+  // --- Loading State ---
   if (isLoading) {
-    return (
-      <div className="container mx-auto py-10 px-4">
-        <h2 className="text-3xl font-bold mb-8">Our Catering Packages</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="space-y-4 border rounded-xl p-4">
-              <Skeleton className="h-48 w-full rounded-lg" />
-              <Skeleton className="h-6 w-3/4" />
-              <Skeleton className="h-4 w-1/2" />
-              <div className="space-y-2 pt-4">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-full" />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
+    return <TableSkeleton />;
   }
 
   // --- Error State ---
   if (isError) {
-    return (
-      <div className="text-center w-full py-20 text-red-500">
-        Failed to load catering data.
-      </div>
-    );
+    return <div className="text-red-500 p-10">Failed to load data.</div>;
   }
 
   return (
     <div className="container mx-auto py-10 px-4">
-      {/* Page Header */}
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900">
-            Catering Packages
-          </h2>
-          <p className="text-muted-foreground mt-1">
-            Choose the perfect menu for your next event.
+          <h2 className="text-2xl font-bold tracking-tight">Catering List</h2>
+          <p className="text-muted-foreground text-sm">
+            Manage your event packages and menus.
           </p>
         </div>
-        <Button variant="outline">Create New</Button>
+        <Button>Add New Package</Button>
       </div>
 
-      {/* Grid Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {caterings.length > 0 ? (
-          caterings.map((item) => (
-            <CateringCard key={item._id || item.id} item={item} />
-          ))
-        ) : (
-          <div className="col-span-full text-center py-20 text-gray-500">
-            No catering packages found.
-          </div>
-        )}
+      <div className="rounded-md border bg-white shadow-sm">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-gray-50/50">
+              <TableHead className="w-25">Image</TableHead>
+              <TableHead className="min-w-50">Package Name</TableHead>
+              <TableHead>Price / Head</TableHead>
+              <TableHead>Min. Guests</TableHead>
+              <TableHead className="hidden md:table-cell">
+                Menu Preview
+              </TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {caterings.length > 0 ? (
+              caterings?.map((item: any) => (
+                <TableRow
+                  key={item._id || item.id}
+                  className="hover:bg-gray-50/50"
+                >
+                  {/* Image Column */}
+                  <TableCell>
+                    <div className="h-12 w-16 rounded-md overflow-hidden bg-gray-100 border border-gray-200">
+                      <img
+                        src={item.image || "/placeholder-food.jpg"}
+                        alt={item.name}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  </TableCell>
+
+                  {/* Name & Description */}
+                  <TableCell>
+                    <div className="flex flex-col">
+                      <span className="font-semibold text-gray-900">
+                        {item.name}
+                      </span>
+                      <span className="text-xs text-muted-foreground line-clamp-1 max-w-[250px]">
+                        {item.description}
+                      </span>
+                    </div>
+                  </TableCell>
+
+                  {/* Price */}
+                  <TableCell>
+                    <Badge variant="secondary" className="font-mono">
+                      ${item.pricePerPerson}
+                    </Badge>
+                  </TableCell>
+
+                  {/* Min Guests */}
+                  <TableCell>
+                    <div className="text-sm font-medium text-gray-700">
+                      {item.minGuests}{" "}
+                      <span className="text-gray-400 font-normal">ppl</span>
+                    </div>
+                  </TableCell>
+
+                  {/* Menu List (Truncated) */}
+                  <TableCell className="hidden md:table-cell max-w-75">
+                    <div className="flex flex-wrap gap-1">
+                      {item.menu?.slice(0, 2).map((m: string, i: number) => (
+                        <Badge
+                          key={i}
+                          variant="outline"
+                          className="text-xs bg-white text-gray-600 font-normal"
+                        >
+                          {m}
+                        </Badge>
+                      ))}
+                      {item.menu?.length > 2 && (
+                        <Badge
+                          variant="outline"
+                          className="text-xs bg-gray-100 text-gray-500"
+                        >
+                          +{item.menu.length - 2} more
+                        </Badge>
+                      )}
+                    </div>
+                  </TableCell>
+
+                  {/* Actions Dropdown */}
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <span className="sr-only">Open menu</span>
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuItem className="cursor-pointer">
+                          <Eye className="mr-2 h-4 w-4" /> View Details
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="cursor-pointer">
+                          <FileEdit className="mr-2 h-4 w-4" /> Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="cursor-pointer text-red-600 focus:text-red-600">
+                          <Trash2 className="mr-2 h-4 w-4" /> Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={6} className="h-24 text-center">
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </div>
     </div>
   );
 };
 
-// --- Sub-Component for individual Cards ---
-const CateringCard = ({ item }) => {
-  return (
-    <Card className="flex flex-col overflow-hidden hover:shadow-lg transition-all duration-300 border-gray-200">
-      {/* Image Section */}
-      <div className="relative h-56 w-full overflow-hidden bg-gray-100 group">
-        <img
-          src={item.image || "/placeholder-food.jpg"} // Fallback image
-          alt={item.name}
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-        />
-        <div className="absolute top-3 right-3">
-          <Badge className="bg-white/90 text-black hover:bg-white shadow-sm backdrop-blur-sm">
-            ${item.pricePerPerson} / person
-          </Badge>
-        </div>
+// --- Helper Component: Loading Skeleton ---
+const TableSkeleton = () => (
+  <div className="container mx-auto py-10 px-4">
+    <div className="space-y-4">
+      <div className="flex justify-between">
+        <Skeleton className="h-8 w-[200px]" />
+        <Skeleton className="h-10 w-[120px]" />
       </div>
+      <div className="border rounded-md">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>
+                <Skeleton className="h-4 w-[60px]" />
+              </TableHead>
+              <TableHead>
+                <Skeleton className="h-4 w-[150px]" />
+              </TableHead>
+              <TableHead>
+                <Skeleton className="h-4 w-[80px]" />
+              </TableHead>
+              <TableHead>
+                <Skeleton className="h-4 w-[80px]" />
+              </TableHead>
+              <TableHead>
+                <Skeleton className="h-4 w-[200px]" />
+              </TableHead>
+              <TableHead>
+                <Skeleton className="h-4 w-[40px]" />
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {[1, 2, 3, 4, 5].map((i) => (
+              <TableRow key={i}>
+                <TableCell>
+                  <Skeleton className="h-12 w-16 rounded" />
+                </TableCell>
+                <TableCell>
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-[180px]" />
+                    <Skeleton className="h-3 w-[120px]" />
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-6 w-12 rounded-full" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-10" />
+                </TableCell>
+                <TableCell>
+                  <div className="flex gap-2">
+                    <Skeleton className="h-5 w-16" />
+                    <Skeleton className="h-5 w-16" />
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-8 w-8 ml-auto" />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  </div>
+);
 
-      {/* Header Section */}
-      <CardHeader className="pb-3">
-        <div className="flex justify-between items-start">
-          <CardTitle className="text-xl font-bold text-gray-900">
-            {item.name}
-          </CardTitle>
-        </div>
-        <p className="text-sm text-muted-foreground line-clamp-2">
-          {item.description}
-        </p>
-      </CardHeader>
-
-      <CardContent className="flex-1 pb-4">
-        {/* Stats Row */}
-        <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
-          <div className="flex items-center gap-1.5">
-            <Users className="w-4 h-4 text-blue-500" />
-            <span className="font-medium">Min {item.minGuests} Guests</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <DollarSign className="w-4 h-4 text-green-600" />
-            <span className="font-medium">Premium</span>
-          </div>
-        </div>
-
-        <Separator className="my-3" />
-
-        {/* Menu Items List */}
-        <div>
-          <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2 flex items-center gap-2">
-            <Utensils className="w-3 h-3" /> Menu Highlights
-          </h4>
-          <ScrollArea className="h-24 pr-2">
-            <ul className="space-y-1.5">
-              {item.menu?.map((menuItem, index) => (
-                <li
-                  key={index}
-                  className="text-sm text-gray-700 flex items-start gap-2"
-                >
-                  <span className="block w-1.5 h-1.5 mt-1.5 rounded-full bg-orange-400 shrink-0" />
-                  {menuItem}
-                </li>
-              ))}
-            </ul>
-          </ScrollArea>
-        </div>
-      </CardContent>
-
-      <CardFooter className="bg-gray-50/50 pt-4 pb-4 border-t">
-        <Button className="w-full gap-2 bg-gray-900 hover:bg-gray-800">
-          View Details <ArrowRight className="w-4 h-4" />
-        </Button>
-      </CardFooter>
-    </Card>
-  );
-};
-
-export default AllCatering;
+export default CateringTable;

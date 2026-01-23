@@ -1,14 +1,22 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, ChangeEvent, FormEvent } from "react";
 import { Upload, Plus, Trash2, Loader2, X } from "lucide-react";
 import { useAddCateringMutation } from "@/redux/api/cateringApi";
+
+// Interface for form data state
+interface CateringFormData {
+  name: string;
+  description: string;
+  pricePerPerson: string;
+  minGuests: string;
+}
 
 const AddCatering = () => {
   // 1. RTK Query Hook
   const [addCatering, { isLoading }] = useAddCateringMutation();
 
   // 2. Form State
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<CateringFormData>({
     name: "",
     description: "",
     pricePerPerson: "",
@@ -16,19 +24,24 @@ const AddCatering = () => {
   });
 
   // 3. Dynamic Menu State
-  const [menuItems, setMenuItems] = useState([""]); // Start with 1 empty input
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
+  const [menuItems, setMenuItems] = useState<string[]>([""]); // Start with 1 empty input
+  // Fix: Explicitly type the File state
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   // --- Handlers ---
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Fix: Add HTMLTextAreaElement to support the description field
+  const handleInputChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   // Handle Dynamic Menu List
-  const handleMenuChange = (index, value) => {
+  // Fix: Change 'index: any' to 'index: number'
+  const handleMenuChange = (index: number, value: string) => {
     const updatedMenu = [...menuItems];
     updatedMenu[index] = value;
     setMenuItems(updatedMenu);
@@ -38,14 +51,15 @@ const AddCatering = () => {
     setMenuItems([...menuItems, ""]);
   };
 
-  const removeMenuField = (index) => {
+  const removeMenuField = (index: number) => {
     const updatedMenu = menuItems.filter((_, i) => i !== index);
     setMenuItems(updatedMenu);
   };
 
   // Handle Image Selection
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    // Fix: Safely access files array
+    const file = e.target.files?.[0];
     if (file) {
       setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
@@ -58,7 +72,7 @@ const AddCatering = () => {
   };
 
   // --- Submit Logic ---
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
     // 1. Construct the Payload
