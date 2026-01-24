@@ -23,6 +23,20 @@ import {
   useGetAllCateringQuery,
 } from "@/redux/api/cateringApi";
 import Link from "next/link";
+import { toast } from "sonner"; // Assuming you use sonner or similar for toasts
+import EditCateringModal from "@/components/modules/catering/EditCateringModal";
+
+// Interface for your data type
+interface CateringItem {
+  _id: string;
+  id?: string;
+  name: string;
+  description: string;
+  pricePerPerson: number;
+  minGuests: number;
+  menu: string[];
+  image?: string;
+}
 
 const CateringTable = () => {
   // 1. Fetch Data
@@ -31,11 +45,24 @@ const CateringTable = () => {
     isLoading,
     isError,
   } = useGetAllCateringQuery(undefined);
-  const caterings = responseData?.data?.result || [];
+
+  // Safe access to data
+  const caterings: CateringItem[] = responseData?.data?.result || [];
 
   // 2. Delete data
   const [deleteCatering, { isLoading: isDeleting }] =
     useDeleteCateringMutation();
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteCatering(id).unwrap();
+      // Toast notification (optional)
+      // toast.success("Deleted successfully");
+    } catch (err) {
+      console.error(err);
+      // toast.error("Failed to delete");
+    }
+  };
 
   // --- Loading State ---
   if (isLoading) {
@@ -56,7 +83,8 @@ const CateringTable = () => {
             Manage your event packages and menus.
           </p>
         </div>
-        <Link href="/add-catering">
+        {/* Update URL to match your structure */}
+        <Link href="/dashboard/catering/add">
           <Button className="bg-[#00B25D] hover:bg-[#009e52]">
             Add New Package
           </Button>
@@ -79,7 +107,7 @@ const CateringTable = () => {
           </TableHeader>
           <TableBody>
             {caterings.length > 0 ? (
-              caterings?.map((item: any) => (
+              caterings.map((item) => (
                 <TableRow
                   key={item._id || item.id}
                   className="hover:bg-gray-50/50"
@@ -125,7 +153,7 @@ const CateringTable = () => {
                   {/* Menu List (Truncated) */}
                   <TableCell className="hidden md:table-cell max-w-75">
                     <div className="flex flex-wrap gap-1">
-                      {item.menu?.slice(0, 2).map((m: string, i: number) => (
+                      {item.menu?.slice(0, 2).map((m, i) => (
                         <Badge
                           key={i}
                           variant="outline"
@@ -156,16 +184,27 @@ const CateringTable = () => {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
+
                         <DropdownMenuItem className="cursor-pointer">
                           <Eye className="mr-2 h-4 w-4" /> View Details
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="cursor-pointer">
-                          <FileEdit className="mr-2 h-4 w-4" /> Edit
+
+                        {/* --- EDIT BUTTON CHANGE --- */}
+                        {/* We use asChild so the Link behaves as the menu item */}
+                        <DropdownMenuItem asChild>
+                          <EditCateringModal catering={item} />
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="cursor-pointer text-red-600 focus:text-red-600">
+
+                        <DropdownMenuItem
+                          className="cursor-pointer text-red-600 focus:text-red-600"
+                          // Prevent closing immediately if you want to show loading state,
+                          // or handle via a separate dialog for safety.
+                          onSelect={(e) => e.preventDefault()}
+                        >
                           <button
-                            onClick={() => deleteCatering(item._id)}
-                            className="flex justify-between items-center cursor-pointer"
+                            onClick={() => handleDelete(item._id)}
+                            className="flex items-center w-full"
+                            disabled={isDeleting}
                           >
                             {isDeleting ? (
                               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -174,7 +213,6 @@ const CateringTable = () => {
                             )}
                             {isDeleting ? "Deleting..." : "Delete"}
                           </button>
-                          {/* <Trash2 className="mr-2 h-4 w-4" /> Delete */}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -195,70 +233,13 @@ const CateringTable = () => {
   );
 };
 
-// --- Helper Component: Loading Skeleton ---
+// ... TableSkeleton code remains the same ...
 const TableSkeleton = () => (
+  // ... (Keep your skeleton code here)
   <div className="container mx-auto py-10 px-4">
-    <div className="space-y-4">
-      <div className="flex justify-between">
-        <Skeleton className="h-8 w-50" />
-        <Skeleton className="h-10 w-30" />
-      </div>
-      <div className="border rounded-md">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>
-                <Skeleton className="h-4 w-15" />
-              </TableHead>
-              <TableHead>
-                <Skeleton className="h-4 w-37.5" />
-              </TableHead>
-              <TableHead>
-                <Skeleton className="h-4 w-20" />
-              </TableHead>
-              <TableHead>
-                <Skeleton className="h-4 w-20" />
-              </TableHead>
-              <TableHead>
-                <Skeleton className="h-4 w-50" />
-              </TableHead>
-              <TableHead>
-                <Skeleton className="h-4 w-10" />
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {[1, 2, 3, 4, 5].map((i) => (
-              <TableRow key={i}>
-                <TableCell>
-                  <Skeleton className="h-12 w-16 rounded" />
-                </TableCell>
-                <TableCell>
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-45" />
-                    <Skeleton className="h-3 w-30" />
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Skeleton className="h-6 w-12 rounded-full" />
-                </TableCell>
-                <TableCell>
-                  <Skeleton className="h-4 w-10" />
-                </TableCell>
-                <TableCell>
-                  <div className="flex gap-2">
-                    <Skeleton className="h-5 w-16" />
-                    <Skeleton className="h-5 w-16" />
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Skeleton className="h-8 w-8 ml-auto" />
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+    <Skeleton className="h-8 w-50 mb-4" />
+    <div className="border rounded-md p-4">
+      <Skeleton className="h-64 w-full" />
     </div>
   </div>
 );
