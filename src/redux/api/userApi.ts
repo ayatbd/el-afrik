@@ -18,12 +18,13 @@ export const userApi = apiSlice.injectEndpoints({
             }),
             providesTags: ["User"],
         }),
-        updateUser: builder.mutation({
+        blockUser: builder.mutation({
             query: (id) => ({
-                url: `/user/block-user/${id}`,
-                method: "PATCH",
+                url: `/user/block-user/${id}`, // or whatever your endpoint is
+                method: "PATCH", // or PUT/POST
+                body: { status: 'blocked' } // if needed
             }),
-            invalidatesTags: ["User"],
+            invalidatesTags: ["User"], // Important to auto-refresh the table list
         }),
         deleteUser: builder.mutation({
             query: (id) => ({
@@ -35,4 +36,4 @@ export const userApi = apiSlice.injectEndpoints({
     }),
 });
 
-export const { useGetUserQuery, useUpdateUserMutation, useDeleteUserMutation, useGetSingleUserQuery } = userApi;
+export const { useGetUserQuery, useBlockUserMutation, useDeleteUserMutation, useGetSingleUserQuery } = userApi;

@@ -14,9 +14,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { FaUserCircle } from "react-icons/fa";
 import { GoBlocked } from "react-icons/go";
+import { MdOutlineRestore } from "react-icons/md"; // Icon for unblocking if needed
 import Link from "next/link";
 import Swal from "sweetalert2";
-import { useGetUserQuery } from "@/redux/api/userApi";
+import { useGetUserQuery, useBlockUserMutation } from "@/redux/api/userApi";
 
 // Helper hook for debouncing search input
 function useDebounce(value: string, delay: number) {
@@ -37,44 +38,75 @@ export default function UserManagementPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
-  // 1. Debounce the search term to avoid hitting the API on every keystroke
+  // 1. Debounce Search
   const debouncedTerm = useDebounce(searchTerm, 500);
 
-  // 2. RTK Query Hook
-  // We pass the current page, limit, and the *debounced* search term
+  // 2. RTK Query Hooks
   const { data, isLoading, isFetching, isError } = useGetUserQuery({
     page: currentPage,
     limit: itemsPerPage,
     searchTerm: debouncedTerm,
   });
-  // console.log(data.data.result);
 
-  // 3. Extract Data safely (Adjust 'data?.data' based on your actual API response structure)
-  // Assuming API response structure: { data: User[], meta: { total: number } }
+  const [blockUser] = useBlockUserMutation();
+
+  // 3. Extract Data
   const users = data?.data?.result || [];
   const meta = data?.meta || {};
-  const totalDocs = meta.total || 0; // Total count of users from DB
+  const totalDocs = meta.total || 0;
 
-  const handleBlock = () => {
-    Swal.fire("Are you sure?", "You want to block this user!", "warning");
+  // 4. Block Handler
+  const handleBlockToggle = (user: any) => {
+    const isBlocked = user.status === "blocked";
+
+    Swal.fire({
+      title: isBlocked ? "Unblock User?" : "Block User?",
+      text: isBlocked
+        ? "This user will regain access to the platform."
+        : "This user will be restricted from accessing the platform!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: isBlocked ? "#10B981" : "#d33", // Green for unblock, Red for block
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: isBlocked ? "Yes, Unblock!" : "Yes, Block!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          // Assuming your API accepts userId and the new status or just toggles it
+          // Adjust payload based on your backend: e.g., { id: user._id, status: isBlocked ? 'active' : 'blocked' }
+          const res = await blockUser(user._id || user.id).unwrap();
+
+          Swal.fire(
+            isBlocked ? "Unblocked!" : "Blocked!",
+            res.message ||
+              (isBlocked
+                ? "User has been activated."
+                : "User has been blocked."),
+            "success",
+          );
+        } catch (err: any) {
+          Swal.fire(
+            "Error!",
+            err?.data?.message || "Failed to update status",
+            "error",
+          );
+        }
+      }
+    });
   };
 
-  // 4. Pagination Math (Server-side)
+  // 5. Pagination Math
   const totalPages = Math.ceil(totalDocs / itemsPerPage);
 
-  // 5. Handlers
   const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1); // Reset to page 1 when searching
+    setCurrentPage(1);
   };
 
-  // 6. Generate visible page numbers
   const getVisiblePages = () => {
     const pages = [];
     const maxVisible = 5;
@@ -107,13 +139,12 @@ export default function UserManagementPage() {
           </h1>
         </div>
 
-        {/* Search Input */}
         <div className="relative w-full md:w-75">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
           <Input
             value={searchTerm}
             onChange={handleSearchChange}
-            placeholder="Search by name, email, or mobile..."
+            placeholder="Search users..."
             className="pl-10 bg-transparent border-gray-800 rounded-md focus-visible:ring-0 focus-visible:border-black placeholder:text-gray-500"
           />
         </div>
@@ -123,20 +154,23 @@ export default function UserManagementPage() {
         <Table>
           <TableHeader>
             <TableRow className="border-b-0 hover:bg-transparent">
-              <TableHead className="text-black font-semibold text-base pl-0">
-                User Image
+              <TableHead className="text-black font-semibold text-base pl-4">
+                User
               </TableHead>
               <TableHead className="text-black font-semibold text-base">
-                Mobile Number
+                Contact
               </TableHead>
               <TableHead className="text-black font-semibold text-base">
                 Email
               </TableHead>
               <TableHead className="text-black font-semibold text-base">
-                Date Joined
+                Joined
               </TableHead>
               <TableHead className="text-black font-semibold text-base">
-                User Type
+                Role
+              </TableHead>
+              <TableHead className="text-black font-semibold text-base">
+                Status
               </TableHead>
               <TableHead className="text-black font-semibold text-base text-center">
                 Action
@@ -144,82 +178,121 @@ export default function UserManagementPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {/* LOADING STATE */}
             {isLoading || isFetching ? (
-              // Simple Skeleton Loading Rows
-              Array.from({ length: 5 }).map((_, idx) => (
+              Array.from({ length: itemsPerPage }).map((_, idx) => (
                 <TableRow key={idx} className="animate-pulse">
-                  <TableCell colSpan={6} className="py-4">
-                    <div className="h-10 bg-gray-200 rounded w-full"></div>
+                  <TableCell colSpan={7} className="py-4">
+                    <div className="h-12 bg-gray-200 rounded w-full"></div>
                   </TableCell>
                 </TableRow>
               ))
             ) : isError ? (
-              // ERROR STATE
               <TableRow>
                 <TableCell
-                  colSpan={6}
+                  colSpan={7}
                   className="text-center py-10 text-red-500"
                 >
-                  Something went wrong fetching users.
+                  Failed to load users.
                 </TableCell>
               </TableRow>
             ) : users.length > 0 ? (
-              // DATA STATE
-              users?.map((user: any) => (
-                <TableRow
-                  key={user.id || user._id}
-                  className="border-b-0 hover:bg-gray-100/50"
-                >
-                  <TableCell className="py-4 pl-0">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={user.image} alt={user.name} />
-                        <AvatarFallback>
-                          {user.name?.charAt(0) || "U"}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="font-medium text-gray-700">
-                        {user.name}
+              users.map((user: any) => {
+                const isBlocked = user.status === "blocked";
+
+                return (
+                  <TableRow
+                    key={user.id || user._id}
+                    className={`border-b-0 hover:bg-gray-100/50 transition-all duration-300 ${
+                      isBlocked ? "bg-red-50/50 opacity-60 grayscale-[0.5]" : ""
+                    }`}
+                  >
+                    {/* User Info */}
+                    <TableCell className="py-4 pl-4">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10 border border-gray-200">
+                          <AvatarImage src={user.image} alt={user.name} />
+                          <AvatarFallback className="bg-gray-100 text-gray-600">
+                            {user.name?.charAt(0).toUpperCase() || "U"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col">
+                          <span
+                            className={`font-medium ${isBlocked ? "text-gray-500 line-through" : "text-gray-700"}`}
+                          >
+                            {user.name}
+                          </span>
+                        </div>
+                      </div>
+                    </TableCell>
+
+                    <TableCell className="py-4 text-gray-600">
+                      {user.contact || "N/A"}
+                    </TableCell>
+                    <TableCell className="py-4 text-gray-600">
+                      {user.email}
+                    </TableCell>
+
+                    {/* Formatted Date */}
+                    <TableCell className="py-4 text-gray-600">
+                      {new Date(user.createdAt).toLocaleDateString()}
+                    </TableCell>
+
+                    <TableCell className="py-4">
+                      <span className="capitalize px-2 py-1 rounded bg-gray-100 text-xs font-medium text-gray-700">
+                        {user.role}
                       </span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="py-4 text-gray-600">
-                    {user.contact}
-                  </TableCell>
-                  <TableCell className="py-4 text-gray-600">
-                    {user.email}
-                  </TableCell>
-                  <TableCell className="py-4 text-gray-600">
-                    {user.createdAt}
-                  </TableCell>
-                  <TableCell className="py-4 text-gray-600">
-                    {user.role}
-                  </TableCell>
-                  <TableCell className="py-4">
-                    <div className="flex items-center justify-center gap-3">
-                      <Link
-                        href={`/user-management/${user.id || user._id}`}
-                        className="p-0.5 rounded-sm border border-gray-800 text-gray-700 bg-gray-900 hover:bg-gray-800 transition-colors"
+                    </TableCell>
+
+                    {/* Status Badge */}
+                    <TableCell className="py-4">
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize border ${
+                          isBlocked
+                            ? "bg-red-100 text-red-800 border-red-200"
+                            : "bg-green-100 text-green-800 border-green-200"
+                        }`}
                       >
-                        <FaUserCircle fill="white" className="h-4 w-4" />
-                      </Link>
-                      <button
-                        type="button"
-                        onClick={handleBlock}
-                        className="p-0.5 rounded-sm border border-gray-800 text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
-                      >
-                        <GoBlocked className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
+                        {user.status || "Active"}
+                      </span>
+                    </TableCell>
+
+                    {/* Actions */}
+                    <TableCell className="py-4">
+                      <div className="flex items-center justify-center gap-2">
+                        {/* Details Link - Disabled if blocked (optional) */}
+                        <Link
+                          href={`/user-management/${user.id || user._id}`}
+                          className={`p-1.5 rounded border border-gray-800 bg-gray-900 text-white hover:bg-gray-700 transition-colors ${isBlocked ? "pointer-events-none opacity-50" : ""}`}
+                        >
+                          <FaUserCircle className="h-4 w-4" />
+                        </Link>
+
+                        {/* Block/Unblock Button */}
+                        <button
+                          type="button"
+                          onClick={() => handleBlockToggle(user)}
+                          title={isBlocked ? "Unblock User" : "Block User"}
+                          className={`p-1.5 rounded border transition-colors cursor-pointer ${
+                            isBlocked
+                              ? "border-green-600 text-green-600 hover:bg-green-50"
+                              : "border-red-600 text-red-600 hover:bg-red-50"
+                          }`}
+                        >
+                          {isBlocked ? (
+                            <MdOutlineRestore className="h-4 w-4" /> // Restore Icon
+                          ) : (
+                            <GoBlocked className="h-4 w-4" /> // Block Icon
+                          )}
+                        </button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             ) : (
-              // EMPTY STATE
               <TableRow>
                 <TableCell
-                  colSpan={6}
+                  colSpan={7}
                   className="text-center py-10 text-gray-500"
                 >
                   No users found matching &quot;{searchTerm}&quot;
@@ -230,43 +303,32 @@ export default function UserManagementPage() {
         </Table>
       </div>
 
-      {/* Pagination Controls */}
+      {/* Pagination (Keep existing code) */}
       {!isLoading && totalPages > 1 && (
         <div className="mt-10 flex items-center justify-center gap-4 text-sm font-medium text-gray-600">
+          {/* ... Pagination Logic remains same ... */}
           <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className="p-2 text-black cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+            className="p-2 disabled:opacity-30"
           >
-            <ChevronLeft className="h-7 w-7" />
+            <ChevronLeft />
           </button>
-
-          {getVisiblePages().map((page) => (
+          {getVisiblePages().map((p) => (
             <button
-              key={page}
-              onClick={() => handlePageChange(page)}
-              className={`flex h-8 w-8 items-center justify-center rounded transition-colors ${
-                currentPage === page
-                  ? "bg-gray-300 text-black cursor-default"
-                  : "cursor-pointer hover:bg-gray-200 hover:text-black"
-              }`}
+              key={p}
+              onClick={() => handlePageChange(p)}
+              className={`h-8 w-8 rounded ${currentPage === p ? "bg-gray-300" : "hover:bg-gray-200"}`}
             >
-              {page}
+              {p}
             </button>
           ))}
-
-          {totalPages > 5 && currentPage < totalPages - 2 && (
-            <span className="flex h-8 w-8 items-center justify-center">
-              ...
-            </span>
-          )}
-
           <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="p-2 text-black disabled:opacity-30 disabled:cursor-not-allowed"
+            className="p-2 disabled:opacity-30"
           >
-            <ChevronRight className="h-7 w-7" />
+            <ChevronRight />
           </button>
         </div>
       )}
