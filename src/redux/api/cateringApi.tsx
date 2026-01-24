@@ -14,7 +14,27 @@ export const cateringApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Caterings"],
     }),
+    editCatering: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `/catering/edit-package/${id}`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: ["Caterings"],
+    }),
+    deleteCatering: builder.mutation({
+      query: (id) => ({
+        url: `/catering/delete-package/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Caterings"],
+    }),
   }),
 });
 
-export const { useGetAllCateringQuery, useAddCateringMutation } = cateringApi;
+export const {
+  useGetAllCateringQuery,
+  useAddCateringMutation,
+  useEditCateringMutation,
+  useDeleteCateringMutation,
+} = cateringApi;

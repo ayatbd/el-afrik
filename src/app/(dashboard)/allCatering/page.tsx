@@ -17,8 +17,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MoreHorizontal, FileEdit, Trash2, Eye } from "lucide-react";
-import { useGetAllCateringQuery } from "@/redux/api/cateringApi";
+import { MoreHorizontal, FileEdit, Trash2, Eye, Loader2 } from "lucide-react";
+import {
+  useDeleteCateringMutation,
+  useGetAllCateringQuery,
+} from "@/redux/api/cateringApi";
 import Link from "next/link";
 
 const CateringTable = () => {
@@ -29,6 +32,10 @@ const CateringTable = () => {
     isError,
   } = useGetAllCateringQuery(undefined);
   const caterings = responseData?.data?.result || [];
+
+  // 2. Delete data
+  const [deleteCatering, { isLoading: isDeleting }] =
+    useDeleteCateringMutation();
 
   // --- Loading State ---
   if (isLoading) {
@@ -156,7 +163,18 @@ const CateringTable = () => {
                           <FileEdit className="mr-2 h-4 w-4" /> Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem className="cursor-pointer text-red-600 focus:text-red-600">
-                          <Trash2 className="mr-2 h-4 w-4" /> Delete
+                          <button
+                            onClick={() => deleteCatering(item._id)}
+                            className="flex justify-between items-center cursor-pointer"
+                          >
+                            {isDeleting ? (
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="mr-2 h-4 w-4" />
+                            )}
+                            {isDeleting ? "Deleting..." : "Delete"}
+                          </button>
+                          {/* <Trash2 className="mr-2 h-4 w-4" /> Delete */}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
