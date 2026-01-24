@@ -75,11 +75,6 @@ export default function Sidebar() {
       icon: <IoIosAdd size={20} />,
     },
     {
-      name: "Add Catering",
-      href: "/add-catering",
-      icon: <IoIosAdd size={20} />,
-    },
-    {
       name: "All Caterings",
       href: "/allCatering",
       icon: <PiCoffeeDuotone size={20} />,

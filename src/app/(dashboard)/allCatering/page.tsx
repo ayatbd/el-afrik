@@ -19,6 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MoreHorizontal, FileEdit, Trash2, Eye } from "lucide-react";
 import { useGetAllCateringQuery } from "@/redux/api/cateringApi";
+import Link from "next/link";
 
 const CateringTable = () => {
   // 1. Fetch Data
@@ -48,7 +49,11 @@ const CateringTable = () => {
             Manage your event packages and menus.
           </p>
         </div>
-        <Button>Add New Package</Button>
+        <Link href="/add-catering">
+          <Button className="bg-[#00B25D] hover:bg-[#009e52]">
+            Add New Package
+          </Button>
+        </Link>
       </div>
 
       <div className="rounded-md border bg-white shadow-sm">
@@ -177,30 +182,30 @@ const TableSkeleton = () => (
   <div className="container mx-auto py-10 px-4">
     <div className="space-y-4">
       <div className="flex justify-between">
-        <Skeleton className="h-8 w-[200px]" />
-        <Skeleton className="h-10 w-[120px]" />
+        <Skeleton className="h-8 w-50" />
+        <Skeleton className="h-10 w-30" />
       </div>
       <div className="border rounded-md">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>
-                <Skeleton className="h-4 w-[60px]" />
+                <Skeleton className="h-4 w-15" />
               </TableHead>
               <TableHead>
-                <Skeleton className="h-4 w-[150px]" />
+                <Skeleton className="h-4 w-37.5" />
               </TableHead>
               <TableHead>
-                <Skeleton className="h-4 w-[80px]" />
+                <Skeleton className="h-4 w-20" />
               </TableHead>
               <TableHead>
-                <Skeleton className="h-4 w-[80px]" />
+                <Skeleton className="h-4 w-20" />
               </TableHead>
               <TableHead>
-                <Skeleton className="h-4 w-[200px]" />
+                <Skeleton className="h-4 w-50" />
               </TableHead>
               <TableHead>
-                <Skeleton className="h-4 w-[40px]" />
+                <Skeleton className="h-4 w-10" />
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -212,8 +217,8 @@ const TableSkeleton = () => (
                 </TableCell>
                 <TableCell>
                   <div className="space-y-2">
-                    <Skeleton className="h-4 w-[180px]" />
-                    <Skeleton className="h-3 w-[120px]" />
+                    <Skeleton className="h-4 w-45" />
+                    <Skeleton className="h-3 w-30" />
                   </div>
                 </TableCell>
                 <TableCell>

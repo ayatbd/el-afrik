@@ -544,7 +544,7 @@ export default function AddProductPage() {
           <Button
             type="submit"
             disabled={isLoading}
-            className="w-full md:w-64 h-12 text-base font-medium bg-[#CF4F26] hover:bg-[#b54420] text-white"
+            className="w-full md:w-64 h-12 text-base font-medium bg-[#CF4F26] hover:bg-[#b54420] text-white cursor-pointer"
           >
             {isLoading ? (
               <>
