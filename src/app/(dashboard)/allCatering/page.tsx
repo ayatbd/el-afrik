@@ -17,13 +17,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MoreHorizontal, FileEdit, Trash2, Eye, Loader2 } from "lucide-react";
+import { MoreHorizontal, Trash2, Eye, Loader2 } from "lucide-react";
 import {
   useDeleteCateringMutation,
   useGetAllCateringQuery,
 } from "@/redux/api/cateringApi";
 import Link from "next/link";
-import { toast } from "sonner"; // Assuming you use sonner or similar for toasts
 import EditCateringModal from "@/components/modules/catering/EditCateringModal";
 
 // Interface for your data type
@@ -129,7 +128,7 @@ const CateringTable = () => {
                       <span className="font-semibold text-gray-900">
                         {item.name}
                       </span>
-                      <span className="text-xs text-muted-foreground line-clamp-1 max-w-[250px]">
+                      <span className="text-xs text-muted-foreground line-clamp-1 max-w-62.5">
                         {item.description}
                       </span>
                     </div>
@@ -185,9 +184,9 @@ const CateringTable = () => {
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
-                        <DropdownMenuItem className="cursor-pointer">
+                        {/* <DropdownMenuItem className="cursor-pointer">
                           <Eye className="mr-2 h-4 w-4" /> View Details
-                        </DropdownMenuItem>
+                        </DropdownMenuItem> */}
 
                         {/* --- EDIT BUTTON CHANGE --- */}
                         {/* We use asChild so the Link behaves as the menu item */}

@@ -18,20 +18,31 @@ import Image from "next/image";
 import { useEditCateringMutation } from "@/redux/api/cateringApi";
 import { cn } from "@/lib/utils";
 
-interface Catering {
+// interface Catering {
+//   _id: string;
+//   name: string;
+//   description: string;
+//   pricePerPerson: number;
+//   minGuests: number;
+//   menu: string[];
+//   image: string;
+// }
+
+interface CateringItem {
   _id: string;
+  id?: string;
   name: string;
   description: string;
   pricePerPerson: number;
   minGuests: number;
   menu: string[];
-  image: string;
+  image?: string;
 }
 
 export default function EditCateringModal({
   catering,
 }: {
-  catering: Catering;
+  catering: CateringItem;
 }) {
   const [open, setOpen] = useState(false);
 
