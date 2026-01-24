@@ -1,80 +1,122 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
+import { useGetDashboardDataQuery } from "@/redux/api/dashboardDataApi";
 import {
-  AreaChart,
-  Area,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
 } from "recharts";
+import { Loader2, Users } from "lucide-react";
 
-// Mock data tuned to match the curve in the image
-const data = [
-  { name: "Jan", value: 70 },
-  { name: "Feb", value: 62 },
-  { name: "Mar", value: 98 },
-  { name: "Apr", value: 68 },
-  { name: "May", value: 85 },
-  { name: "Jun", value: 65 },
-  { name: "July", value: 55 },
-  { name: "Augt", value: 65 },
-  { name: "Sept", value: 82 },
-  { name: "Oct", value: 60 },
-  { name: "Nov", value: 75 },
-  { name: "Dec", value: 92 },
-];
+const UserOverview = () => {
+  // 1. State for Year Selector
+  const currentYear = new Date().getFullYear();
+  const [selectedYear, setSelectedYear] = useState(2026);
 
-export default function UserOverview() {
+  // 2. Fetch Data passing the year
+  const { data: response, isLoading } = useGetDashboardDataQuery(selectedYear);
+
+  // 3. Extract userGraphData
+  const chartData = response?.data?.userGraphData || [];
+
+  // Generate year options
+  const years = Array.from({ length: 7 }, (_, i) => currentYear - i + 6);
+
+  if (isLoading) {
+    return (
+      <div className="h-64 w-full flex items-center justify-center bg-white rounded-xl border border-gray-100">
+        <Loader2 className="animate-spin text-gray-400" />
+      </div>
+    );
+  }
+
   return (
-    <>
-      <div className="h-62.5 w-full">
+    <div className="w-full bg-white p-4 rounded-xl">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2">
+          <div className="p-2 bg-purple-50 rounded-lg text-purple-600">
+            <Users size={18} />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-gray-800">User Growth</h3>
+            <p className="text-xs text-gray-500">New signups per month</p>
+          </div>
+        </div>
+
+        <select
+          value={selectedYear}
+          onChange={(e) => setSelectedYear(Number(e.target.value))}
+          className="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-purple-500 focus:border-purple-500 block p-2 outline-none cursor-pointer"
+        >
+          {years.map((year) => (
+            <option key={year} value={year}>
+              {year}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Chart */}
+      <div className="h-64 w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data}>
-            <defs>
-              <linearGradient id="colorUser" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#FB923C" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="#FB923C" stopOpacity={0} />
-              </linearGradient>
-            </defs>
+          <BarChart data={chartData} barGap={8}>
             <CartesianGrid
               strokeDasharray="3 3"
               vertical={false}
-              stroke="#E5E7EB"
+              stroke="#F3F4F6"
             />
+
             <XAxis
-              dataKey="name"
+              dataKey="month"
               axisLine={false}
               tickLine={false}
               tick={{ fontSize: 12, fill: "#9CA3AF" }}
               dy={10}
             />
+
             <YAxis
               axisLine={false}
               tickLine={false}
               tick={{ fontSize: 12, fill: "#9CA3AF" }}
+              allowDecimals={false} // Users cannot be fractions
             />
-            <YAxis
-              axisLine={false}
-              tickLine={false}
-              tick={{ fill: "#6B7280", fontSize: 14 }}
-              domain={[0, 100]}
-              ticks={[0, 20, 40, 60, 80, 100]}
+
+            <Tooltip cursor={{ fill: "#F9FAFB" }} content={<CustomTooltip />} />
+
+            <Bar
+              dataKey="totalUsers"
+              name="New Users"
+              fill="#8B5CF6" // Purple color to distinguish from Sales
+              radius={[4, 4, 0, 0]}
+              barSize={24} // Slightly wider bars since it's a single metric
             />
-            <Tooltip />
-            <Area
-              type="monotone"
-              dataKey="value"
-              stroke="#F97316"
-              strokeWidth={3}
-              fillOpacity={1}
-              fill="url(#colorUser)"
-            />
-          </AreaChart>
+          </BarChart>
         </ResponsiveContainer>
       </div>
-    </>
+    </div>
   );
-}
+};
+
+// Custom Tooltip
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white p-3 border border-gray-100 shadow-lg rounded-lg text-xs">
+        <p className="font-bold text-gray-800 mb-2">{label}</p>
+        <p className="text-[#8B5CF6] font-medium flex items-center gap-1">
+          <Users size={12} />
+          New Users: {payload[0].value}
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
+
+export default UserOverview;

@@ -22,6 +22,7 @@ export const faqApi = apiSlice.injectEndpoints({
                 }
             },
             invalidatesTags: ['Faq'],
+
         }),
         editFaq: builder.mutation({
             query: ({ id, data }) => {
@@ -32,7 +33,12 @@ export const faqApi = apiSlice.injectEndpoints({
                     body: data,
                 }
             },
-            invalidatesTags: ['Faq'],
+            invalidatesTags: ['Faq']
+            // invalidatesTags: (result, error, args) => {
+            //     return [
+            //         { type: "Job", id: args.id }
+            //     ]
+            // }
         }),
         deleteFaq: builder.mutation({
             query: (id) => {
