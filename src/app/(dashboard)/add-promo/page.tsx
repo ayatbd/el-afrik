@@ -101,7 +101,7 @@ export default function AddProductPage() {
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <Link
-            href="/"
+            href="/special-promos"
             className="p-2 -ml-2 hover:bg-white bg-white/50 rounded-full transition-all border border-transparent hover:border-gray-200 shadow-sm"
           >
             <ArrowLeft className="h-5 w-5 text-gray-700" />
