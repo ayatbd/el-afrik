@@ -1,10 +1,10 @@
 
 import { apiSlice } from "./apiSlice";
 
-export const promo = apiSlice.injectEndpoints({
+export const promoApi = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
         getPromo: builder.query({
-            query: (id) => `/profile/${id}`,
+            query: () => "/promos/all",
             providesTags: ["Promo"],
         }),
         addPromo: builder.mutation({
@@ -15,7 +15,14 @@ export const promo = apiSlice.injectEndpoints({
             }),
             invalidatesTags: ["Promo"],
         }),
+        deletePromo: builder.mutation({
+            query: (id) => ({
+                url: `/promos/${id}`,
+                method: "DELETE",
+            }),
+            invalidatesTags: ["Promo"],
+        })
     }),
 });
 
-export const { useGetPromoQuery, useAddPromoMutation } = promo;
+export const { useGetPromoQuery, useAddPromoMutation, useDeletePromoMutation } = promoApi;

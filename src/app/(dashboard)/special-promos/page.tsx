@@ -1,268 +1,270 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Loader2, CalendarIcon } from "lucide-react";
+import { format, isPast, parseISO } from "date-fns";
+import { useGetPromoQuery } from "@/redux/api/PromoApi";
+import { FullScreenLoader } from "@/app/loading";
 
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+// Shadcn & UI Components
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useAddPromoMutation } from "@/redux/api/specialPromos";
-import { useGetProductsQuery } from "@/redux/api/productApi";
-import Swal from "sweetalert2";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import {
+  Copy,
+  Check,
+  CalendarDays,
+  Tag,
+  ChevronRight,
+  ShoppingBag,
+  AlertCircle,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
-export default function AddProductPage() {
-  // 1. API Hooks
-  const [addPromo, { isLoading: isSubmitting }] = useAddPromoMutation();
-  const { data: productsData, isLoading: isLoadingProducts } =
-    useGetProductsQuery(undefined);
+const SpecialPromoPage = () => {
+  const {
+    data: specialPromos,
+    isLoading,
+    isError,
+  } = useGetPromoQuery(undefined);
+  const promoData = specialPromos?.data?.result || [];
 
-  // Safely extract products list
-  const allProducts = productsData?.data?.result || [];
+  // State for the "Copy to Clipboard" feedback
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  // 2. Form State
-  const [formData, setFormData] = useState({
-    product: "", // Stores Product ID
-    validity: "",
-    type: "",
-    specialPromoCode: "",
-    discountType: "",
-    discountAmount: "",
-  });
-
-  // 3. Handlers
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const handleCopy = (code: string, id: string) => {
+    navigator.clipboard.writeText(code);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  // Helper to determine status
+  const getStatus = (validityDate: string) => {
+    if (!validityDate)
+      return { label: "Unknown", color: "bg-gray-100 text-gray-500" };
+    const date = parseISO(validityDate);
+    const expired = isPast(date);
+
+    return expired
+      ? { label: "Expired", color: "bg-gray-100 text-gray-500 border-gray-200" }
+      : {
+          label: "Active",
+          color: "bg-emerald-50 text-emerald-600 border-emerald-200",
+        };
   };
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  if (isLoading) return <FullScreenLoader />;
 
-    // Basic Validation
-    if (
-      !formData.product ||
-      !formData.specialPromoCode ||
-      !formData.discountAmount ||
-      !formData.discountType ||
-      !formData.type ||
-      !formData.validity
-    ) {
-      Swal.fire("Error", "Please fill in all required fields", "error");
-      return;
-    }
-
-    try {
-      // 4. Construct Payload
-      // Note: formData.product already contains the ID from the Select value
-      const payload = {
-        product: formData.product,
-        validity: formData.validity,
-        type: formData.type,
-        specialPromoCode: formData.specialPromoCode,
-        discountType: formData.discountType,
-        discountAmount: Number(formData.discountAmount),
-      };
-
-      const res = await addPromo(payload).unwrap();
-
-      if (res?.success) {
-        Swal.fire("Success", "Promo added successfully!", "success");
-        // Reset form
-        setFormData({
-          product: "",
-          validity: "",
-          type: "",
-          specialPromoCode: "",
-          discountType: "",
-          discountAmount: "",
-        });
-      }
-    } catch (err: any) {
-      console.error(err);
-      Swal.fire("Error", err?.data?.message || "Failed to add promo", "error");
-    }
-  };
+  if (isError) {
+    return (
+      <div className="flex h-[50vh] flex-col items-center justify-center text-red-500 gap-2">
+        <AlertCircle size={40} />
+        <p className="font-medium">Failed to load promotions.</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen w-full bg-[#F9FAFB] p-6 md:p-10 font-sans text-gray-800">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Link
-            href="/"
-            className="p-2 -ml-2 hover:bg-white bg-white/50 rounded-full transition-all border border-transparent hover:border-gray-200 shadow-sm"
-          >
-            <ArrowLeft className="h-5 w-5 text-gray-700" />
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Add New Promo</h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Create a special offer for a specific product.
-            </p>
-          </div>
+    <div className="container mx-auto py-10 px-4 md:px-8 space-y-8">
+      {/* Page Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900">
+            Promo Campaigns
+          </h2>
+          <p className="text-muted-foreground mt-1">
+            Manage your special discounts and product offers.
+          </p>
         </div>
-
-        {/* Form Container */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-10">
-          <form onSubmit={handleSubmit} className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Product Selection (Maps Name -> Sends ID) */}
-              <div className="space-y-3">
-                <Label className="text-gray-600 font-medium">
-                  Select Product <span className="text-red-500">*</span>
-                </Label>
-                <Select
-                  value={formData.product}
-                  onValueChange={(val) => handleSelectChange("product", val)}
-                >
-                  <SelectTrigger className="h-12 border-gray-200 bg-gray-50/30 focus:ring-1 focus:ring-gray-300">
-                    <SelectValue
-                      placeholder={
-                        isLoadingProducts
-                          ? "Loading products..."
-                          : "Select a product"
-                      }
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {allProducts.map((prod: any) => (
-                      <SelectItem key={prod._id} value={prod._id}>
-                        {prod.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Promo Type */}
-              <div className="space-y-3">
-                <Label className="text-gray-600 font-medium">
-                  Promo Type <span className="text-red-500">*</span>
-                </Label>
-                <Select
-                  value={formData.type}
-                  onValueChange={(val) => handleSelectChange("type", val)}
-                >
-                  <SelectTrigger className="h-12 border-gray-200 bg-gray-50/30 focus:ring-1 focus:ring-gray-300">
-                    <SelectValue placeholder="Select type (e.g. Holiday)" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Holiday">Holiday</SelectItem>
-                    <SelectItem value="Weekend">Weekend</SelectItem>
-                    <SelectItem value="Limited">Limited Time</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Validity Date */}
-              <div className="space-y-3">
-                <Label htmlFor="validity" className="text-gray-600 font-medium">
-                  Valid Until <span className="text-red-500">*</span>
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="validity"
-                    name="validity"
-                    type="date"
-                    value={formData.validity}
-                    onChange={handleInputChange}
-                    className="h-12 border-gray-200 bg-gray-50/30 focus:ring-1 focus:ring-gray-300 block w-full"
-                  />
-                  <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
-                </div>
-              </div>
-
-              {/* Promo Code */}
-              <div className="space-y-3">
-                <Label
-                  htmlFor="specialPromoCode"
-                  className="text-gray-600 font-medium"
-                >
-                  Promo Code <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="specialPromoCode"
-                  name="specialPromoCode"
-                  value={formData.specialPromoCode}
-                  onChange={handleInputChange}
-                  placeholder="e.g. SUMMER2026"
-                  className="h-12 border-gray-200 bg-gray-50/30 focus:ring-1 focus:ring-gray-300 uppercase tracking-wide"
-                />
-              </div>
-
-              {/* Discount Type */}
-              <div className="space-y-3">
-                <Label className="text-gray-600 font-medium">
-                  Discount Type
-                </Label>
-                <Select
-                  value={formData.discountType}
-                  onValueChange={(val) =>
-                    handleSelectChange("discountType", val)
-                  }
-                >
-                  <SelectTrigger className="h-12 border-gray-200 bg-gray-50/30 focus:ring-1 focus:ring-gray-300">
-                    <SelectValue placeholder="percentage" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="percentage">Percentage (%)</SelectItem>
-                    <SelectItem value="fixed">Fixed Amount ($)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Discount Amount */}
-              <div className="space-y-3">
-                <Label
-                  htmlFor="discountAmount"
-                  className="text-gray-600 font-medium"
-                >
-                  Discount Amount <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="discountAmount"
-                  name="discountAmount"
-                  type="number"
-                  value={formData.discountAmount}
-                  onChange={handleInputChange}
-                  placeholder="e.g. 20"
-                  className="h-12 border-gray-200 bg-gray-50/30 focus:ring-1 focus:ring-gray-300"
-                />
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <div className="flex justify-center pt-6">
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full md:w-48 h-12 text-base font-medium bg-[#CF4F26] hover:bg-[#b54420] text-white shadow-md rounded-lg transition-all"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />{" "}
-                    Publishing...
-                  </>
-                ) : (
-                  "Publish Promo"
-                )}
-              </Button>
-            </div>
-          </form>
-        </div>
+        <Link href="/add-promo" className="w-full md:w-auto">
+          <Button className="bg-[#081028] hover:bg-[#0f1c42] text-white shadow-lg shadow-blue-900/20">
+            + Create New Promo
+          </Button>
+        </Link>
       </div>
+
+      {/* Main Table Card */}
+      <Card className="border shadow-sm overflow-hidden bg-white">
+        <CardHeader className="bg-gray-50/50 border-b py-4">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base font-semibold text-gray-700">
+              All Active & Past Promos
+            </CardTitle>
+            <Badge variant="outline" className="bg-white">
+              Total: {promoData.length}
+            </Badge>
+          </div>
+        </CardHeader>
+
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent bg-gray-50/30">
+                <TableHead className="w-[300px] py-4 pl-6 text-xs uppercase tracking-wider font-semibold text-gray-500">
+                  Product Details
+                </TableHead>
+                <TableHead className="text-xs uppercase tracking-wider font-semibold text-gray-500">
+                  Product Name
+                </TableHead>
+                <TableHead className="text-xs uppercase tracking-wider font-semibold text-gray-500">
+                  Promo Code
+                </TableHead>
+                <TableHead className="text-xs uppercase tracking-wider font-semibold text-gray-500">
+                  Discount
+                </TableHead>
+                <TableHead className="text-xs uppercase tracking-wider font-semibold text-gray-500">
+                  Status
+                </TableHead>
+                <TableHead className="text-right pr-6 text-xs uppercase tracking-wider font-semibold text-gray-500">
+                  Actions
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {promoData?.map((promo: any) => {
+                const status = getStatus(promo.validity);
+
+                return (
+                  <TableRow
+                    key={promo.id}
+                    className="group border-b border-gray-100 hover:bg-blue-50/30 transition-all duration-200"
+                  >
+                    {/* Product Info */}
+                    <TableCell className="pl-6 py-4">
+                      <div className="flex items-center gap-4">
+                        <div className="relative h-14 w-14 rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white group-hover:shadow-md transition-shadow">
+                          <Avatar className="h-full w-full rounded-none">
+                            <AvatarImage
+                              src={promo?.product?.images?.[0]}
+                              className="object-cover"
+                            />
+                            <AvatarFallback className="bg-gray-50 text-gray-300">
+                              <ShoppingBag size={20} />
+                            </AvatarFallback>
+                          </Avatar>
+                        </div>
+                        <div className="flex flex-col gap-0.5">
+                          <span className="font-semibold text-gray-900 line-clamp-1">
+                            {promo?.product?.productName}
+                          </span>
+                          <span className="text-xs text-gray-500 flex items-center gap-1">
+                            <CalendarDays size={12} />
+                            Created:{" "}
+                            {format(parseISO(promo.createdAt), "MMM dd, yyyy")}
+                          </span>
+                        </div>
+                      </div>
+                    </TableCell>
+
+                    {/* Product Name */}
+                    <TableCell>
+                      <span className="font-semibold text-gray-900 line-clamp-1">
+                        {promo?.product?.name}
+                      </span>
+                    </TableCell>
+
+                    {/* Promo Code with Copy Function */}
+                    <TableCell>
+                      <div
+                        onClick={() =>
+                          handleCopy(promo.specialPromoCode, promo.id)
+                        }
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-dashed border-gray-300 bg-gray-50 w-fit cursor-pointer hover:border-blue-300 hover:bg-blue-50 transition-colors group/code"
+                      >
+                        <Tag
+                          size={14}
+                          className="text-gray-400 group-hover/code:text-blue-500"
+                        />
+                        <span className="font-mono text-sm font-medium text-gray-700 group-hover/code:text-blue-700">
+                          {promo.specialPromoCode}
+                        </span>
+                        {copiedId === promo.id ? (
+                          <Check size={14} className="text-green-500" />
+                        ) : (
+                          <Copy
+                            size={14}
+                            className="text-gray-300 group-hover/code:text-blue-400"
+                          />
+                        )}
+                      </div>
+                    </TableCell>
+
+                    {/* Discount */}
+                    <TableCell>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-lg font-bold text-gray-900">
+                          {/* Add currency symbol if needed */}
+                          {promo.discountAmount}
+                        </span>
+                        <span className="text-xs font-medium text-muted-foreground uppercase">
+                          OFF
+                        </span>
+                      </div>
+                    </TableCell>
+
+                    {/* Status / Validity */}
+                    <TableCell>
+                      <div className="flex flex-col items-start gap-1">
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            "font-medium px-2.5 py-0.5 shadow-sm",
+                            status.color,
+                          )}
+                        >
+                          {status.label}
+                        </Badge>
+                        <span className="text-[11px] text-gray-400 font-medium ml-1">
+                          Ends {format(parseISO(promo.validity), "MMM dd")}
+                        </span>
+                      </div>
+                    </TableCell>
+
+                    {/* Action */}
+                    <TableCell className="text-right pr-6">
+                      <Link href={`/dashboard/special-promos/${promo.id}`}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-gray-500 hover:text-blue-600 hover:bg-blue-50 group-hover:bg-white group-hover:shadow-sm border border-transparent group-hover:border-gray-100 transition-all"
+                        >
+                          Details <ChevronRight size={16} className="ml-1" />
+                        </Button>
+                      </Link>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+
+          {/* Empty State */}
+          {promoData.length === 0 && (
+            <div className="py-20 text-center">
+              <div className="bg-gray-50 h-16 w-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Tag className="text-gray-300" size={32} />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900">
+                No Promos Found
+              </h3>
+              <p className="text-gray-500 max-w-sm mx-auto mt-1">
+                You haven&apos;t created any special promotion campaigns yet.
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
-}
+};
+
+export default SpecialPromoPage;
