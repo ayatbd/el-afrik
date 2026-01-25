@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { format, isPast, parseISO } from "date-fns";
-import { useGetPromoQuery } from "@/redux/api/PromoApi";
+import { useDeletePromoMutation, useGetPromoQuery } from "@/redux/api/PromoApi";
 import { FullScreenLoader } from "@/app/loading";
 
 // Shadcn & UI Components
@@ -24,11 +24,12 @@ import {
   Check,
   CalendarDays,
   Tag,
-  ChevronRight,
   ShoppingBag,
   AlertCircle,
+  Trash2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "react-toastify";
 
 const SpecialPromoPage = () => {
   const {
@@ -37,6 +38,20 @@ const SpecialPromoPage = () => {
     isError,
   } = useGetPromoQuery(undefined);
   const promoData = specialPromos?.data?.result || [];
+
+  const [deletePromo] = useDeletePromoMutation();
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deletePromo(id).unwrap();
+      toast.success("Promo deleted successfully!");
+    } catch (error: unknown) {
+      const errorMessage =
+        (((error as Record<string, unknown>)?.data as Record<string, unknown>)
+          ?.message as string | undefined) || "Failed to delete Promo";
+      toast.error(errorMessage);
+    }
+  };
 
   // State for the "Copy to Clipboard" feedback
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -231,15 +246,14 @@ const SpecialPromoPage = () => {
 
                     {/* Action */}
                     <TableCell className="text-right pr-6">
-                      <Link href={`/dashboard/special-promos/${promo.id}`}>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-gray-500 hover:text-blue-600 hover:bg-blue-50 group-hover:bg-white group-hover:shadow-sm border border-transparent group-hover:border-gray-100 transition-all"
-                        >
-                          Details <ChevronRight size={16} className="ml-1" />
-                        </Button>
-                      </Link>
+                      <Button
+                        onClick={() => handleDelete(promo._id)}
+                        variant="ghost"
+                        size="sm"
+                        className="text-gray-500 hover:text-blue-600 hover:bg-blue-50 group-hover:bg-white group-hover:shadow-sm border border-transparent group-hover:border-gray-100 transition-all cursor-pointer"
+                      >
+                        <Trash2 size={16} className="text-red-400" />
+                      </Button>
                     </TableCell>
                   </TableRow>
                 );
