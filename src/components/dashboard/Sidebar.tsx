@@ -9,10 +9,8 @@ import { AiFillProduct, AiOutlineOrderedList } from "react-icons/ai";
 import { TbCategoryPlus } from "react-icons/tb";
 import { IoIosAdd, IoIosBicycle } from "react-icons/io";
 import { PiCoffeeDuotone } from "react-icons/pi";
-import { Plus, Proportions } from "lucide-react";
-import { SiFuturelearn } from "react-icons/si";
+import { Proportions } from "lucide-react";
 import { CiSettings } from "react-icons/ci";
-import { IoTrophySharp } from "react-icons/io5";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "../ui/button";
 import { useAppDispatch } from "@/redux/hooks";
@@ -84,16 +82,16 @@ export default function Sidebar() {
       href: "/special-promos",
       icon: <Proportions size={20} />,
     },
-    {
-      name: "Earnings",
-      href: "/earnings",
-      icon: <SiFuturelearn size={20} />,
-    },
-    {
-      name: "Rewards",
-      href: "/rewards",
-      icon: <IoTrophySharp size={20} />,
-    },
+    // {
+    //   name: "Earnings",
+    //   href: "/earnings",
+    //   icon: <SiFuturelearn size={20} />,
+    // },
+    // {
+    //   name: "Rewards",
+    //   href: "/rewards",
+    //   icon: <IoTrophySharp size={20} />,
+    // },
   ];
 
   const NavSubItems = [
@@ -117,10 +115,10 @@ export default function Sidebar() {
       name: "Notifications",
       href: "/notifications",
     },
-    {
-      name: "Operating Hours",
-      href: "/operating-hours",
-    },
+    // {
+    //   name: "Operating Hours",
+    //   href: "/operating-hours",
+    // },
     {
       name: "About Us",
       href: "/about-us",

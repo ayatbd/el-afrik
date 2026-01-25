@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useGetOrdersQuery } from "@/redux/api/ordersApi";
+import { FullScreenLoader } from "@/app/loading";
 
 // mock data
 
@@ -51,11 +52,7 @@ export default function OrdersPage() {
 
   // error handling
   if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        Loading...
-      </div>
-    );
+    return <FullScreenLoader />;
   }
   return (
     <div className="min-h-screen w-full bg-[#F8F9FA] p-6 md:p-10 font-sans text-gray-900">

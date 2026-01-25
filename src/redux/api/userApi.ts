@@ -18,13 +18,15 @@ export const userApi = apiSlice.injectEndpoints({
             }),
             providesTags: ["User"],
         }),
+        // UPDATE THIS MUTATION
         blockUser: builder.mutation({
-            query: (id) => ({
-                url: `/user/block-user/${id}`, // or whatever your endpoint is
-                method: "PATCH", // or PUT/POST
-                body: { status: 'blocked' } // if needed
+            // We now expect an object: { id: "123", data: { status: "blocked" } }
+            query: ({ id, data }) => ({
+                url: `/user/block-user/${id}`, // Verify if your backend uses /users/:id or /users/:id/block
+                method: "PATCH",
+                body: data, // This sends { status: "active" } or { status: "blocked" }
             }),
-            invalidatesTags: ["User"], // Important to auto-refresh the table list
+            invalidatesTags: ["User"],
         }),
         deleteUser: builder.mutation({
             query: (id) => ({

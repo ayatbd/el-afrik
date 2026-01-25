@@ -83,7 +83,7 @@ const CateringTable = () => {
           </p>
         </div>
         {/* Update URL to match your structure */}
-        <Link href="/dashboard/catering/add">
+        <Link href="/add-catering">
           <Button className="bg-[#00B25D] hover:bg-[#009e52]">
             Add New Package
           </Button>

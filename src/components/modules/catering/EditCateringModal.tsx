@@ -55,7 +55,7 @@ export default function EditCateringModal({
 
   // Image State
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
+  const [preview, setPreview] = useState<string | null | undefined>(null);
 
   const [editCatering, { isLoading }] = useEditCateringMutation();
 

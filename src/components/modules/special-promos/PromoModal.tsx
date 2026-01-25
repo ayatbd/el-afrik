@@ -26,7 +26,7 @@ export default function PromoModal() {
     if (files) {
       // Convert FileList to Array and create object URLs for preview
       const newImages = Array.from(files).map((file) =>
-        URL.createObjectURL(file)
+        URL.createObjectURL(file),
       );
       // Append new images to existing ones
       setImages((prev) => [...prev, ...newImages]);

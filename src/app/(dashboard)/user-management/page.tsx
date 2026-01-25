@@ -57,7 +57,12 @@ export default function UserManagementPage() {
 
   // 4. Block Handler
   const handleBlockToggle = (user: any) => {
+    // 1. Determine current state
     const isBlocked = user.status === "blocked";
+
+    // 2. Determine the intended NEW status
+    // If currently blocked, we want 'active'. If active, we want 'blocked'.
+    const newStatus = isBlocked ? "in-progress" : "blocked";
 
     Swal.fire({
       title: isBlocked ? "Unblock User?" : "Block User?",
@@ -66,25 +71,25 @@ export default function UserManagementPage() {
         : "This user will be restricted from accessing the platform!",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: isBlocked ? "#10B981" : "#d33", // Green for unblock, Red for block
+      confirmButtonColor: isBlocked ? "#10B981" : "#d33",
       cancelButtonColor: "#3085d6",
       confirmButtonText: isBlocked ? "Yes, Unblock!" : "Yes, Block!",
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          // Assuming your API accepts userId and the new status or just toggles it
-          // Adjust payload based on your backend: e.g., { id: user._id, status: isBlocked ? 'active' : 'blocked' }
-          const res = await blockUser(user._id || user.id).unwrap();
+          // 3. SEND BOTH ID AND DATA
+          const res = await blockUser({
+            id: user._id || user.id,
+            data: { status: newStatus }, // Payload
+          }).unwrap();
 
           Swal.fire(
             isBlocked ? "Unblocked!" : "Blocked!",
-            res.message ||
-              (isBlocked
-                ? "User has been activated."
-                : "User has been blocked."),
+            res.message || "User status updated successfully.",
             "success",
           );
         } catch (err: any) {
+          console.error(err);
           Swal.fire(
             "Error!",
             err?.data?.message || "Failed to update status",
@@ -94,7 +99,6 @@ export default function UserManagementPage() {
       }
     });
   };
-
   // 5. Pagination Math
   const totalPages = Math.ceil(totalDocs / itemsPerPage);
 

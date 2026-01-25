@@ -1,12 +1,11 @@
 "use client";
 
+import { useState, FormEvent } from "react";
 import Link from "next/link";
-import { ArrowLeft, X } from "lucide-react";
-import { useState, ChangeEvent } from "react";
+import { ArrowLeft, Loader2, CalendarIcon } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -15,215 +14,253 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import PromoModal from "@/components/modules/special-promos/PromoModal";
+import { useAddPromoMutation } from "@/redux/api/specialPromos";
+import { useGetProductsQuery } from "@/redux/api/productApi";
+import Swal from "sweetalert2";
 
 export default function AddProductPage() {
-  const [images, setImages] = useState<string[]>([]);
+  // 1. API Hooks
+  const [addPromo, { isLoading: isSubmitting }] = useAddPromoMutation();
+  const { data: productsData, isLoading: isLoadingProducts } =
+    useGetProductsQuery(undefined);
 
-  // Handle File Selection
-  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files) {
-      // Convert FileList to Array and create object URLs for preview
-      const newImages = Array.from(files).map((file) =>
-        URL.createObjectURL(file)
-      );
-      // Append new images to existing ones
-      setImages((prev) => [...prev, ...newImages]);
+  // Safely extract products list
+  const allProducts = productsData?.data?.result || [];
+
+  // 2. Form State
+  const [formData, setFormData] = useState({
+    product: "", // Stores Product ID
+    validity: "",
+    type: "",
+    specialPromoCode: "",
+    discountType: "",
+    discountAmount: "",
+  });
+
+  // 3. Handlers
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+
+    // Basic Validation
+    if (
+      !formData.product ||
+      !formData.specialPromoCode ||
+      !formData.discountAmount ||
+      !formData.discountType ||
+      !formData.type ||
+      !formData.validity
+    ) {
+      Swal.fire("Error", "Please fill in all required fields", "error");
+      return;
+    }
+
+    try {
+      // 4. Construct Payload
+      // Note: formData.product already contains the ID from the Select value
+      const payload = {
+        product: formData.product,
+        validity: formData.validity,
+        type: formData.type,
+        specialPromoCode: formData.specialPromoCode,
+        discountType: formData.discountType,
+        discountAmount: Number(formData.discountAmount),
+      };
+
+      const res = await addPromo(payload).unwrap();
+
+      if (res?.success) {
+        Swal.fire("Success", "Promo added successfully!", "success");
+        // Reset form
+        setFormData({
+          product: "",
+          validity: "",
+          type: "",
+          specialPromoCode: "",
+          discountType: "",
+          discountAmount: "",
+        });
+      }
+    } catch (err: any) {
+      console.error(err);
+      Swal.fire("Error", err?.data?.message || "Failed to add promo", "error");
     }
   };
 
-  // Remove Image from selection
-  const removeImage = (indexToRemove: number) => {
-    setImages((prev) => prev.filter((_, index) => index !== indexToRemove));
-  };
-
   return (
-    <div className="min-h-screen md:min-w-7xl mx-auto bg-white p-6 md:p-10 font-sans text-gray-800">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
-        <div className="flex items-center gap-3">
+    <div className="min-h-screen w-full bg-[#F9FAFB] p-6 md:p-10 font-sans text-gray-800">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-8">
           <Link
             href="/"
-            className="p-1 -ml-2 hover:bg-gray-200 rounded-full transition-colors"
+            className="p-2 -ml-2 hover:bg-white bg-white/50 rounded-full transition-all border border-transparent hover:border-gray-200 shadow-sm"
           >
-            <ArrowLeft className="h-6 w-6 text-gray-900" />
+            <ArrowLeft className="h-5 w-5 text-gray-700" />
           </Link>
-          <h1 className="text-xl font-semibold text-gray-900">Add Product</h1>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Add New Promo</h1>
+            <p className="text-sm text-gray-500 mt-1">
+              Create a special offer for a specific product.
+            </p>
+          </div>
         </div>
-        <div className="flex items-center gap-4">
-          <PromoModal />
-        </div>
-      </div>
 
-      <div className="space-y-8">
-        {/* --- Image Upload Section --- */}
-        <div className="space-y-4">
-          <Label className="text-base font-normal text-gray-500">
-            Upload Product Images
-          </Label>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {/* 1. Upload Button (Always Visible) */}
-            <label
-              htmlFor="imageUpload"
-              className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50/50 hover:bg-gray-50 transition-colors cursor-pointer"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-12 w-12 text-gray-500 mb-3"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="1.5"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M3 5a2 2 0 012-2h4l2 2h8a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M8 13l2-2 3 3 3-3"
-                />
-              </svg>
-              <p className="text-green-500 font-medium text-lg text-center px-2">
-                Browse Images
-              </p>
-
-              {/* Added 'multiple' and 'onChange' */}
-              <input
-                id="imageUpload"
-                type="file"
-                accept="image/*"
-                multiple
-                className="hidden"
-                onChange={handleImageChange}
-              />
-            </label>
-
-            {/* 2. Image Previews */}
-            {images.map((img, index) => (
-              <div
-                key={index}
-                className="relative h-48 w-full group rounded-lg overflow-hidden border border-gray-200"
-              >
-                <img
-                  src={img}
-                  alt={`Preview ${index}`}
-                  className="h-full w-full object-cover"
-                />
-                <button
-                  onClick={() => removeImage(index)}
-                  className="absolute top-2 right-2 p-1 bg-white/80 hover:bg-white text-red-500 rounded-full shadow-sm transition-all opacity-0 group-hover:opacity-100"
+        {/* Form Container */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-10">
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Product Selection (Maps Name -> Sends ID) */}
+              <div className="space-y-3">
+                <Label className="text-gray-600 font-medium">
+                  Select Product <span className="text-red-500">*</span>
+                </Label>
+                <Select
+                  value={formData.product}
+                  onValueChange={(val) => handleSelectChange("product", val)}
                 >
-                  <X className="h-4 w-4" />
-                </button>
+                  <SelectTrigger className="h-12 border-gray-200 bg-gray-50/30 focus:ring-1 focus:ring-gray-300">
+                    <SelectValue
+                      placeholder={
+                        isLoadingProducts
+                          ? "Loading products..."
+                          : "Select a product"
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {allProducts.map((prod: any) => (
+                      <SelectItem key={prod._id} value={prod._id}>
+                        {prod.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            ))}
-          </div>
-        </div>
 
-        {/* --- Form Fields --- */}
-        <div className="space-y-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="space-y-3">
-              <Label htmlFor="name" className="text-gray-500 font-normal">
-                Product Name
-              </Label>
-              <Input
-                id="name"
-                placeholder="Fresh Strawberry"
-                className="h-12 border-gray-200 bg-white"
-              />
+              {/* Promo Type */}
+              <div className="space-y-3">
+                <Label className="text-gray-600 font-medium">
+                  Promo Type <span className="text-red-500">*</span>
+                </Label>
+                <Select
+                  value={formData.type}
+                  onValueChange={(val) => handleSelectChange("type", val)}
+                >
+                  <SelectTrigger className="h-12 border-gray-200 bg-gray-50/30 focus:ring-1 focus:ring-gray-300">
+                    <SelectValue placeholder="Select type (e.g. Holiday)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Holiday">Holiday</SelectItem>
+                    <SelectItem value="Weekend">Weekend</SelectItem>
+                    <SelectItem value="Limited">Limited Time</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Validity Date */}
+              <div className="space-y-3">
+                <Label htmlFor="validity" className="text-gray-600 font-medium">
+                  Valid Until <span className="text-red-500">*</span>
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="validity"
+                    name="validity"
+                    type="date"
+                    value={formData.validity}
+                    onChange={handleInputChange}
+                    className="h-12 border-gray-200 bg-gray-50/30 focus:ring-1 focus:ring-gray-300 block w-full"
+                  />
+                  <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Promo Code */}
+              <div className="space-y-3">
+                <Label
+                  htmlFor="specialPromoCode"
+                  className="text-gray-600 font-medium"
+                >
+                  Promo Code <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="specialPromoCode"
+                  name="specialPromoCode"
+                  value={formData.specialPromoCode}
+                  onChange={handleInputChange}
+                  placeholder="e.g. SUMMER2026"
+                  className="h-12 border-gray-200 bg-gray-50/30 focus:ring-1 focus:ring-gray-300 uppercase tracking-wide"
+                />
+              </div>
+
+              {/* Discount Type */}
+              <div className="space-y-3">
+                <Label className="text-gray-600 font-medium">
+                  Discount Type
+                </Label>
+                <Select
+                  value={formData.discountType}
+                  onValueChange={(val) =>
+                    handleSelectChange("discountType", val)
+                  }
+                >
+                  <SelectTrigger className="h-12 border-gray-200 bg-gray-50/30 focus:ring-1 focus:ring-gray-300">
+                    <SelectValue placeholder="percentage" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="percentage">Percentage (%)</SelectItem>
+                    <SelectItem value="fixed">Fixed Amount ($)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Discount Amount */}
+              <div className="space-y-3">
+                <Label
+                  htmlFor="discountAmount"
+                  className="text-gray-600 font-medium"
+                >
+                  Discount Amount <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="discountAmount"
+                  name="discountAmount"
+                  type="number"
+                  value={formData.discountAmount}
+                  onChange={handleInputChange}
+                  placeholder="e.g. 20"
+                  className="h-12 border-gray-200 bg-gray-50/30 focus:ring-1 focus:ring-gray-300"
+                />
+              </div>
             </div>
 
-            <div className="space-y-3">
-              <Label htmlFor="price" className="text-gray-500 font-normal">
-                Promo validity date
-              </Label>
-              <Input
-                id="price"
-                placeholder="12/12/2023"
-                className="h-12 border-gray-200 bg-white"
-              />
-            </div>
-            <div className="space-y-3">
-              <Label
-                htmlFor="deliveryFee"
-                className="text-gray-500 font-normal"
+            {/* Submit Button */}
+            <div className="flex justify-center pt-6">
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full md:w-48 h-12 text-base font-medium bg-[#CF4F26] hover:bg-[#b54420] text-white shadow-md rounded-lg transition-all"
               >
-                Promo Code
-              </Label>
-              <Input
-                id="deliveryFee"
-                placeholder="ELAFRIK20"
-                className="h-12 border-gray-200 bg-white"
-              />
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />{" "}
+                    Publishing...
+                  </>
+                ) : (
+                  "Publish Promo"
+                )}
+              </Button>
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="space-y-3">
-              <Label className="text-gray-500 font-normal">
-                Select Category
-              </Label>
-              <Select>
-                <SelectTrigger className="h-12 border-gray-200 bg-white text-gray-400">
-                  <SelectValue placeholder="Foods" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="foods">Foods</SelectItem>
-                  <SelectItem value="drinks">Drinks</SelectItem>
-                  <SelectItem value="snacks">Snacks</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-3">
-              <Label className="text-gray-500 font-normal">Points</Label>
-              <Select>
-                <SelectTrigger className="h-12 border-gray-200 bg-white text-gray-400">
-                  <SelectValue placeholder="Points" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="10">05 Points</SelectItem>
-                  <SelectItem value="10">10 Points</SelectItem>
-                  <SelectItem value="10">15 Points</SelectItem>
-                  <SelectItem value="10">20 Points</SelectItem>
-                  <SelectItem value="20">25 Points</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-3">
-              <Label htmlFor="quantity" className="text-gray-500 font-normal">
-                Quantity
-              </Label>
-              <Input
-                id="quantity"
-                placeholder="500-600gm"
-                className="h-12 border-gray-200 bg-white"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <Label htmlFor="description" className="text-gray-500 font-normal">
-              Description
-            </Label>
-            <Textarea
-              id="description"
-              placeholder="Write here...."
-              className="min-h-30 border-gray-200 bg-white resize-none p-4"
-            />
-          </div>
-        </div>
-
-        <div className="flex justify-center pt-8 pb-4">
-          <Button className="w-full md:w-64 h-12 text-base font-medium bg-[#CF4F26] hover:bg-[#b54420] text-white shadow-md rounded-md">
-            Publish
-          </Button>
+          </form>
         </div>
       </div>
     </div>
