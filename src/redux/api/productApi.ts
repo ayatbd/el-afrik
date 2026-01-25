@@ -3,11 +3,12 @@ import { apiSlice } from "./apiSlice";
 export const productApi = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
         getProducts: builder.query({
-            query: () => {
+            query: (params) => {
                 console.log('getProducts');
                 return {
-                    url: '/product/allProduct?page=1&limit=50000000000000',
+                    url: '/product/allProduct',
                     method: 'GET',
+                    params: params
                 }
             },
             providesTags: ['Product'],
@@ -25,7 +26,7 @@ export const productApi = apiSlice.injectEndpoints({
         }),
         editProduct: builder.mutation({
             query: ({ id, data }) => {
-                console.log(data);
+                // console.log(data);
                 return {
                     url: `product/update-product/${id}`,
                     method: 'PATCH',

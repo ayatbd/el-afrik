@@ -120,7 +120,7 @@ export default function ManageProductsPage() {
     page: currentPage,
     limit: 10,
     searchTerm: searchTerm,
-    category: categoryFilter !== "all" ? categoryFilter : undefined,
+    category: categoryFilter !== "all" ? categoryFilter : "",
   };
 
   const {
