@@ -170,7 +170,7 @@ export default function AddProductPage() {
     <div className="min-h-screen md:min-w-7xl mx-auto bg-white p-6 md:p-10 font-sans text-gray-800">
       <div className="flex items-center gap-3 mb-10">
         <Link
-          href="/manage-products"
+          href="/product-management"
           className="p-1 -ml-2 hover:bg-gray-200 rounded-full transition-colors"
         >
           <ArrowLeft className="h-6 w-6 text-gray-900" />

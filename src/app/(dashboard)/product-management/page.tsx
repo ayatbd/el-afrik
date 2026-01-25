@@ -411,7 +411,7 @@ export default function ManageProductsPage() {
 
                   <TableCell className="py-4">
                     <div className="flex items-center justify-center gap-4">
-                      <EditProductModal />
+                      <EditProductModal product={product} />
                       <button
                         onClick={() => handleDelete(product._id)}
                         className="text-gray-400 hover:text-red-500 transition-colors"

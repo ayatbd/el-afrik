@@ -24,11 +24,11 @@ export const productApi = apiSlice.injectEndpoints({
             invalidatesTags: ['Product'],
         }),
         editProduct: builder.mutation({
-            query: (data) => {
+            query: ({ id, data }) => {
                 console.log(data);
                 return {
-                    url: 'product/update-product',
-                    method: 'PUT',
+                    url: `product/update-product/${id}`,
+                    method: 'PATCH',
                     body: data,
                 }
             },

@@ -101,7 +101,7 @@ const SpecialPromoPage = () => {
           </p>
         </div>
         <Link href="/add-promo" className="w-full md:w-auto">
-          <Button className="bg-[#081028] hover:bg-[#0f1c42] text-white shadow-lg shadow-blue-900/20">
+          <Button className="bg-[#00B25D] hover:bg-[#009e52] cursor-pointer">
             + Create New Promo
           </Button>
         </Link>

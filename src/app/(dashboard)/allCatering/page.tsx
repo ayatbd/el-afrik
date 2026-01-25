@@ -17,7 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MoreHorizontal, Trash2, Eye, Loader2 } from "lucide-react";
+import { MoreHorizontal, Trash2, Loader2 } from "lucide-react";
 import {
   useDeleteCateringMutation,
   useGetAllCateringQuery,

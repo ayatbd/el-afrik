@@ -9,7 +9,7 @@ import { AiFillProduct, AiOutlineOrderedList } from "react-icons/ai";
 import { TbCategoryPlus } from "react-icons/tb";
 import { IoIosAdd, IoIosBicycle } from "react-icons/io";
 import { PiCoffeeDuotone } from "react-icons/pi";
-import { Proportions } from "lucide-react";
+import { Proportions, QrCodeIcon } from "lucide-react";
 import { CiSettings } from "react-icons/ci";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "../ui/button";
@@ -81,6 +81,11 @@ export default function Sidebar() {
       name: "Special Promos",
       href: "/special-promos",
       icon: <Proportions size={20} />,
+    },
+    {
+      name: "all QR Codes",
+      href: "/all-qr",
+      icon: <QrCodeIcon size={20} />,
     },
     // {
     //   name: "Earnings",

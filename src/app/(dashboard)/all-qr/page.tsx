@@ -22,7 +22,6 @@ import {
   Check,
   Calendar,
   Coins,
-  MoreHorizontal,
   CheckCircle2,
   XCircle,
 } from "lucide-react";
@@ -92,7 +91,7 @@ const QRCodeTable = () => {
             Manage generated QR codes and point allocations.
           </p>
         </div>
-        <Button className="bg-[#081028] hover:bg-[#0f1c42]">
+        <Button className="bg-[#00B25D] hover:bg-[#009e52] cursor-pointer">
           + Generate QR
         </Button>
       </div>
@@ -114,7 +113,7 @@ const QRCodeTable = () => {
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent bg-gray-50/30">
-                <TableHead className="w-[300px] py-4 pl-6 text-xs uppercase tracking-wider font-semibold text-gray-500">
+                <TableHead className="w-75 py-4 pl-6 text-xs uppercase tracking-wider font-semibold text-gray-500">
                   QR Campaign Info
                 </TableHead>
                 <TableHead className="text-xs uppercase tracking-wider font-semibold text-gray-500">
@@ -132,7 +131,7 @@ const QRCodeTable = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {qrList.map((item) => {
+              {qrList.map((item: QRCode) => {
                 const status = getStatus(item.isUsed, item.expiryDate);
                 const StatusIcon = status.icon;
 
