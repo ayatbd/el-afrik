@@ -2,8 +2,17 @@
 
 import React, { useState } from "react";
 import { format, isPast, parseISO } from "date-fns";
-// Replace with your actual API hook
-// import { useGetQRCodesQuery } from "@/redux/api/qrApi";
+import { QRCodeCanvas } from "qrcode.react"; // Import the QR library
+
+// Imports for the Modal/Dialog (Ensure you have these in your shadcn/ui components)
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 import {
   Table,
@@ -18,42 +27,62 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   QrCode,
-  Copy,
-  Check,
   Calendar,
   Coins,
   CheckCircle2,
   XCircle,
+  Download,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useGetQrQuery } from "@/redux/api/qrApi";
 import { FullScreenLoader } from "@/app/loading";
 
-// Mock data based on your snippet (Delete this when using real API)
 type QRCode = {
-  _id: "697596cf08a9a976b45607e9";
-  title: "Welcome Bonus QR";
-  code: "QR-AUWLFRFC";
-  points: 100;
-  isUsed: false;
-  expiryDate: "2026-02-24T04:06:39.861Z";
-  createdAt: "2026-01-25T04:06:39.862Z";
+  _id: string;
+  title: string;
+  code: string; // The value we turn into a QR Image
+  points: number;
+  isUsed: boolean;
+  expiryDate: string;
+  createdAt: string;
 };
 
 const QRCodeTable = () => {
   const { data, isLoading } = useGetQrQuery(undefined);
   const qrList = data?.data || [];
-  //   const qrList = MOCK_DATA; // Using mock data for display
 
-  const [copiedId, setCopiedId] = useState<string | null>(null);
+  // State for the modal
+  const [selectedQr, setSelectedQr] = useState<QRCode | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  // const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  const handleCopy = (code: string, id: string) => {
-    navigator.clipboard.writeText(code);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2000);
+  // Function to handle downloading the QR code as an image
+  const downloadQR = () => {
+    const canvas = document.getElementById("qr-gen") as HTMLCanvasElement;
+    if (canvas) {
+      const pngUrl = canvas.toDataURL("image/png");
+      const downloadLink = document.createElement("a");
+      downloadLink.href = pngUrl;
+      downloadLink.download = `${selectedQr?.code || "qrcode"}.png`;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+    }
   };
 
-  // Logic to determine the visual status
+  // Standard copy text function
+  // const handleCopy = (code: string, id: string) => {
+  //   navigator.clipboard.writeText(code);
+  //   setCopiedId(id);
+  //   setTimeout(() => setCopiedId(null), 2000);
+  // };
+
+  // Open the view modal
+  const handleViewQr = (item: QRCode) => {
+    setSelectedQr(item);
+    setIsModalOpen(true);
+  };
+
   const getStatus = (isUsed: boolean, expiryDate: string) => {
     if (isUsed) {
       return {
@@ -96,7 +125,6 @@ const QRCodeTable = () => {
         </Button>
       </div>
 
-      {/* Table Card */}
       <Card className="border shadow-sm bg-white overflow-hidden">
         <CardHeader className="bg-gray-50/50 border-b py-4">
           <div className="flex items-center justify-between">
@@ -117,7 +145,7 @@ const QRCodeTable = () => {
                   QR Campaign Info
                 </TableHead>
                 <TableHead className="text-xs uppercase tracking-wider font-semibold text-gray-500">
-                  Unique Code
+                  Code & Action
                 </TableHead>
                 <TableHead className="text-xs uppercase tracking-wider font-semibold text-gray-500">
                   Points
@@ -140,7 +168,7 @@ const QRCodeTable = () => {
                     key={item._id}
                     className="group border-b border-gray-100 hover:bg-blue-50/30 transition-colors"
                   >
-                    {/* Column 1: Title & Icon */}
+                    {/* Column 1: Info */}
                     <TableCell className="pl-6 py-4">
                       <div className="flex items-center gap-4">
                         <div className="h-12 w-12 rounded-xl bg-gray-900 flex items-center justify-center text-white shadow-sm">
@@ -152,30 +180,38 @@ const QRCodeTable = () => {
                           </span>
                           <span className="text-xs text-gray-500 flex items-center gap-1">
                             <Calendar size={12} />
-                            Created:{" "}
                             {format(parseISO(item.createdAt), "MMM dd, yyyy")}
                           </span>
                         </div>
                       </div>
                     </TableCell>
 
-                    {/* Column 2: Code (Copyable) */}
+                    {/* Column 2: The View/Download Button */}
                     <TableCell>
-                      <div
-                        onClick={() => handleCopy(item.code, item._id)}
-                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-dashed border-gray-300 bg-gray-50 w-fit cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors group/code"
-                      >
-                        <span className="font-mono text-sm font-medium text-gray-700 group-hover/code:text-blue-700">
-                          {item.code}
-                        </span>
-                        {copiedId === item._id ? (
-                          <Check size={14} className="text-green-500" />
-                        ) : (
-                          <Copy
-                            size={14}
-                            className="text-gray-400 group-hover/code:text-blue-400"
-                          />
-                        )}
+                      <div className="flex items-center gap-2">
+                        {/* View/Download Button */}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleViewQr(item)}
+                          className="h-8 gap-2 border-dashed border-gray-300 hover:border-blue-400 hover:bg-blue-50 text-gray-700"
+                        >
+                          <QrCode size={14} />
+                          View QR
+                        </Button>
+
+                        {/* Quick Copy Button (Optional) */}
+                        {/* <button
+                          onClick={() => handleCopy(item.code, item._id)}
+                          className="p-2 hover:bg-gray-100 rounded-md transition-colors text-gray-400 hover:text-gray-700"
+                          title="Copy text code"
+                        >
+                          {copiedId === item._id ? (
+                            <Check size={14} className="text-green-500" />
+                          ) : (
+                            <Copy size={14} />
+                          )}
+                        </button> */}
                       </div>
                     </TableCell>
 
@@ -192,7 +228,7 @@ const QRCodeTable = () => {
                       </div>
                     </TableCell>
 
-                    {/* Column 4: Status Badge */}
+                    {/* Column 4: Status */}
                     <TableCell>
                       <Badge
                         variant="outline"
@@ -206,17 +242,15 @@ const QRCodeTable = () => {
                       </Badge>
                     </TableCell>
 
-                    {/* Column 5: Expiry & Actions */}
+                    {/* Column 5: Expiry */}
                     <TableCell className="text-right pr-6">
-                      <div className="flex items-center justify-end gap-4">
-                        <div className="text-right">
-                          <p className="text-sm font-medium text-gray-700">
-                            {format(parseISO(item.expiryDate), "MMM dd, yyyy")}
-                          </p>
-                          <p className="text-xs text-gray-400">
-                            {format(parseISO(item.expiryDate), "h:mm a")}
-                          </p>
-                        </div>
+                      <div className="text-right">
+                        <p className="text-sm font-medium text-gray-700">
+                          {format(parseISO(item.expiryDate), "MMM dd, yyyy")}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {format(parseISO(item.expiryDate), "h:mm a")}
+                        </p>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -226,6 +260,58 @@ const QRCodeTable = () => {
           </Table>
         </CardContent>
       </Card>
+
+      {/* =========================================================
+          QR CODE PREVIEW & DOWNLOAD MODAL
+      ========================================================= */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="sm:max-w-md bg-white">
+          <DialogHeader>
+            <DialogTitle>QR Code Details</DialogTitle>
+            <DialogDescription>
+              Scan this code to redeem points or download the image.
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedQr && (
+            <div className="flex flex-col items-center justify-center py-6 space-y-6">
+              <div className="p-4 bg-white border rounded-xl shadow-sm">
+                {/* The Actual QR Generator Canvas */}
+                <QRCodeCanvas
+                  id="qr-gen"
+                  value={selectedQr.code}
+                  size={200}
+                  level={"H"} // High error correction
+                  includeMargin={true}
+                />
+              </div>
+
+              <div className="text-center space-y-1">
+                {/* <p className="font-mono text-xl font-bold tracking-wider text-gray-800">
+                  {selectedQr.code}
+                </p> */}
+                <p className="text-sm text-gray-500">{selectedQr.title}</p>
+                <Badge className="mt-2 bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border-none">
+                  Value: {selectedQr.points} Points
+                </Badge>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="sm:justify-between gap-2">
+            <Button variant="secondary" onClick={() => setIsModalOpen(false)}>
+              Close
+            </Button>
+            <Button
+              className="bg-[#00B25D] hover:bg-[#009e52] w-full sm:w-auto gap-2"
+              onClick={downloadQR}
+            >
+              <Download size={16} />
+              Download PNG
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
