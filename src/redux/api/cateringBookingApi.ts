@@ -6,11 +6,21 @@ export const cateringBookingApi = apiSlice.injectEndpoints({
             query: () => "/catering/admin/bookings",
             providesTags: ["CateringBooking"],
         }),
+
+        // Updated endpoint for downloading files
         downloadInvoice: builder.query({
-            query: (id) => `/catering/invoice/${id}`,
-            providesTags: ["CateringBooking"],
+            query: (id) => ({
+                url: `/catering/invoice/${id}`,
+                method: "GET",
+                // CRITICAL: This tells RTK Query to parse the response as a file/blob, not JSON
+                responseHandler: (response) => response.blob(),
+            }),
         }),
     }),
-})
+});
 
-export const { useGetCateringBookingQuery, useDownloadInvoiceQuery } = cateringBookingApi
+export const {
+    useGetCateringBookingQuery,
+    useDownloadInvoiceQuery,      // Standard hook
+    useLazyDownloadInvoiceQuery   // <--- YOU NEED THIS for the button click
+} = cateringBookingApi;

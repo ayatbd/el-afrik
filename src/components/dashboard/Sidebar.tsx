@@ -9,7 +9,7 @@ import { AiFillProduct, AiOutlineOrderedList } from "react-icons/ai";
 import { TbCategoryPlus } from "react-icons/tb";
 import { IoIosAdd, IoIosBicycle } from "react-icons/io";
 import { PiCoffeeDuotone } from "react-icons/pi";
-import { LifeBuoy, Proportions, QrCodeIcon } from "lucide-react";
+import { LifeBuoy, Megaphone, Proportions, QrCodeIcon } from "lucide-react";
 import { CiSettings } from "react-icons/ci";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "../ui/button";
@@ -91,6 +91,11 @@ export default function Sidebar() {
       name: "Reservations",
       href: "/all-reservation",
       icon: <LifeBuoy size={20} />,
+    },
+    {
+      name: "Ads",
+      href: "/ads",
+      icon: <Megaphone size={20} />,
     },
     // {
     //   name: "Earnings",

@@ -8,39 +8,63 @@ import {
   Users,
   Phone,
   Mail,
-  Eye,
-  Trash2,
   CheckCircle,
   XCircle,
   Clock,
   Download,
+  Loader2, // Imported loader icon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useGetCateringBookingQuery } from "@/redux/api/cateringBookingApi";
+// Ensure you are importing useLazy... for the download
+import {
+  useGetCateringBookingQuery,
+  useLazyDownloadInvoiceQuery,
+} from "@/redux/api/cateringBookingApi";
 import { FullScreenLoader } from "@/app/loading";
-
-// 1. Type Definition based on your JSON
-// type Reservation = {
-//   _id: string; // Added ID for key props
-//   email: string;
-//   name: string; // e.g., "Royal Wedding Menu"
-//   guestCount: number;
-//   totalPrice: number;
-//   contactNumber: string;
-//   paymentStatus: "pending" | "paid" | "cancelled";
-//   date?: string; // Optional: Added for UI realism
-// };
+import { toast } from "sonner"; // Assuming you use sonner or react-hot-toast
 
 const AllReservation = () => {
+  // 1. Fetch Table Data
   const { data: response, isLoading } = useGetCateringBookingQuery(undefined);
   const reservations = response?.data?.result || [];
-  console.log(reservations);
 
+  // 2. Setup Lazy Query for Download
+  // We use 'trigger' to call it manually
+  const [triggerDownload] = useLazyDownloadInvoiceQuery();
+
+  // 3. State to track which specific row is currently downloading
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
-  if (isLoading) {
-    return <FullScreenLoader />;
-  }
+  // 4. Download Handler
+  const handleDownloadInvoice = async (id: string) => {
+    try {
+      setDownloadingId(id); // Start loading spinner for this row
+
+      // Trigger the API call and unwrap the result (expecting a Blob)
+      const blob = await triggerDownload(id).unwrap();
+
+      // Create a temporary URL for the blob
+      const url = window.URL.createObjectURL(blob);
+
+      // Create a hidden <a> element to trigger the download
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `invoice-${id}.pdf`); // Set filename
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Download failed:", error);
+      toast.error("Failed to download invoice. Please try again.");
+    } finally {
+      setDownloadingId(null); // Stop loading spinner
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "paid":
@@ -65,6 +89,10 @@ const AllReservation = () => {
         return <span className="text-gray-500">{status}</span>;
     }
   };
+
+  if (isLoading) {
+    return <FullScreenLoader />;
+  }
 
   return (
     <div className="w-full min-h-screen bg-slate-50 p-6 md:p-10 font-sans">
@@ -125,7 +153,7 @@ const AllReservation = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-sm">
-                {reservations?.map((res) => (
+                {reservations?.map((res: any) => (
                   <tr
                     key={res._id}
                     className="hover:bg-slate-50/80 transition-colors group"
@@ -135,7 +163,7 @@ const AllReservation = () => {
                       <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-2 text-slate-700 font-medium">
                           <Mail size={14} className="text-slate-400" />
-                          {res.user.email}
+                          {res.user?.email}
                         </div>
                         <div className="flex items-center gap-2 text-slate-500 text-xs">
                           <Phone size={14} className="text-slate-400" />
@@ -177,12 +205,21 @@ const AllReservation = () => {
 
                     {/* Actions */}
                     <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div>
                         <button
-                          className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                          onClick={() => handleDownloadInvoice(res._id)}
+                          disabled={downloadingId === res._id}
+                          className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors disabled:cursor-not-allowed"
                           title="Download the invoice"
                         >
-                          <Download size={18} />
+                          {downloadingId === res._id ? (
+                            <Loader2
+                              size={18}
+                              className="animate-spin text-indigo-600"
+                            />
+                          ) : (
+                            <Download size={18} />
+                          )}
                         </button>
                       </div>
                     </td>
@@ -194,7 +231,7 @@ const AllReservation = () => {
 
           {/* Pagination (Footer) */}
           <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-            <span>Showing 4 of 128 entries</span>
+            <span>Showing {reservations.length} entries</span>
             <div className="flex gap-2">
               <Button
                 variant="outline"
