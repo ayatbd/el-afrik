@@ -13,11 +13,9 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
+    "plugins": [{
+      "name": "next"
+    }],
     "paths": {
       "@/*": ["./src/*"]
     }
@@ -28,7 +26,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
-    "**/*.mts"
+    "**/*.mts", "src/redux/api/qrApi.tss"
   ],
   "exclude": ["node_modules"]
 }
