@@ -93,6 +93,9 @@ export default function OrdersPage() {
               <TableHead className="text-gray-900 font-medium text-base py-5">
                 Delivery Received By
               </TableHead>
+              <TableHead className="text-gray-900 font-medium text-base py-5">
+                Status
+              </TableHead>
               <TableHead className="text-gray-900 font-medium text-base py-5 text-right">
                 Action
               </TableHead>
@@ -177,18 +180,21 @@ export default function OrdersPage() {
                   </div>
                 </TableCell>
 
-                <TableCell className="py-6 text-right align-middle space-x-2">
-                  <Button
-                    className={`px-3 py-0.5 text-sm font-normal shadow-none hover:opacity-90 transition-opacity ${
+                <TableCell className="py-6 text-gray-700 font-normal align-middle">
+                  <button
+                    className={`px-3 py-0.5 text-sm font-normal shadow-none rounded-full ${
                       order.orderStatus === "delivered"
-                        ? "bg-[#00C058] hover:bg-[#00a84d] text-white"
-                        : "bg-[#FF4D4F] hover:bg-[#e04143] text-white"
+                        ? "bg-[#00C058] text-white"
+                        : "bg-[#FF4D4F] text-white"
                     }`}
                   >
                     {order.orderStatus}
-                  </Button>
+                  </button>
+                </TableCell>
+
+                <TableCell className="py-6 text-right align-middle space-x-2">
                   <Link href={`/orders/${order._id}`}>
-                    <Button className="px-5 py-1.5 text-sm font-normal shadow-none hover:opacity-90 transition-opacity bg-[#00C058] hover:bg-[#00a84d] text-white">
+                    <Button className="px-5 py-1.5! text-sm font-normal shadow-none hover:opacity-90 transition-opacity bg-[#00C058] hover:bg-[#00a84d] text-white">
                       View Details
                     </Button>
                   </Link>

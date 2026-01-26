@@ -4,11 +4,20 @@ export const productApi = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
         getProducts: builder.query({
             query: (params) => {
-                console.log('getProducts');
+                // console.log('getProducts');
                 return {
                     url: '/product/allProduct',
                     method: 'GET',
                     params: params
+                }
+            },
+            providesTags: ['Product'],
+        }),
+        getSingleProduct: builder.query({
+            query: (id) => {
+                return {
+                    url: `/product/single-product/${id}`,
+                    method: 'GET',
                 }
             },
             providesTags: ['Product'],
@@ -47,4 +56,4 @@ export const productApi = apiSlice.injectEndpoints({
     }),
 });
 
-export const { useGetProductsQuery, useAddProductsMutation, useEditProductMutation, useDeleteProductMutation } = productApi;
+export const { useGetProductsQuery, useGetSingleProductQuery, useAddProductsMutation, useEditProductMutation, useDeleteProductMutation } = productApi;

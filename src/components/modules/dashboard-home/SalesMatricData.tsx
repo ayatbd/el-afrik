@@ -27,7 +27,7 @@ const SalesMatricData = () => {
   const chartData = response?.data?.earningGraphData || [];
 
   // 4. Generate a list of years for the dropdown (e.g., last 5 years)
-  const years = Array.from({ length: 7 }, (_, i) => currentYear - i + 6); // [2027, 2026, 2025...]
+  const years = Array.from({ length: 10 }, (_, i) => currentYear - i + 6); // [2027, 2026, 2025...]
 
   if (isLoading) {
     return (

@@ -9,6 +9,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Loader2,
+  Eye,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
@@ -410,7 +411,10 @@ export default function ManageProductsPage() {
                   </TableCell>
 
                   <TableCell className="py-4">
-                    <div className="flex items-center justify-center gap-4">
+                    <div className="flex items-center justify-center gap-2">
+                      <Link href={`/product-management/${product._id}`}>
+                        <Eye className="h-4 w-4" />
+                      </Link>
                       <EditProductModal product={product} />
                       <button
                         onClick={() => handleDelete(product._id)}

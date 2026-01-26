@@ -9,9 +9,6 @@ import {
   Phone,
   Mail,
   CreditCard,
-  Printer,
-  XCircle,
-  CheckCircle,
   Package,
   Award,
 } from "lucide-react";

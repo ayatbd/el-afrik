@@ -7,11 +7,13 @@ import { useGetDashboardDataQuery } from "@/redux/api/dashboardDataApi";
 import { FullScreenLoader } from "@/app/loading";
 
 export default function Main() {
+  const currentYear = new Date().getFullYear();
   const { data: dashboardStats, isLoading } =
-    useGetDashboardDataQuery(undefined);
+    useGetDashboardDataQuery(currentYear);
   const lifetimeSummary = dashboardStats?.data?.lifetimeSummary || {};
-  const totalUsers = dashboardStats?.data?.lifetimeSummary || {};
-  console.log(lifetimeSummary);
+  const yearlySummary = dashboardStats?.data?.yearlySummary || {};
+  // console.log(dashboardStats);
+  // console.log(yearlySummary);
 
   if (isLoading) return <FullScreenLoader />;
   const topStats = [
@@ -23,37 +25,49 @@ export default function Main() {
       value: lifetimeSummary?.totalEarnings?.toFixed(2),
     },
   ];
+  const bottomStats = [
+    { label: "Year", value: yearlySummary?.year || "0" },
+    { label: "Total Users", value: yearlySummary?.totalUsersInYear },
+    { label: "Total Sales", value: yearlySummary?.totalSalesInYear },
+    { label: "Total Earnings", value: yearlySummary?.totalEarningsInYear },
+  ];
   return (
     <div className="p-6 bg-gray-50 min-h-screen space-y-6 w-full">
       {/* lifetimeSummary */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
-        {topStats?.map((stat, idx) => (
-          <Card key={idx} className="shadow-sm border-gray-100">
-            <CardContent className="flex flex-col items-center justify-center py-6 text-center">
-              <span className="text-gray-500 text-sm font-medium mb-2">
-                {stat.label}
-              </span>
-              <span className="text-3xl font-bold text-gray-800">
-                {stat.value}
-              </span>
-            </CardContent>
-          </Card>
-        ))}
+      <div>
+        <h2 className="font-semibold text-gray-700 mb-4">Lifetime Summary</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
+          {topStats?.map((stat, idx) => (
+            <Card key={idx} className="shadow-sm border-gray-100">
+              <CardContent className="flex flex-col items-center justify-center py-6 text-center">
+                <span className="text-gray-500 text-sm font-medium mb-2">
+                  {stat.label}
+                </span>
+                <span className="text-3xl font-bold text-gray-800">
+                  {stat.value}
+                </span>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
       {/* lifetimeSummary */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
-        {topStats?.map((stat, idx) => (
-          <Card key={idx} className="shadow-sm border-gray-100">
-            <CardContent className="flex flex-col items-center justify-center py-6 text-center">
-              <span className="text-gray-500 text-sm font-medium mb-2">
-                {stat.label}
-              </span>
-              <span className="text-3xl font-bold text-gray-800">
-                {stat.value}
-              </span>
-            </CardContent>
-          </Card>
-        ))}
+      <div>
+        <h2 className="font-semibold text-gray-700 mb-4">Yearly Summary</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
+          {bottomStats?.map((stat, idx) => (
+            <Card key={idx} className="shadow-sm border-gray-100">
+              <CardContent className="flex flex-col items-center justify-center py-6 text-center">
+                <span className="text-gray-500 text-sm font-medium mb-2">
+                  {stat.label}
+                </span>
+                <span className="text-3xl font-bold text-gray-800">
+                  {stat.value}
+                </span>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
       {/* <UserOverview /> */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
