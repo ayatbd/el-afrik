@@ -25,4 +25,4 @@ export const adsApi = apiSlice.injectEndpoints({
     }),
 })
 
-export const { useGetAdsQuery, useDeleteAdMutation } = adsApi
+export const { useGetAdsQuery, useDeleteAdMutation, useCreateAdMutation } = adsApi

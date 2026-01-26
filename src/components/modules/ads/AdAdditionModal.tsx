@@ -8,45 +8,39 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { toast } from "react-toastify"; // Ensure you have the ToastContainer in your layout
+import { toast } from "react-toastify";
 import { ChangeEvent, useEffect, useState } from "react";
-import { useAddCategoryMutation } from "@/redux/api/categoriesApi";
 import Image from "next/image";
+import { useCreateAdMutation } from "@/redux/api/adsApi";
 
-export default function AddCategoryModal() {
-  const [open, setOpen] = useState(false); // Control modal visibility
-  const [categoryName, setCategoryName] = useState("");
-  const [imageFiles, setImageFiles] = useState<File[]>([]); // Store actual files
-  const [previews, setPreviews] = useState<string[]>([]); // Store preview URLs
+// CHANGE 1: Import the correct hook
 
-  const [addCategory, { isLoading }] = useAddCategoryMutation();
+export default function AdAdditionModal() {
+  const [open, setOpen] = useState(false);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
 
-  // Cleanup Object URLs to avoid memory leaks
+  // CHANGE 2: Use the Ads mutation
+  const [createAd, { isLoading }] = useCreateAdMutation();
+
   useEffect(() => {
     return () => {
       previews.forEach((url) => URL.revokeObjectURL(url));
     };
   }, [previews]);
 
-  // Handle File Selection
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
       const newFiles = Array.from(files);
-
-      // 1. Update Files State
       setImageFiles((prev) => [...prev, ...newFiles]);
-
-      // 2. Update Previews State
       const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
       setPreviews((prev) => [...prev, ...newPreviews]);
     }
   };
 
-  // Remove Image
   const removeImage = (indexToRemove: number) => {
     setImageFiles((prev) => prev.filter((_, index) => index !== indexToRemove));
     setPreviews((prev) => prev.filter((_, index) => index !== indexToRemove));
@@ -54,44 +48,34 @@ export default function AddCategoryModal() {
 
   const handleClose = () => {
     setOpen(false);
-    // Reset form on close
     setTimeout(() => {
-      setCategoryName("");
       setImageFiles([]);
       setPreviews([]);
     }, 300);
   };
 
   const handleSubmit = async () => {
-    // 1. Validation
-    if (!categoryName.trim()) {
-      toast.error("Category name is required");
-      return;
-    }
     if (imageFiles.length === 0) {
-      toast.error("Please upload a category image");
+      toast.error("Please upload an ad image");
       return;
     }
 
     try {
       const formData = new FormData();
 
-      // 2. Append Body (JSON)
-      const bodyData = {
-        categoryName,
-      };
-      formData.append("body", JSON.stringify(bodyData));
-
-      // 3. Append Image(s)
+      // Postman screenshot shows key is "image".
+      // If backend only accepts ONE image, ensure you only send one.
+      // If it accepts multiple, this loop is fine.
       imageFiles.forEach((file) => {
         formData.append("image", file);
       });
 
-      // 4. API Call
-      const res = await addCategory(formData).unwrap();
+      // CHANGE 3: Call the correct function
+      const res = await createAd(formData).unwrap();
 
+      // Check for success based on your Postman response structure
       if (res.success) {
-        toast.success("Category added successfully!", {
+        toast.success("Ad posted successfully!", {
           position: "top-center",
           autoClose: 2000,
         });
@@ -99,7 +83,7 @@ export default function AddCategoryModal() {
       }
     } catch (error: any) {
       console.error(error);
-      const errMsg = error?.data?.message || "Failed to add category";
+      const errMsg = error?.data?.message || "Failed to post ad";
       toast.error(errMsg, { position: "top-center" });
     }
   };
@@ -107,30 +91,30 @@ export default function AddCategoryModal() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-[#00B25D] hover:bg-[#009e52] cursor-pointer">
-          + Create New Ad
+        <Button className="cursor-pointer bg-[#00B25D] hover:bg-[#009e52] text-white px-6 h-11">
+          <Plus className="h-4 w-4 mr-2" />
+          Add an Ad
         </Button>
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-125 bg-white p-6 md:p-8 gap-6">
         <DialogHeader className="mb-2">
           <DialogTitle className="text-xl font-semibold text-gray-800">
-            Add Category
+            Create Advertisement
           </DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-5">
-          {/* Image Upload Section */}
           <div className="space-y-3">
             <Label className="text-gray-500 font-normal">
-              Category Image <span className="text-red-500">*</span>
+              Ad Image <span className="text-red-500">*</span>
             </Label>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {/* Upload Box */}
               <label
-                htmlFor="categoryImageUpload"
+                htmlFor="adImageUpload"
                 className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50/50 hover:bg-gray-50 transition-colors cursor-pointer"
               >
+                {/* SVG Icon */}
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-12 w-12 text-gray-500 mb-3"
@@ -155,17 +139,14 @@ export default function AddCategoryModal() {
                 </p>
 
                 <input
-                  id="categoryImageUpload"
+                  id="adImageUpload"
                   type="file"
                   accept="image/*"
                   className="hidden"
                   onChange={handleImageChange}
-                  // Removed 'multiple' if you only want 1 image per category,
-                  // but kept logic compatible if you want multiple.
                 />
               </label>
 
-              {/* Previews */}
               {previews.map((img, index) => (
                 <div
                   key={index}
@@ -177,6 +158,7 @@ export default function AddCategoryModal() {
                     src={img}
                     alt={`Preview ${index}`}
                     className="h-full w-full object-cover"
+                    unoptimized // Add this if testing with local blobs to avoid next/image errors
                   />
                   <button
                     type="button"
@@ -189,20 +171,6 @@ export default function AddCategoryModal() {
               ))}
             </div>
           </div>
-
-          {/* Name Input Section */}
-          <div className="space-y-3">
-            <Label htmlFor="categoryName" className="text-gray-500 font-normal">
-              Category Name <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="categoryName"
-              value={categoryName}
-              onChange={(e) => setCategoryName(e.target.value)}
-              placeholder="e.g. Foods, Drinks"
-              className="h-12 border-gray-200 bg-white placeholder:text-gray-400 focus-visible:ring-[#4BD37B]"
-            />
-          </div>
         </div>
 
         <div className="flex justify-center mt-4">
@@ -214,7 +182,7 @@ export default function AddCategoryModal() {
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Adding...
+                Posting...
               </>
             ) : (
               "Submit"

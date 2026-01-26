@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { FullScreenLoader } from "@/app/loading";
 
 // Shadcn & UI Components
@@ -19,8 +18,9 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Tag, AlertCircle, Trash2 } from "lucide-react";
 import { toast } from "react-toastify";
 import { useDeleteAdMutation, useGetAdsQuery } from "@/redux/api/adsApi";
+import AdAdditionModal from "@/components/modules/ads/AdAdditionModal";
 
-const SpecialPromoPage = () => {
+const AllAdsPage = () => {
   const { data: response, isLoading, isError } = useGetAdsQuery(undefined);
   const allAds = response?.data || [];
   //   console.log(allAds);
@@ -30,11 +30,11 @@ const SpecialPromoPage = () => {
   const handleDelete = async (id: string) => {
     try {
       await deleteAd(id).unwrap();
-      toast.success("Promo deleted successfully!");
+      toast.success("Ad deleted successfully!");
     } catch (error: unknown) {
       const errorMessage =
         (((error as Record<string, unknown>)?.data as Record<string, unknown>)
-          ?.message as string | undefined) || "Failed to delete Promo";
+          ?.message as string | undefined) || "Failed to delete Ad";
       toast.error(errorMessage);
     }
   };
@@ -56,17 +56,11 @@ const SpecialPromoPage = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-3xl font-bold tracking-tight text-gray-900">
-            Promo Campaigns
+            Ads Management
           </h2>
-          <p className="text-muted-foreground mt-1">
-            Manage your special discounts and product offers.
-          </p>
+          <p className="text-muted-foreground mt-1">Manage your ads here.</p>
         </div>
-        <Link href="/add-promo" className="w-full md:w-auto">
-          <Button className="bg-[#00B25D] hover:bg-[#009e52] cursor-pointer">
-            + Create New Promo
-          </Button>
-        </Link>
+        <AdAdditionModal />
       </div>
 
       {/* Main Table Card */}
@@ -125,7 +119,8 @@ const SpecialPromoPage = () => {
                     {/* Product Name */}
                     <TableCell>
                       <span className="font-semibold text-gray-900 line-clamp-1">
-                        {singleAd?.createdAt}
+                        {new Date(singleAd?.createdAt).toLocaleDateString()}
+                        {/* {singleAd?.createdAt} */}
                       </span>
                     </TableCell>
 
@@ -166,4 +161,4 @@ const SpecialPromoPage = () => {
   );
 };
 
-export default SpecialPromoPage;
+export default AllAdsPage;
