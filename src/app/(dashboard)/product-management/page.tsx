@@ -112,6 +112,7 @@ export default function ManageProductsPage() {
   // --- States ---
   const [name, setName] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [mounted, setMounted] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -129,7 +130,7 @@ export default function ManageProductsPage() {
     limit: 10,
     name: name,
     category: categoryFilter !== "all" ? categoryFilter : "",
-    // name: "",
+    status: statusFilter !== "all" ? statusFilter : "",
   };
 
   const {
@@ -168,6 +169,11 @@ export default function ManageProductsPage() {
 
   const handleCategoryChange = (value: string) => {
     setCategoryFilter(value);
+    setCurrentPage(1);
+  };
+
+  const handleStatusChange = (value: string) => {
+    setStatusFilter(value);
     setCurrentPage(1);
   };
 
@@ -263,18 +269,30 @@ export default function ManageProductsPage() {
             />
           </div>
 
-          {/* Filter */}
+          {/* Category Filter */}
           <Select value={categoryFilter} onValueChange={handleCategoryChange}>
             <SelectTrigger className="w-45 h-11 border-gray-300 bg-white text-gray-500">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Categories</SelectItem>
-              {categories?.map((category: Category) => (
+              {categories?.map((category: any) => (
                 <SelectItem key={category._id} value={category._id}>
                   {category.categoryName}
                 </SelectItem>
               ))}
+            </SelectContent>
+          </Select>
+
+          {/* Stock Filter */}
+          <Select value={statusFilter} onValueChange={handleStatusChange}>
+            <SelectTrigger className="w-45 h-11 border-gray-300 bg-white text-gray-500">
+              <SelectValue placeholder="Select Stock" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Stock</SelectItem>
+              <SelectItem value="in_stock">In Stock</SelectItem>
+              <SelectItem value="out_of_stock">Out of Stock</SelectItem>
             </SelectContent>
           </Select>
         </div>
