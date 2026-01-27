@@ -150,7 +150,7 @@ const SpecialPromoPage = () => {
 
                 return (
                   <TableRow
-                    key={promo.id}
+                    key={promo._id}
                     className="group border-b border-gray-100 hover:bg-blue-50/30 transition-all duration-200"
                   >
                     {/* Product Info */}

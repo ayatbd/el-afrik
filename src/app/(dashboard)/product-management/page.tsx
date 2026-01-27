@@ -38,6 +38,7 @@ import {
   useDeleteProductMutation,
   useGetProductsQuery,
 } from "@/redux/api/productApi";
+import { useGetCategoriesQuery } from "@/redux/api/categoriesApi";
 
 // --- TYPES BASED ON YOUR API RESPONSE ---
 
@@ -53,6 +54,8 @@ interface Product {
   status: string;
   createdAt: string;
   isDateLate?: boolean;
+  deliveryFee: number;
+  points: number;
 }
 
 interface Meta {
@@ -107,12 +110,16 @@ const formatStatusLabel = (status: string) => {
 
 export default function ManageProductsPage() {
   // --- States ---
-  const [searchTerm, setSearchTerm] = useState("");
+  const [name, setName] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [mounted, setMounted] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [deleteProduct, { isLoading: isDeleting }] = useDeleteProductMutation();
+  const [deleteProduct] = useDeleteProductMutation();
+
+  const { data: response, isLoading: isCategoriesLoading } =
+    useGetCategoriesQuery(undefined);
+  const categories = response?.data?.result || [];
 
   // --- RTK Query ---
   // We pass query params here assuming your backend handles filtering/pagination
@@ -120,8 +127,9 @@ export default function ManageProductsPage() {
   const queryParams = {
     page: currentPage,
     limit: 10,
-    searchTerm: searchTerm,
+    name: name,
     category: categoryFilter !== "all" ? categoryFilter : "",
+    // name: "",
   };
 
   const {
@@ -142,7 +150,7 @@ export default function ManageProductsPage() {
     totalPage: 1,
   };
 
-  console.log(meta);
+  // console.log(meta);
 
   useEffect(() => {
     setMounted(true);
@@ -154,7 +162,7 @@ export default function ManageProductsPage() {
 
   // --- Handlers ---
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
+    setName(e.target.value);
     setCurrentPage(1); // Reset to page 1 when searching
   };
 
@@ -248,8 +256,8 @@ export default function ManageProductsPage() {
           <div className="relative w-full md:w-70">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Search products..."
-              value={searchTerm}
+              placeholder="Product Name"
+              value={name}
               onChange={handleSearchChange}
               className="pl-10 h-11 border-gray-300 bg-white"
             />
@@ -262,11 +270,11 @@ export default function ManageProductsPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Categories</SelectItem>
-              {/* These IDs should ideally come from a Category API */}
-              <SelectItem value="60c72b2f9d1c3f5f5f5c7c10">
-                Furniture
-              </SelectItem>
-              <SelectItem value="foods">Foods</SelectItem>
+              {categories?.map((category: Category) => (
+                <SelectItem key={category._id} value={category._id}>
+                  {category.categoryName}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
