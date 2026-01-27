@@ -6,7 +6,15 @@ export const qrApi = apiSlice.injectEndpoints({
       query: () => "qrcode/all",
       providesTags: ["Qr"],
     }),
+    createQr: builder.mutation({
+      query: (data) => ({
+        url: "/qrcode/generate",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Qr"],
+    })
   }),
 });
 
-export const { useGetQrQuery } = qrApi;
+export const { useGetQrQuery, useCreateQrMutation } = qrApi;

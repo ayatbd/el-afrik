@@ -14,12 +14,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { FaUserCircle } from "react-icons/fa";
 import { GoBlocked } from "react-icons/go";
-import { MdOutlineRestore } from "react-icons/md"; // Icon for unblocking if needed
+import { MdOutlineRestore } from "react-icons/md";
 import Link from "next/link";
 import Swal from "sweetalert2";
 import { useGetUserQuery, useBlockUserMutation } from "@/redux/api/userApi";
 
-// Helper hook for debouncing search input
+// --- 1. Debounce Hook ---
 function useDebounce(value: string, delay: number) {
   const [debouncedValue, setDebouncedValue] = useState(value);
 
@@ -33,37 +33,64 @@ function useDebounce(value: string, delay: number) {
   return debouncedValue;
 }
 
+interface Meta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPage: number;
+}
+
 export default function UserManagementPage() {
+  // --- 2. State Management ---
   const [nameSearch, setNameSearch] = useState("");
   const [emailSearch, setEmailSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
+  const itemsPerPage = 10; // Fixed Limit
 
-  // 1. Debounce Search
-  // const debouncedTerm = useDebounce(searchTerm, 500);
+  // --- 3. Debounce Search Terms ---
+  // This prevents API calls on every keystroke
+  const debouncedName = useDebounce(nameSearch, 500);
+  const debouncedEmail = useDebounce(emailSearch, 500);
 
-  // 2. RTK Query Hooks
+  // --- 4. RTK Query Hooks ---
   const { data, isLoading, isFetching, isError } = useGetUserQuery({
     page: currentPage,
     limit: itemsPerPage,
-    firstName: nameSearch || "",
-    email: emailSearch || "",
+    firstName: debouncedName || "", // Use debounced value
+    email: debouncedEmail || "", // Use debounced value
   });
 
   const [blockUser] = useBlockUserMutation();
 
-  // 3. Extract Data
+  // --- 5. Data Extraction ---
   const users = data?.data?.result || [];
-  const meta = data?.meta || {};
-  const totalDocs = meta.total || 0;
+  const meta: Meta = data?.data?.meta || {
+    page: 1,
+    limit: itemsPerPage,
+    total: 0,
+    totalPage: 1,
+  };
 
-  // 4. Block Handler
+  // Use meta.totalPage directly from backend, fallback to 1
+  const totalPages = meta.totalPage > 0 ? meta.totalPage : 1;
+
+  // --- 6. Handlers ---
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+  };
+
+  const handleNameSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNameSearch(e.target.value);
+    setCurrentPage(1); // Reset to page 1 on filter change
+  };
+
+  const handleEmailSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmailSearch(e.target.value);
+    setCurrentPage(1); // Reset to page 1 on filter change
+  };
+
   const handleBlockToggle = (user: any) => {
-    // 1. Determine current state
     const isBlocked = user.status === "blocked";
-
-    // 2. Determine the intended NEW status
-    // If currently blocked, we want 'active'. If active, we want 'blocked'.
     const newStatus = isBlocked ? "in-progress" : "blocked";
 
     Swal.fire({
@@ -79,10 +106,9 @@ export default function UserManagementPage() {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          // 3. SEND BOTH ID AND DATA
           const res = await blockUser({
             id: user._id || user.id,
-            data: { status: newStatus }, // Payload
+            data: { status: newStatus },
           }).unwrap();
 
           Swal.fire(
@@ -101,23 +127,8 @@ export default function UserManagementPage() {
       }
     });
   };
-  // 5. Pagination Math
-  const totalPages = Math.ceil(totalDocs / itemsPerPage);
 
-  const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) setCurrentPage(page);
-  };
-
-  const handleNameSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNameSearch(e.target.value);
-    setCurrentPage(1);
-  };
-
-  const handleEmailSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmailSearch(e.target.value);
-    setCurrentPage(1);
-  };
-
+  // --- 7. Pagination Logic ---
   const getVisiblePages = () => {
     const pages = [];
     const maxVisible = 5;
@@ -201,6 +212,7 @@ export default function UserManagementPage() {
           </TableHeader>
           <TableBody>
             {isLoading || isFetching ? (
+              // Using itemsPerPage safely here
               Array.from({ length: itemsPerPage }).map((_, idx) => (
                 <TableRow key={idx} className="animate-pulse">
                   <TableCell colSpan={7} className="py-4">
@@ -228,7 +240,6 @@ export default function UserManagementPage() {
                       isBlocked ? "bg-red-50/50 opacity-60 grayscale-[0.5]" : ""
                     }`}
                   >
-                    {/* User Info */}
                     <TableCell className="py-4 pl-4">
                       <div className="flex items-center gap-3">
                         <Avatar className="h-10 w-10 border border-gray-200">
@@ -254,7 +265,6 @@ export default function UserManagementPage() {
                       {user.email}
                     </TableCell>
 
-                    {/* Formatted Date */}
                     <TableCell className="py-4 text-gray-600">
                       {new Date(user.createdAt).toLocaleDateString()}
                     </TableCell>
@@ -265,7 +275,6 @@ export default function UserManagementPage() {
                       </span>
                     </TableCell>
 
-                    {/* Status Badge */}
                     <TableCell className="py-4">
                       <span
                         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize border ${
@@ -278,10 +287,8 @@ export default function UserManagementPage() {
                       </span>
                     </TableCell>
 
-                    {/* Actions */}
                     <TableCell className="py-4">
                       <div className="flex items-center justify-center gap-2">
-                        {/* Details Link - Disabled if blocked (optional) */}
                         <Link
                           href={`/user-management/${user.id || user._id}`}
                           className={`p-1.5 rounded border border-gray-800 bg-gray-900 text-white hover:bg-gray-700 transition-colors ${isBlocked ? "pointer-events-none opacity-50" : ""}`}
@@ -289,7 +296,6 @@ export default function UserManagementPage() {
                           <FaUserCircle className="h-4 w-4" />
                         </Link>
 
-                        {/* Block/Unblock Button */}
                         <button
                           type="button"
                           onClick={() => handleBlockToggle(user)}
@@ -301,9 +307,9 @@ export default function UserManagementPage() {
                           }`}
                         >
                           {isBlocked ? (
-                            <MdOutlineRestore className="h-4 w-4" /> // Restore Icon
+                            <MdOutlineRestore className="h-4 w-4" />
                           ) : (
-                            <GoBlocked className="h-4 w-4" /> // Block Icon
+                            <GoBlocked className="h-4 w-4" />
                           )}
                         </button>
                       </div>
@@ -317,7 +323,7 @@ export default function UserManagementPage() {
                   colSpan={7}
                   className="text-center py-10 text-gray-500"
                 >
-                  No users found matching &quot;{searchTerm}&quot;
+                  No users found matching your search.
                 </TableCell>
               </TableRow>
             )}
@@ -325,32 +331,39 @@ export default function UserManagementPage() {
         </Table>
       </div>
 
-      {/* Pagination (Keep existing code) */}
+      {/* --- 8. Fixed Pagination Rendering --- */}
       {!isLoading && totalPages > 1 && (
         <div className="mt-10 flex items-center justify-center gap-4 text-sm font-medium text-gray-600">
-          {/* ... Pagination Logic remains same ... */}
           <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className="p-2 disabled:opacity-30"
+            className="p-2 rounded hover:bg-gray-100 disabled:opacity-30 disabled:hover:bg-transparent"
           >
-            <ChevronLeft />
+            <ChevronLeft className="h-5 w-5" />
           </button>
-          {getVisiblePages().map((p) => (
-            <button
-              key={p}
-              onClick={() => handlePageChange(p)}
-              className={`h-8 w-8 rounded ${currentPage === p ? "bg-gray-300" : "hover:bg-gray-200"}`}
-            >
-              {p}
-            </button>
-          ))}
+
+          <div className="flex gap-2">
+            {getVisiblePages().map((p) => (
+              <button
+                key={p}
+                onClick={() => handlePageChange(p)}
+                className={`h-8 w-8 rounded flex items-center justify-center transition-colors ${
+                  currentPage === p
+                    ? "bg-black text-white"
+                    : "hover:bg-gray-200 text-gray-700"
+                }`}
+              >
+                {p}
+              </button>
+            ))}
+          </div>
+
           <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="p-2 disabled:opacity-30"
+            className="p-2 rounded hover:bg-gray-100 disabled:opacity-30 disabled:hover:bg-transparent"
           >
-            <ChevronRight />
+            <ChevronRight className="h-5 w-5" />
           </button>
         </div>
       )}

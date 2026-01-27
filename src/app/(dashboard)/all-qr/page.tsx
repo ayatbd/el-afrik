@@ -36,6 +36,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useGetQrQuery } from "@/redux/api/qrApi";
 import { FullScreenLoader } from "@/app/loading";
+import CreateQrModal from "@/components/modules/qr/CreateQrModal";
 
 type QRCode = {
   _id: string;
@@ -106,6 +107,9 @@ const QRCodeTable = () => {
     };
   };
 
+  // 1. State determines if modal is visible
+  const [showModal, setShowModal] = useState(false);
+
   if (isLoading) return <FullScreenLoader />;
 
   return (
@@ -120,9 +124,13 @@ const QRCodeTable = () => {
             Manage generated QR codes and point allocations.
           </p>
         </div>
-        <Button className="bg-[#00B25D] hover:bg-[#009e52] cursor-pointer">
+        <Button
+          onClick={() => setShowModal(true)}
+          className="bg-[#00B25D] hover:bg-[#009e52] cursor-pointer"
+        >
           + Generate QR
         </Button>
+        <CreateQrModal open={showModal} setOpen={setShowModal} />
       </div>
 
       <Card className="border shadow-sm bg-white overflow-hidden">
