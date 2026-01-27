@@ -113,6 +113,7 @@ export default function ManageProductsPage() {
   const [name, setName] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [favoriteFilter, setFavoriteFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [mounted, setMounted] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -131,6 +132,7 @@ export default function ManageProductsPage() {
     name: name,
     category: categoryFilter !== "all" ? categoryFilter : "",
     status: statusFilter !== "all" ? statusFilter : "",
+    isFavourite: favoriteFilter !== "all" ? favoriteFilter : "",
   };
 
   const {
@@ -174,6 +176,11 @@ export default function ManageProductsPage() {
 
   const handleStatusChange = (value: string) => {
     setStatusFilter(value);
+    setCurrentPage(1);
+  };
+
+  const handleFavoriteChange = (value: string) => {
+    setFavoriteFilter(value);
     setCurrentPage(1);
   };
 
@@ -293,6 +300,18 @@ export default function ManageProductsPage() {
               <SelectItem value="all">All Stock</SelectItem>
               <SelectItem value="in_stock">In Stock</SelectItem>
               <SelectItem value="out_of_stock">Out of Stock</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Favorite Product Filter */}
+          <Select value={favoriteFilter} onValueChange={handleFavoriteChange}>
+            <SelectTrigger className="w-45 h-11 border-gray-300 bg-white text-gray-500">
+              <SelectValue placeholder="Select Favorite" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Stock</SelectItem>
+              <SelectItem value="true">Favorite</SelectItem>
+              <SelectItem value="false">Non Favorite</SelectItem>
             </SelectContent>
           </Select>
         </div>
