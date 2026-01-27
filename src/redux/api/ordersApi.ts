@@ -3,7 +3,13 @@ import { apiSlice } from "./apiSlice";
 export const ordersApi = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
         getOrders: builder.query({
-            query: () => "/order/admin/all",
+            query: (params) => {
+                return {
+                    url: "/order/admin/all",
+                    method: "GET",
+                    params: params,
+                }
+            },
             providesTags: ["Orders"],
         }),
         getSingleOrder: builder.query({
