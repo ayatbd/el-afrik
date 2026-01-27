@@ -34,18 +34,20 @@ function useDebounce(value: string, delay: number) {
 }
 
 export default function UserManagementPage() {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [nameSearch, setNameSearch] = useState("");
+  const [emailSearch, setEmailSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
   // 1. Debounce Search
-  const debouncedTerm = useDebounce(searchTerm, 500);
+  // const debouncedTerm = useDebounce(searchTerm, 500);
 
   // 2. RTK Query Hooks
   const { data, isLoading, isFetching, isError } = useGetUserQuery({
     page: currentPage,
     limit: itemsPerPage,
-    searchTerm: debouncedTerm,
+    firstName: nameSearch || "",
+    email: emailSearch || "",
   });
 
   const [blockUser] = useBlockUserMutation();
@@ -106,8 +108,13 @@ export default function UserManagementPage() {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
+  const handleNameSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNameSearch(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleEmailSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmailSearch(e.target.value);
     setCurrentPage(1);
   };
 
@@ -143,14 +150,25 @@ export default function UserManagementPage() {
           </h1>
         </div>
 
-        <div className="relative w-full md:w-75">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-          <Input
-            value={searchTerm}
-            onChange={handleSearchChange}
-            placeholder="Search users..."
-            className="pl-10 bg-transparent border-gray-800 rounded-md focus-visible:ring-0 focus-visible:border-black placeholder:text-gray-500"
-          />
+        <div className="flex items-center gap-5">
+          <div className="relative w-full md:w-60">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+            <Input
+              value={nameSearch}
+              onChange={handleNameSearchChange}
+              placeholder="Search users by name..."
+              className="pl-10 bg-transparent border-gray-800 rounded-md focus-visible:ring-0 focus-visible:border-black placeholder:text-gray-500"
+            />
+          </div>
+          <div className="relative w-full md:w-60">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+            <Input
+              value={emailSearch}
+              onChange={handleEmailSearchChange}
+              placeholder="Search users by email..."
+              className="pl-10 bg-transparent border-gray-800 rounded-md focus-visible:ring-0 focus-visible:border-black placeholder:text-gray-500"
+            />
+          </div>
         </div>
       </div>
 

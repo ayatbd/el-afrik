@@ -3,10 +3,11 @@ import { apiSlice } from "./apiSlice";
 export const userApi = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
         getUser: builder.query({
-            query: () => {
+            query: (params) => {
                 return {
                     url: "/user/all",
                     method: "GET",
+                    params: params,
                 }
             },
             providesTags: ["User"],
