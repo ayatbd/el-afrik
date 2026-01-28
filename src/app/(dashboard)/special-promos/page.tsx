@@ -15,6 +15,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,20 +34,38 @@ import {
   ShoppingBag,
   AlertCircle,
   Trash2,
+  ChevronLeft,
+  ChevronRight,
+  Filter,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "react-toastify";
 
 const SpecialPromoPage = () => {
+  // --- 1. State for Pagination & Filtering ---
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+  const [filterType, setFilterType] = useState<string>("all"); // 'all', 'holiday', 'weekend', etc.
+
+  // --- 2. API Query with Params ---
+  // Ensure your backend accepts these query parameters
   const {
-    data: specialPromos,
+    data: responseData,
     isLoading,
     isError,
-  } = useGetPromoQuery(undefined);
-  const promoData = specialPromos?.data?.result || [];
+  } = useGetPromoQuery({
+    page: currentPage,
+    limit: itemsPerPage,
+    type: filterType !== "all" ? filterType : undefined,
+  });
+
+  // Safe Data Extraction
+  const promoData = responseData?.data?.result || [];
+  const meta = responseData?.data?.meta || { totalPage: 1, total: 0 };
 
   const [deletePromo] = useDeletePromoMutation();
 
+  // --- Handlers ---
   const handleDelete = async (id: string) => {
     try {
       await deletePromo(id).unwrap();
@@ -51,6 +76,17 @@ const SpecialPromoPage = () => {
           ?.message as string | undefined) || "Failed to delete Promo";
       toast.error(errorMessage);
     }
+  };
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= meta.totalPage) {
+      setCurrentPage(newPage);
+    }
+  };
+
+  const handleFilterChange = (value: string) => {
+    setFilterType(value);
+    setCurrentPage(1); // Reset to page 1 when filter changes
   };
 
   // State for the "Copy to Clipboard" feedback
@@ -77,6 +113,31 @@ const SpecialPromoPage = () => {
         };
   };
 
+  // --- Pagination Logic (Visible Pages) ---
+  const getVisiblePages = () => {
+    const total = meta.totalPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    let start = Math.max(1, currentPage - 2);
+    let end = Math.min(total, currentPage + 2);
+
+    if (currentPage <= 3) {
+      end = 5;
+      start = 1;
+    } else if (currentPage >= total - 2) {
+      start = total - 4;
+      end = total;
+    }
+
+    const pages = [];
+    for (let i = start; i <= end; i++) pages.push(i);
+    return pages;
+  };
+
   if (isLoading) return <FullScreenLoader />;
 
   if (isError) {
@@ -89,7 +150,7 @@ const SpecialPromoPage = () => {
   }
 
   return (
-    <div className="container mx-auto py-10 px-4 md:px-8 space-y-8">
+    <div className="container mx-auto py-10 px-4 md:px-8 space-y-8 min-h-screen bg-gray-50/30">
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -101,7 +162,7 @@ const SpecialPromoPage = () => {
           </p>
         </div>
         <Link href="/add-promo" className="w-full md:w-auto">
-          <Button className="bg-[#00B25D] hover:bg-[#009e52] cursor-pointer">
+          <Button className="bg-[#00B25D] hover:bg-[#009e52] cursor-pointer w-full md:w-auto">
             + Create New Promo
           </Button>
         </Link>
@@ -109,26 +170,45 @@ const SpecialPromoPage = () => {
 
       {/* Main Table Card */}
       <Card className="border shadow-sm overflow-hidden bg-white">
-        <CardHeader className="bg-gray-50/50 border-b py-4">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-base font-semibold text-gray-700">
+        <CardHeader className="bg-white border-b py-4 px-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <CardTitle className="text-base font-semibold text-gray-700 flex items-center gap-2">
               All Active & Past Promos
+              <Badge
+                variant="secondary"
+                className="bg-gray-100 text-gray-600 hover:bg-gray-100"
+              >
+                {meta.total} Total
+              </Badge>
             </CardTitle>
-            <Badge variant="outline" className="bg-white">
-              Total: {promoData.length}
-            </Badge>
+
+            {/* --- Filter Dropdown --- */}
+            <div className="flex items-center gap-2">
+              <Filter size={16} className="text-gray-400" />
+              <Select value={filterType} onValueChange={handleFilterChange}>
+                <SelectTrigger className="w-45 h-9 text-xs">
+                  <SelectValue placeholder="Filter by Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="holiday">Holiday Special</SelectItem>
+                  <SelectItem value="weekend">Weekend Deal</SelectItem>
+                  <SelectItem value="limited">Limited</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </CardHeader>
 
         <CardContent className="p-0">
           <Table>
             <TableHeader>
-              <TableRow className="hover:bg-transparent bg-gray-50/30">
-                <TableHead className="w-[300px] py-4 pl-6 text-xs uppercase tracking-wider font-semibold text-gray-500">
+              <TableRow className="hover:bg-transparent bg-gray-50/50">
+                <TableHead className="w-75 py-4 pl-6 text-xs uppercase tracking-wider font-semibold text-gray-500">
                   Product Details
                 </TableHead>
                 <TableHead className="text-xs uppercase tracking-wider font-semibold text-gray-500">
-                  Product Name
+                  Type
                 </TableHead>
                 <TableHead className="text-xs uppercase tracking-wider font-semibold text-gray-500">
                   Promo Code
@@ -145,137 +225,194 @@ const SpecialPromoPage = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {promoData?.map((promo: any) => {
-                const status = getStatus(promo.validity);
+              {promoData.length > 0 ? (
+                promoData.map((promo: any) => {
+                  const status = getStatus(promo.validity);
 
-                return (
-                  <TableRow
-                    key={promo._id}
-                    className="group border-b border-gray-100 hover:bg-blue-50/30 transition-all duration-200"
-                  >
-                    {/* Product Info */}
-                    <TableCell className="pl-6 py-4">
-                      <div className="flex items-center gap-4">
-                        <div className="relative h-14 w-14 rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white group-hover:shadow-md transition-shadow">
-                          <Avatar className="h-full w-full rounded-none">
-                            <AvatarImage
-                              src={promo?.product?.images?.[0]}
-                              className="object-cover"
-                            />
-                            <AvatarFallback className="bg-gray-50 text-gray-300">
-                              <ShoppingBag size={20} />
-                            </AvatarFallback>
-                          </Avatar>
+                  return (
+                    <TableRow
+                      key={promo._id}
+                      className="group border-b border-gray-100 hover:bg-gray-50/50 transition-all duration-200"
+                    >
+                      {/* Product Info */}
+                      <TableCell className="pl-6 py-4">
+                        <div className="flex items-center gap-4">
+                          <div className="relative h-12 w-12 rounded-lg overflow-hidden border border-gray-200 bg-white">
+                            <Avatar className="h-full w-full rounded-none">
+                              <AvatarImage
+                                src={promo?.product?.images?.[0]}
+                                className="object-cover"
+                              />
+                              <AvatarFallback className="bg-gray-50 text-gray-300">
+                                <ShoppingBag size={18} />
+                              </AvatarFallback>
+                            </Avatar>
+                          </div>
+                          <div className="flex flex-col gap-0.5">
+                            <span className="font-medium text-gray-900 line-clamp-1 text-sm">
+                              {promo?.product?.productName || "Product Name"}
+                            </span>
+                            <span className="text-[10px] text-gray-500 flex items-center gap-1">
+                              <CalendarDays size={10} />
+                              {format(
+                                parseISO(promo.createdAt),
+                                "MMM dd, yyyy",
+                              )}
+                            </span>
+                          </div>
                         </div>
-                        <div className="flex flex-col gap-0.5">
-                          <span className="font-semibold text-gray-900 line-clamp-1">
-                            {promo?.product?.productName}
-                          </span>
-                          <span className="text-xs text-gray-500 flex items-center gap-1">
-                            <CalendarDays size={12} />
-                            Created:{" "}
-                            {format(parseISO(promo.createdAt), "MMM dd, yyyy")}
-                          </span>
-                        </div>
-                      </div>
-                    </TableCell>
+                      </TableCell>
 
-                    {/* Product Name */}
-                    <TableCell>
-                      <span className="font-semibold text-gray-900 line-clamp-1">
-                        {promo?.product?.name}
-                      </span>
-                    </TableCell>
-
-                    {/* Promo Code with Copy Function */}
-                    <TableCell>
-                      <div
-                        onClick={() =>
-                          handleCopy(promo.specialPromoCode, promo.id)
-                        }
-                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-dashed border-gray-300 bg-gray-50 w-fit cursor-pointer hover:border-blue-300 hover:bg-blue-50 transition-colors group/code"
-                      >
-                        <Tag
-                          size={14}
-                          className="text-gray-400 group-hover/code:text-blue-500"
-                        />
-                        <span className="font-mono text-sm font-medium text-gray-700 group-hover/code:text-blue-700">
-                          {promo.specialPromoCode}
-                        </span>
-                        {copiedId === promo.id ? (
-                          <Check size={14} className="text-green-500" />
-                        ) : (
-                          <Copy
-                            size={14}
-                            className="text-gray-300 group-hover/code:text-blue-400"
-                          />
-                        )}
-                      </div>
-                    </TableCell>
-
-                    {/* Discount */}
-                    <TableCell>
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-lg font-bold text-gray-900">
-                          {/* Add currency symbol if needed */}
-                          {promo.discountAmount}
-                        </span>
-                        <span className="text-xs font-medium text-muted-foreground uppercase">
-                          OFF
-                        </span>
-                      </div>
-                    </TableCell>
-
-                    {/* Status / Validity */}
-                    <TableCell>
-                      <div className="flex flex-col items-start gap-1">
+                      {/* Type Badge (Added column for context) */}
+                      <TableCell>
                         <Badge
                           variant="outline"
-                          className={cn(
-                            "font-medium px-2.5 py-0.5 shadow-sm",
-                            status.color,
-                          )}
+                          className="capitalize font-normal text-xs bg-gray-50 text-gray-600 border-gray-200"
                         >
-                          {status.label}
+                          {promo.type || "General"}
                         </Badge>
-                        <span className="text-[11px] text-gray-400 font-medium ml-1">
-                          Ends {format(parseISO(promo.validity), "MMM dd")}
-                        </span>
-                      </div>
-                    </TableCell>
+                      </TableCell>
 
-                    {/* Action */}
-                    <TableCell className="text-right pr-6">
-                      <Button
-                        onClick={() => handleDelete(promo._id)}
-                        variant="ghost"
-                        size="sm"
-                        className="text-gray-500 hover:text-blue-600 hover:bg-blue-50 group-hover:bg-white group-hover:shadow-sm border border-transparent group-hover:border-gray-100 transition-all cursor-pointer"
-                      >
-                        <Trash2 size={16} className="text-red-400" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+                      {/* Promo Code with Copy Function */}
+                      <TableCell>
+                        <div
+                          onClick={() =>
+                            handleCopy(promo.specialPromoCode, promo.id)
+                          }
+                          className="flex items-center gap-2 px-2.5 py-1 rounded-md border border-dashed border-gray-300 bg-white w-fit cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors group/code"
+                        >
+                          <Tag
+                            size={12}
+                            className="text-gray-400 group-hover/code:text-blue-500"
+                          />
+                          <span className="font-mono text-xs font-semibold text-gray-700 group-hover/code:text-blue-700">
+                            {promo.specialPromoCode}
+                          </span>
+                          {copiedId === promo.id ? (
+                            <Check size={12} className="text-green-500" />
+                          ) : (
+                            <Copy
+                              size={12}
+                              className="text-gray-300 group-hover/code:text-blue-400"
+                            />
+                          )}
+                        </div>
+                      </TableCell>
+
+                      {/* Discount */}
+                      <TableCell>
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-sm font-bold text-gray-900">
+                            {promo.discountAmount}
+                          </span>
+                          <span className="text-[10px] font-medium text-muted-foreground uppercase">
+                            OFF
+                          </span>
+                        </div>
+                      </TableCell>
+
+                      {/* Status / Validity */}
+                      <TableCell>
+                        <div className="flex flex-col items-start gap-1">
+                          <Badge
+                            variant="outline"
+                            className={cn(
+                              "font-medium px-2 py-0 text-[10px] shadow-none border",
+                              status.color,
+                            )}
+                          >
+                            {status.label}
+                          </Badge>
+                          <span className="text-[10px] text-gray-400 font-medium ml-0.5">
+                            Ends {format(parseISO(promo.validity), "MMM dd")}
+                          </span>
+                        </div>
+                      </TableCell>
+
+                      {/* Action */}
+                      <TableCell className="text-right pr-6">
+                        <Button
+                          onClick={() => handleDelete(promo._id)}
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all cursor-pointer rounded-full"
+                        >
+                          <Trash2 size={14} />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              ) : (
+                // Empty State
+                <TableRow>
+                  <TableCell colSpan={6} className="h-64 text-center">
+                    <div className="flex flex-col items-center justify-center">
+                      <div className="bg-gray-50 h-16 w-16 rounded-full flex items-center justify-center mb-3">
+                        <Tag className="text-gray-300" size={32} />
+                      </div>
+                      <h3 className="text-sm font-semibold text-gray-900">
+                        No Promos Found
+                      </h3>
+                      <p className="text-xs text-gray-500 max-w-xs mt-1">
+                        {filterType !== "all"
+                          ? `No promos found for "${filterType}". Try changing the filter.`
+                          : "You haven't created any special promotion campaigns yet."}
+                      </p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
-
-          {/* Empty State */}
-          {promoData.length === 0 && (
-            <div className="py-20 text-center">
-              <div className="bg-gray-50 h-16 w-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Tag className="text-gray-300" size={32} />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900">
-                No Promos Found
-              </h3>
-              <p className="text-gray-500 max-w-sm mx-auto mt-1">
-                You haven&apos;t created any special promotion campaigns yet.
-              </p>
-            </div>
-          )}
         </CardContent>
+
+        {/* --- Pagination Footer --- */}
+        {meta.totalPage > 1 && (
+          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50/50">
+            <span className="text-xs text-gray-500 font-medium">
+              Page {currentPage} of {meta.totalPage}
+            </span>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 bg-white"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+
+              <div className="flex gap-1">
+                {getVisiblePages().map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => handlePageChange(page)}
+                    className={`h-8 w-8 rounded-md text-xs font-medium transition-colors border ${
+                      page === currentPage
+                        ? "bg-black text-white border-black"
+                        : "bg-white text-gray-600 border-gray-200 hover:bg-gray-100"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+              </div>
+
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 bg-white"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === meta.totalPage}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
       </Card>
     </div>
   );

@@ -88,7 +88,7 @@ export default function Sidebar() {
       icon: <QrCodeIcon size={20} />,
     },
     {
-      name: "Reservations",
+      name: "Catering Reservations",
       href: "/all-reservation",
       icon: <LifeBuoy size={20} />,
     },

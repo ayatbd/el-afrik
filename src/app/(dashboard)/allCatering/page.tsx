@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   Table,
@@ -26,6 +26,7 @@ import {
   Loader2,
   ChevronLeft,
   ChevronRight,
+  Search,
 } from "lucide-react";
 import {
   useDeleteCateringMutation,
@@ -33,6 +34,7 @@ import {
 } from "@/redux/api/cateringApi";
 import EditCateringModal from "@/components/modules/catering/EditCateringModal";
 import Swal from "sweetalert2";
+import { Input } from "@/components/ui/input";
 
 interface CateringItem {
   _id: string;
@@ -45,17 +47,34 @@ interface CateringItem {
   image?: string;
 }
 
+function useDebounce(value: string, delay: number) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+  return debouncedValue;
+}
+
 const CateringTable = () => {
   // 1. Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(10); // Items per page
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // 2. Fetch Data with Pagination Params
+  const debouncedSearch = useDebounce(searchTerm, 500);
+
   const {
     data: responseData,
     isLoading,
     isError,
-  } = useGetAllCateringQuery({ page: currentPage, limit });
+  } = useGetAllCateringQuery({
+    page: currentPage,
+    limit,
+    search: debouncedSearch,
+  });
 
   // 3. Safe Access to Data & Meta
   const caterings: CateringItem[] = responseData?.data?.result || [];
@@ -131,13 +150,27 @@ const CateringTable = () => {
     <div className="container mx-auto py-10 px-4 min-h-screen bg-gray-50/30">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight text-gray-900">
-            Catering List
-          </h2>
-          <p className="text-muted-foreground text-sm mt-1">
-            Manage your event packages and menus.
-          </p>
+        <div className="flex items-center gap-12">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight text-gray-900">
+              Catering List
+            </h2>
+            <p className="text-muted-foreground text-sm mt-1">
+              Manage your event packages and menus.
+            </p>
+          </div>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+            <Input
+              placeholder="Search 'birthday'"
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="pl-9"
+            />
+          </div>
         </div>
         <Link href="/add-catering">
           <Button className="bg-[#00B25D] hover:bg-[#009e52] text-white">
@@ -151,8 +184,8 @@ const CateringTable = () => {
         <Table>
           <TableHeader>
             <TableRow className="bg-gray-50 border-b border-gray-100">
-              <TableHead className="w-[80px] py-4 pl-6">Image</TableHead>
-              <TableHead className="min-w-[200px] py-4">Package Name</TableHead>
+              <TableHead className="w-20 py-4 pl-6">Image</TableHead>
+              <TableHead className="min-w-50 py-4">Package Name</TableHead>
               <TableHead className="py-4">Price / Head</TableHead>
               <TableHead className="py-4">Min. Guests</TableHead>
               <TableHead className="hidden md:table-cell py-4">
@@ -162,8 +195,8 @@ const CateringTable = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {caterings.length > 0 ? (
-              caterings.map((item, index) => (
+            {caterings?.length > 0 ? (
+              caterings.map((item: CateringItem) => (
                 <TableRow
                   key={item._id || item.id}
                   className="hover:bg-gray-50/50 transition-colors border-b border-gray-100 last:border-0"
@@ -185,7 +218,7 @@ const CateringTable = () => {
                       <span className="font-semibold text-gray-900">
                         {item.name}
                       </span>
-                      <span className="text-xs text-muted-foreground line-clamp-1 max-w-[250px]">
+                      <span className="text-xs text-muted-foreground line-clamp-1 max-w-62.5">
                         {item.description}
                       </span>
                     </div>
@@ -210,7 +243,7 @@ const CateringTable = () => {
                   </TableCell>
 
                   {/* Menu */}
-                  <TableCell className="hidden md:table-cell py-4 max-w-[300px]">
+                  <TableCell className="hidden md:table-cell py-4 max-w-75">
                     <div className="flex flex-wrap gap-1">
                       {item.menu?.slice(0, 2).map((m, i) => (
                         <Badge
@@ -243,7 +276,7 @@ const CateringTable = () => {
                           <MoreHorizontal className="h-4 w-4 text-gray-500" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-[160px]">
+                      <DropdownMenuContent align="end" className="w-40">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
                         <DropdownMenuItem asChild>

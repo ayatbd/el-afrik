@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Search,
   Filter,
@@ -22,6 +22,7 @@ import {
 } from "@/redux/api/cateringBookingApi";
 import { FullScreenLoader } from "@/app/loading";
 import { toast } from "sonner"; // Assuming you use sonner or react-hot-toast
+import CateringBookingModal from "@/components/modules/catering-booking/CateringBookingModal";
 
 const AllReservation = () => {
   // 1. Fetch Table Data
@@ -114,9 +115,7 @@ const AllReservation = () => {
             >
               <Filter size={16} className="mr-2" /> Filter
             </Button>
-            <Button className="bg-indigo-600 hover:bg-indigo-700 text-white">
-              <Calendar size={16} className="mr-2" /> Create Booking
-            </Button>
+            <CateringBookingModal />
           </div>
         </div>
 

@@ -4,7 +4,13 @@ import { apiSlice } from "./apiSlice";
 export const promoApi = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
         getPromo: builder.query({
-            query: () => "/promos/all",
+            query: (params) => (
+                {
+                    url: "/promos/all",
+                    method: "GET",
+                    params
+                }
+            ),
             providesTags: ["Promo"],
         }),
         addPromo: builder.mutation({

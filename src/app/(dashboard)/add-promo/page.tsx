@@ -159,9 +159,9 @@ export default function AddProductPage() {
                     <SelectValue placeholder="Select type (e.g. Holiday)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Holiday">Holiday</SelectItem>
-                    <SelectItem value="Weekend">Weekend</SelectItem>
-                    <SelectItem value="Limited">Limited Time</SelectItem>
+                    <SelectItem value="holiday">Holiday</SelectItem>
+                    <SelectItem value="weekend">Weekend</SelectItem>
+                    <SelectItem value="limited">Limited Time</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -237,7 +237,7 @@ export default function AddProductPage() {
                   type="number"
                   value={formData.discountAmount}
                   onChange={handleInputChange}
-                  placeholder="e.g. 20"
+                  placeholder="e.g. 20%"
                   className="h-12 border-gray-200 bg-gray-50/30 focus:ring-1 focus:ring-gray-300"
                 />
               </div>
