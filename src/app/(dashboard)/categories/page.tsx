@@ -42,22 +42,28 @@ type Category = {
 export default function CategoryPage() {
   // --- 1. State for Pagination & Filter ---
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
   const [categoryFilter, setCategoryFilter] = useState("all");
 
-  // --- 2. RTK Query with Parameters ---
-  // Note: To make the filter work server-side, you usually need to pass
-  // the 'categoryFilter' state to this query (e.g., searchTerm: categoryFilter).
+  // --- 2. API Hook ---
   const { data, isLoading, isFetching } = useGetCategoriesQuery({
     page: currentPage,
-    limit: itemsPerPage,
+    limit: 10,
+    // Pass filter to backend (Assuming backend accepts 'searchTerm' or 'categoryName')
+    searchTerm: categoryFilter !== "all" ? categoryFilter : undefined,
   });
+
   const [deleteCategory] = useDeleteCategoryMutation();
 
-  // --- 3. Safe Data Extraction ---
+  // --- 3. Safe Data Extraction (FIXED) ---
   const categories = data?.data?.result || [];
-  const meta = data?.meta || { page: 1, limit: 10, total: 0, totalPage: 1 };
-  const totalPages = meta.totalPage || 1;
+
+  // FIX: Extract meta from 'data.data.meta', not from 'categories'
+  const meta = data?.data?.meta || {
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPage: 1,
+  };
 
   // --- Date Time Logic ---
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
@@ -105,28 +111,38 @@ export default function CategoryPage() {
   };
 
   const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
+    if (page >= 1 && page <= meta.totalPage) {
       setCurrentPage(page);
     }
   };
 
   const handleCategoryChange = (value: string) => {
     setCategoryFilter(value);
-    setCurrentPage(1);
+    setCurrentPage(1); // Reset to page 1 on filter change
   };
 
   // --- Pagination Logic (Visible Numbers) ---
   const getVisiblePages = () => {
-    const pages = [];
-    const maxVisiblePages = 5;
-    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-    let endPage = startPage + maxVisiblePages - 1;
+    const total = meta.totalPage;
+    const maxVisible = 5;
 
-    if (endPage > totalPages) {
-      endPage = totalPages;
-      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    // If total pages are less than max, return all
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
     }
 
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(total, currentPage + 2);
+
+    if (currentPage <= 3) {
+      endPage = 5;
+      startPage = 1;
+    } else if (currentPage >= total - 2) {
+      startPage = total - 4;
+      endPage = total;
+    }
+
+    const pages = [];
     for (let i = startPage; i <= endPage; i++) {
       pages.push(i);
     }
@@ -155,15 +171,18 @@ export default function CategoryPage() {
 
       <div className="flex flex-col md:flex-row justify-between md:items-center mb-6 gap-4">
         <div className="flex items-center gap-4 w-full md:w-auto">
+          {/* 
+             NOTE: Using a Select to filter by category name from the *current list* 
+             is tricky because the list changes when you filter. 
+             If you want to filter globally, a Search Input is usually better UX.
+          */}
           <Select value={categoryFilter} onValueChange={handleCategoryChange}>
             <SelectTrigger className="w-45 h-11 border-gray-300 bg-white text-gray-500">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent>
-              {/* Static option for resetting the filter */}
               <SelectItem value="all">All Categories</SelectItem>
-
-              {/* Dynamic mapping of categories */}
+              {/* This map might shrink if you filter. Consider fetching all categories separately for the dropdown options if needed. */}
               {categories?.map((category: Category) => (
                 <SelectItem key={category._id} value={category.categoryName}>
                   {category.categoryName}
@@ -208,7 +227,7 @@ export default function CategoryPage() {
                   className="border-b border-gray-100 hover:bg-white/50"
                 >
                   <TableCell className="py-4 text-gray-500">
-                    {(currentPage - 1) * itemsPerPage + index + 1}.
+                    {(currentPage - 1) * 10 + index + 1}.
                   </TableCell>
 
                   <TableCell className="py-4">
@@ -254,14 +273,15 @@ export default function CategoryPage() {
           </TableBody>
         </Table>
 
-        {!isLoading && totalPages > 1 && (
+        {/* --- Pagination Footer --- */}
+        {!isLoading && meta.totalPage > 1 && (
           <div className="mt-10 flex items-center justify-center gap-4 text-sm font-medium text-gray-600">
             <button
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className="p-2 text-black cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed transition-opacity"
+              className="p-2 text-black cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed transition-opacity hover:bg-gray-200 rounded"
             >
-              <ChevronLeft className="h-7 w-7" />
+              <ChevronLeft className="h-5 w-5" />
             </button>
 
             {getVisiblePages().map((page) => (
@@ -270,26 +290,20 @@ export default function CategoryPage() {
                 onClick={() => handlePageChange(page)}
                 className={`flex h-8 w-8 items-center justify-center rounded transition-colors ${
                   currentPage === page
-                    ? "bg-gray-300 text-black cursor-default"
-                    : "cursor-pointer hover:bg-gray-200 hover:text-black"
+                    ? "bg-black text-white cursor-default"
+                    : "cursor-pointer hover:bg-gray-200 text-gray-700"
                 }`}
               >
                 {page}
               </button>
             ))}
 
-            {totalPages > 5 && currentPage < totalPages - 2 && (
-              <span className="flex h-8 w-8 items-center justify-center">
-                ...
-              </span>
-            )}
-
             <button
               onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className="p-2 text-black cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed transition-opacity"
+              disabled={currentPage === meta.totalPage}
+              className="p-2 text-black cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed transition-opacity hover:bg-gray-200 rounded"
             >
-              <ChevronRight className="h-7 w-7" />
+              <ChevronRight className="h-5 w-5" />
             </button>
           </div>
         )}

@@ -106,6 +106,7 @@ const NotificationsPage = () => {
           // List
           notifications?.map((notification: any) => (
             <div
+              onClick={() => handleMarkAsRead(notification._id)}
               key={notification._id}
               className={`relative group flex gap-4 p-5 rounded-xl border transition-all duration-200 ${
                 notification.isRead
@@ -151,10 +152,7 @@ const NotificationsPage = () => {
                   </span>
 
                   {!notification.isRead && (
-                    <button
-                      onClick={() => handleMarkAsRead(notification._id)}
-                      className="text-xs flex items-center text-blue-600 hover:text-blue-800 font-medium transition-colors"
-                    >
+                    <button className="text-xs flex items-center text-blue-600 hover:text-blue-800 font-medium transition-colors">
                       <CheckCheck className="h-3 w-3 mr-1" /> Mark as read
                     </button>
                   )}

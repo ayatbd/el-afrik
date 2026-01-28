@@ -7,7 +7,6 @@ import {
   Search,
   ChevronLeft,
   ChevronRight,
-  Filter,
   ArrowUpDown,
 } from "lucide-react";
 
@@ -25,7 +24,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useGetOrdersQuery } from "@/redux/api/ordersApi";
 import { FullScreenLoader } from "@/app/loading";
 
-// --- 1. Debounce Hook to prevent API spam ---
 function useDebounce(value: string, delay: number) {
   const [debouncedValue, setDebouncedValue] = useState(value);
   useEffect(() => {
@@ -38,9 +36,8 @@ function useDebounce(value: string, delay: number) {
 }
 
 export default function OrdersPage() {
-  // --- 2. State Management for Filters & Pagination ---
-  const [page, setPage] = useState(1);
-  const [limit] = useState(10); // Items per page
+  const [currentPage, setCurrentPage] = useState(1);
+  const [limit] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [orderStatus, setOrderStatus] = useState("");
   const [orderType, setOrderType] = useState("");
@@ -49,12 +46,10 @@ export default function OrdersPage() {
 
   const debouncedSearch = useDebounce(searchTerm, 500);
 
-  // --- 3. RTK Query with Parameters ---
-  // We pass the object directly. ensure your API slice accepts these args.
   const { data, isLoading } = useGetOrdersQuery({
-    page,
+    page: currentPage,
     limit,
-    searchTerm: debouncedSearch,
+    search: debouncedSearch,
     orderStatus,
     orderType,
     paymentStatus,
@@ -62,28 +57,27 @@ export default function OrdersPage() {
     sortOrder,
   });
 
-  // Accessing data safely (Adjust 'result' or 'orders' based on your actual API response structure)
   const orders = data?.data?.result || data?.data?.orders || [];
-  const meta = data?.data?.meta || { total: 0, totalPage: 1 };
 
-  // --- 4. Handlers ---
+  // FIX 1: Standardize the property name (totalPages)
+  const meta = data?.data?.meta || { total: 0, totalPages: 1 };
+  // console.log(meta.totalPages);
+
   const handlePageChange = (newPage: number) => {
-    if (newPage >= 1 && newPage <= meta.totalPage) {
-      setPage(newPage);
+    if (newPage >= 1 && newPage <= meta.totalPages) {
+      setCurrentPage(newPage);
     }
   };
 
-  // Reset page to 1 when any filter changes
   const handleFilterChange = (setter: any, value: string) => {
     setter(value);
-    setPage(1);
+    setCurrentPage(1);
   };
 
   const toggleSort = () => {
     setSortOrder((prev) => (prev === "desc" ? "asc" : "desc"));
   };
 
-  // Helper for Status Colors
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
       case "delivered":
@@ -97,6 +91,35 @@ export default function OrdersPage() {
       default:
         return "bg-gray-200 text-gray-700";
     }
+  };
+
+  // FIX 2: Improved Logic to prevent overflowing total pages
+  const getVisiblePages = () => {
+    const total = meta.totalPages;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      // If total pages are less than max, return all [1, 2, 3...]
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    let start = Math.max(1, currentPage - 2);
+    let end = Math.min(total, currentPage + 2);
+
+    // Adjust if we are near the start
+    if (currentPage <= 3) {
+      end = Math.min(5, total); // Ensure end doesn't exceed total
+      start = 1;
+    }
+    // Adjust if we are near the end
+    else if (currentPage >= total - 2) {
+      start = Math.max(1, total - 4); // Ensure start doesn't go below 1
+      end = total;
+    }
+
+    const pages = [];
+    for (let i = start; i <= end; i++) pages.push(i);
+    return pages;
   };
 
   if (isLoading) {
@@ -123,21 +146,19 @@ export default function OrdersPage() {
       {/* --- Filters Toolbar --- */}
       <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
             <Input
-              placeholder="Search items..."
+              placeholder="Search by order number"
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
-                setPage(1);
+                setCurrentPage(1);
               }}
               className="pl-9"
             />
           </div>
 
-          {/* Order Status Filter */}
           <select
             className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             value={orderStatus}
@@ -149,7 +170,6 @@ export default function OrdersPage() {
             <option value="cancelled">Cancelled</option>
           </select>
 
-          {/* Order Type Filter */}
           <select
             className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             value={orderType}
@@ -161,7 +181,6 @@ export default function OrdersPage() {
             <option value="point_redemption">Redemption</option>
           </select>
 
-          {/* Payment Status Filter */}
           <select
             className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             value={paymentStatus}
@@ -176,7 +195,6 @@ export default function OrdersPage() {
             <option value="points_paid">Points Paid</option>
           </select>
 
-          {/* Sort Button */}
           <Button
             variant="outline"
             onClick={toggleSort}
@@ -224,17 +242,15 @@ export default function OrdersPage() {
                   key={order._id || index}
                   className="border-b hover:bg-gray-50/50 transition-colors"
                 >
-                  {/* Order Info (S No & ID) */}
                   <TableCell className="py-6 pl-6 align-top">
                     <span className="font-mono text-gray-500 text-xs block mb-1">
-                      #{(page - 1) * limit + index + 1}
+                      #{(currentPage - 1) * limit + index + 1}
                     </span>
                     <span className="font-medium text-sm text-gray-900">
                       ID: {order.orderId || order._id?.slice(-6)}
                     </span>
                   </TableCell>
 
-                  {/* Items Images */}
                   <TableCell className="py-6 align-top">
                     <div className="flex items-center gap-3">
                       <div className="flex -space-x-3">
@@ -265,7 +281,6 @@ export default function OrdersPage() {
                     </div>
                   </TableCell>
 
-                  {/* Financials */}
                   <TableCell className="py-6 align-top">
                     <div className="flex flex-col gap-1">
                       <span className="font-medium text-gray-900">
@@ -280,7 +295,6 @@ export default function OrdersPage() {
                     </div>
                   </TableCell>
 
-                  {/* Date */}
                   <TableCell className="py-6 align-top text-gray-700 font-normal">
                     {new Date(order.createdAt).toLocaleDateString()}
                     <br />
@@ -292,7 +306,6 @@ export default function OrdersPage() {
                     </span>
                   </TableCell>
 
-                  {/* Customer */}
                   <TableCell className="py-6 align-top">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-9 w-9">
@@ -315,17 +328,13 @@ export default function OrdersPage() {
                     </div>
                   </TableCell>
 
-                  {/* Status Badges */}
                   <TableCell className="py-6 align-top">
                     <div className="flex flex-col gap-2 items-start">
-                      {/* Order Status */}
                       <span
                         className={`px-2.5 py-0.5 text-xs font-medium rounded-full ${getStatusColor(order.orderStatus)}`}
                       >
                         {order.orderStatus}
                       </span>
-
-                      {/* Type & Payment (Mini Badges) */}
                       <div className="flex gap-1">
                         <span className="text-[10px] border border-gray-200 px-1.5 py-0.5 rounded text-gray-600 uppercase bg-gray-50">
                           {order.orderType === "point_redemption"
@@ -341,7 +350,6 @@ export default function OrdersPage() {
                     </div>
                   </TableCell>
 
-                  {/* Action */}
                   <TableCell className="py-6 align-middle text-right pr-6">
                     <Link href={`/orders/${order._id}`}>
                       <Button
@@ -368,31 +376,45 @@ export default function OrdersPage() {
         </Table>
 
         {/* --- Pagination Footer --- */}
-        {meta.totalPage > 1 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50">
-            <span className="text-sm text-gray-500">
-              Page {page} of {meta.totalPage} ({meta.total} total)
-            </span>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => handlePageChange(page - 1)}
-                disabled={page === 1}
-                className="h-8 w-8"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => handlePageChange(page + 1)}
-                disabled={page === meta.totalPage}
-                className="h-8 w-8"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
+        {!isLoading && meta.totalPages > 1 && (
+          <div className="mt-8 flex items-center justify-center gap-2 mb-8">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="h-9 w-9 border-gray-200 hover:bg-gray-100 hover:text-black"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+
+            <div className="flex gap-2 mx-2">
+              {getVisiblePages().map((page) => (
+                <button
+                  key={page}
+                  onClick={() => handlePageChange(page)}
+                  // FIX 3: Corrected check (page === currentPage)
+                  className={`h-9 w-9 rounded-md text-sm font-medium transition-all
+                  ${
+                    page === currentPage
+                      ? "bg-black text-white shadow-md"
+                      : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
             </div>
+
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === meta.totalPages}
+              className="h-9 w-9 border-gray-200 hover:bg-gray-100 hover:text-black"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
           </div>
         )}
       </div>
