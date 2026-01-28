@@ -3,7 +3,7 @@ import { apiSlice } from "./apiSlice";
 export const cateringApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getAllCatering: builder.query({
-      query: () => `/catering/packages`,
+      query: (params) => ({ url: "/catering/packages", method: "GET", params }),
       providesTags: ["Caterings"],
     }),
     addCatering: builder.mutation({

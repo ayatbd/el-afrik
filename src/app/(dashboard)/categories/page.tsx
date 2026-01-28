@@ -49,7 +49,7 @@ export default function CategoryPage() {
     page: currentPage,
     limit: 10,
     // Pass filter to backend (Assuming backend accepts 'searchTerm' or 'categoryName')
-    searchTerm: categoryFilter !== "all" ? categoryFilter : undefined,
+    // searchTerm: categoryFilter !== "all" ? categoryFilter : undefined,
   });
 
   const [deleteCategory] = useDeleteCategoryMutation();

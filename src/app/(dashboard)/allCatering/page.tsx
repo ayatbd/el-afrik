@@ -1,4 +1,7 @@
 "use client";
+
+import { useState } from "react";
+import Link from "next/link";
 import {
   Table,
   TableBody,
@@ -17,15 +20,20 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MoreHorizontal, Trash2, Loader2 } from "lucide-react";
+import {
+  MoreHorizontal,
+  Trash2,
+  Loader2,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import {
   useDeleteCateringMutation,
   useGetAllCateringQuery,
 } from "@/redux/api/cateringApi";
-import Link from "next/link";
 import EditCateringModal from "@/components/modules/catering/EditCateringModal";
+import Swal from "sweetalert2";
 
-// Interface for your data type
 interface CateringItem {
   _id: string;
   id?: string;
@@ -38,81 +46,130 @@ interface CateringItem {
 }
 
 const CateringTable = () => {
-  // 1. Fetch Data
+  // 1. Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [limit] = useState(10); // Items per page
+
+  // 2. Fetch Data with Pagination Params
   const {
     data: responseData,
     isLoading,
     isError,
-  } = useGetAllCateringQuery(undefined);
+  } = useGetAllCateringQuery({ page: currentPage, limit });
 
-  // Safe access to data
+  // 3. Safe Access to Data & Meta
   const caterings: CateringItem[] = responseData?.data?.result || [];
+  const meta = responseData?.data?.meta || { totalPage: 1, total: 0 };
 
-  // 2. Delete data
+  // 4. Delete Mutation
   const [deleteCatering, { isLoading: isDeleting }] =
     useDeleteCateringMutation();
 
   const handleDelete = async (id: string) => {
-    try {
-      await deleteCatering(id).unwrap();
-      // Toast notification (optional)
-      // toast.success("Deleted successfully");
-    } catch (err) {
-      console.error(err);
-      // toast.error("Failed to delete");
+    Swal.fire({
+      title: "Are you sure?",
+      text: "This action cannot be undone.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await deleteCatering(id).unwrap();
+          Swal.fire("Deleted!", "Package has been removed.", "success");
+        } catch (err) {
+          Swal.fire("Error", "Failed to delete package.", "error");
+        }
+      }
+    });
+  };
+
+  // 5. Pagination Logic
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= meta.totalPage) {
+      setCurrentPage(newPage);
     }
   };
 
+  const getVisiblePages = () => {
+    const total = meta.totalPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    let start = Math.max(1, currentPage - 2);
+    let end = Math.min(total, currentPage + 2);
+
+    if (currentPage <= 3) {
+      end = 5;
+      start = 1;
+    } else if (currentPage >= total - 2) {
+      start = total - 4;
+      end = total;
+    }
+
+    const pages = [];
+    for (let i = start; i <= end; i++) pages.push(i);
+    return pages;
+  };
+
   // --- Loading State ---
-  if (isLoading) {
-    return <TableSkeleton />;
-  }
+  if (isLoading) return <TableSkeleton />;
 
   // --- Error State ---
-  if (isError) {
-    return <div className="text-red-500 p-10">Failed to load data.</div>;
-  }
+  if (isError)
+    return (
+      <div className="text-red-500 p-10 text-center">
+        Failed to load catering data.
+      </div>
+    );
 
   return (
-    <div className="container mx-auto py-10 px-4">
+    <div className="container mx-auto py-10 px-4 min-h-screen bg-gray-50/30">
+      {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Catering List</h2>
-          <p className="text-muted-foreground text-sm">
+          <h2 className="text-2xl font-bold tracking-tight text-gray-900">
+            Catering List
+          </h2>
+          <p className="text-muted-foreground text-sm mt-1">
             Manage your event packages and menus.
           </p>
         </div>
-        {/* Update URL to match your structure */}
         <Link href="/add-catering">
-          <Button className="bg-[#00B25D] hover:bg-[#009e52]">
+          <Button className="bg-[#00B25D] hover:bg-[#009e52] text-white">
             Add New Package
           </Button>
         </Link>
       </div>
 
-      <div className="rounded-md border bg-white shadow-sm">
+      {/* Table Container */}
+      <div className="rounded-xl border bg-white shadow-sm overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow className="bg-gray-50/50">
-              <TableHead className="w-25">Image</TableHead>
-              <TableHead className="min-w-50">Package Name</TableHead>
-              <TableHead>Price / Head</TableHead>
-              <TableHead>Min. Guests</TableHead>
-              <TableHead className="hidden md:table-cell">
+            <TableRow className="bg-gray-50 border-b border-gray-100">
+              <TableHead className="w-[80px] py-4 pl-6">Image</TableHead>
+              <TableHead className="min-w-[200px] py-4">Package Name</TableHead>
+              <TableHead className="py-4">Price / Head</TableHead>
+              <TableHead className="py-4">Min. Guests</TableHead>
+              <TableHead className="hidden md:table-cell py-4">
                 Menu Preview
               </TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="text-right py-4 pr-6">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {caterings.length > 0 ? (
-              caterings.map((item) => (
+              caterings.map((item, index) => (
                 <TableRow
                   key={item._id || item.id}
-                  className="hover:bg-gray-50/50"
+                  className="hover:bg-gray-50/50 transition-colors border-b border-gray-100 last:border-0"
                 >
-                  {/* Image Column */}
-                  <TableCell>
+                  {/* Image */}
+                  <TableCell className="pl-6 py-4">
                     <div className="h-12 w-16 rounded-md overflow-hidden bg-gray-100 border border-gray-200">
                       <img
                         src={item.image || "/placeholder-food.jpg"}
@@ -122,41 +179,44 @@ const CateringTable = () => {
                     </div>
                   </TableCell>
 
-                  {/* Name & Description */}
-                  <TableCell>
+                  {/* Name */}
+                  <TableCell className="py-4">
                     <div className="flex flex-col">
                       <span className="font-semibold text-gray-900">
                         {item.name}
                       </span>
-                      <span className="text-xs text-muted-foreground line-clamp-1 max-w-62.5">
+                      <span className="text-xs text-muted-foreground line-clamp-1 max-w-[250px]">
                         {item.description}
                       </span>
                     </div>
                   </TableCell>
 
                   {/* Price */}
-                  <TableCell>
-                    <Badge variant="secondary" className="font-mono">
+                  <TableCell className="py-4">
+                    <Badge
+                      variant="secondary"
+                      className="font-mono bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200"
+                    >
                       ${item.pricePerPerson}
                     </Badge>
                   </TableCell>
 
-                  {/* Min Guests */}
-                  <TableCell>
+                  {/* Guests */}
+                  <TableCell className="py-4">
                     <div className="text-sm font-medium text-gray-700">
                       {item.minGuests}{" "}
                       <span className="text-gray-400 font-normal">ppl</span>
                     </div>
                   </TableCell>
 
-                  {/* Menu List (Truncated) */}
-                  <TableCell className="hidden md:table-cell max-w-75">
+                  {/* Menu */}
+                  <TableCell className="hidden md:table-cell py-4 max-w-[300px]">
                     <div className="flex flex-wrap gap-1">
                       {item.menu?.slice(0, 2).map((m, i) => (
                         <Badge
                           key={i}
                           variant="outline"
-                          className="text-xs bg-white text-gray-600 font-normal"
+                          className="text-[10px] bg-white text-gray-600 font-normal border-gray-200"
                         >
                           {m}
                         </Badge>
@@ -164,7 +224,7 @@ const CateringTable = () => {
                       {item.menu?.length > 2 && (
                         <Badge
                           variant="outline"
-                          className="text-xs bg-gray-100 text-gray-500"
+                          className="text-[10px] bg-gray-50 text-gray-500 border-gray-200"
                         >
                           +{item.menu.length - 2} more
                         </Badge>
@@ -172,46 +232,37 @@ const CateringTable = () => {
                     </div>
                   </TableCell>
 
-                  {/* Actions Dropdown */}
-                  <TableCell className="text-right">
+                  {/* Actions */}
+                  <TableCell className="text-right pr-6 py-4">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <span className="sr-only">Open menu</span>
-                          <MoreHorizontal className="h-4 w-4" />
+                        <Button
+                          variant="ghost"
+                          className="h-8 w-8 p-0 hover:bg-gray-100"
+                        >
+                          <MoreHorizontal className="h-4 w-4 text-gray-500" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
+                      <DropdownMenuContent align="end" className="w-[160px]">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
-                        {/* <DropdownMenuItem className="cursor-pointer">
-                          <Eye className="mr-2 h-4 w-4" /> View Details
-                        </DropdownMenuItem> */}
-
-                        {/* --- EDIT BUTTON CHANGE --- */}
-                        {/* We use asChild so the Link behaves as the menu item */}
                         <DropdownMenuItem asChild>
-                          <EditCateringModal catering={item} />
+                          <div className="w-full cursor-pointer">
+                            <EditCateringModal catering={item} />
+                          </div>
                         </DropdownMenuItem>
 
                         <DropdownMenuItem
-                          className="cursor-pointer text-red-600 focus:text-red-600"
-                          // Prevent closing immediately if you want to show loading state,
-                          // or handle via a separate dialog for safety.
+                          className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
                           onSelect={(e) => e.preventDefault()}
+                          onClick={() => handleDelete(item._id)}
                         >
-                          <button
-                            onClick={() => handleDelete(item._id)}
-                            className="flex items-center w-full"
-                            disabled={isDeleting}
-                          >
-                            {isDeleting ? (
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            ) : (
-                              <Trash2 className="mr-2 h-4 w-4" />
-                            )}
-                            {isDeleting ? "Deleting..." : "Delete"}
-                          </button>
+                          {isDeleting ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="mr-2 h-4 w-4" />
+                          )}
+                          Delete Package
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -220,25 +271,84 @@ const CateringTable = () => {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center">
-                  No results.
+                <TableCell
+                  colSpan={6}
+                  className="h-32 text-center text-muted-foreground"
+                >
+                  No catering packages found.
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
+
+        {/* --- Pagination Footer --- */}
+        {meta.totalPage > 1 && (
+          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50/50">
+            <span className="text-xs text-gray-500 font-medium">
+              Page {currentPage} of {meta.totalPage}
+            </span>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 bg-white"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+
+              <div className="flex gap-1">
+                {getVisiblePages().map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => handlePageChange(page)}
+                    className={`h-8 w-8 rounded-md text-xs font-medium transition-colors border ${
+                      page === currentPage
+                        ? "bg-black text-white border-black"
+                        : "bg-white text-gray-600 border-gray-200 hover:bg-gray-100"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+              </div>
+
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 bg-white"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === meta.totalPage}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
-// ... TableSkeleton code remains the same ...
 const TableSkeleton = () => (
-  // ... (Keep your skeleton code here)
   <div className="container mx-auto py-10 px-4">
-    <Skeleton className="h-8 w-50 mb-4" />
-    <div className="border rounded-md p-4">
-      <Skeleton className="h-64 w-full" />
+    <div className="flex justify-between mb-6">
+      <div className="space-y-2">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-4 w-64" />
+      </div>
+      <Skeleton className="h-10 w-32" />
+    </div>
+    <div className="border rounded-md bg-white p-4 space-y-4">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <div key={i} className="flex gap-4">
+          <Skeleton className="h-12 w-16 rounded" />
+          <Skeleton className="h-12 w-full" />
+        </div>
+      ))}
     </div>
   </div>
 );
