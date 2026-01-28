@@ -280,22 +280,19 @@ const CateringTable = () => {
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
                         <DropdownMenuItem asChild>
-                          <div className="w-full cursor-pointer">
-                            <EditCateringModal catering={item} />
-                          </div>
+                          <EditCateringModal catering={item} />
                         </DropdownMenuItem>
 
                         <DropdownMenuItem
-                          className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
                           onSelect={(e) => e.preventDefault()}
                           onClick={() => handleDelete(item._id)}
                         >
                           {isDeleting ? (
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                           ) : (
-                            <Trash2 className="mr-2 h-4 w-4" />
+                            <Trash2 className="h-4 w-4" />
                           )}
-                          Delete Package
+                          Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

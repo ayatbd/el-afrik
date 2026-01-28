@@ -20,12 +20,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar, CalendarPlus, Loader2, Save } from "lucide-react";
+import { Calendar, Loader2, Save } from "lucide-react";
 import Swal from "sweetalert2";
 
 // Redux Hooks
-import { useCreateCategoryMutation } from "@/redux/api/cateringBookingApi";
+import { useCreateCateringBookingMutation } from "@/redux/api/cateringBookingApi";
 import { useGetAllCateringQuery } from "@/redux/api/cateringApi"; // To fetch package list
+import { FullScreenLoader } from "@/app/loading";
 
 const INITIAL_DATA = {
   packageId: "",
@@ -36,16 +37,28 @@ const INITIAL_DATA = {
   notes: "",
 };
 
+interface CateringItem {
+  _id: string;
+  id?: string;
+  name: string;
+  description: string;
+  pricePerPerson: number;
+  minGuests: number;
+  menu: string[];
+  image?: string;
+}
+
 export default function CateringBookingModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState(INITIAL_DATA);
 
   // 1. Fetch Packages for the Dropdown
-  const { data: packageData } = useGetAllCateringQuery({ limit: 100 }); // Fetch enough to show in dropdown
+  const { data: packageData } = useGetAllCateringQuery({}); // Fetch enough to show in dropdown
   const packages = packageData?.data?.result || [];
 
   // 2. Mutation Hook
-  const [createBooking, { isLoading }] = useCreateCategoryMutation();
+  const [createCateringBooking, { isLoading }] =
+    useCreateCateringBookingMutation();
 
   // Handle Text/Number Changes
   const handleChange = (
@@ -90,7 +103,7 @@ export default function CateringBookingModal() {
         notes: formData.notes,
       };
 
-      await createBooking(payload).unwrap();
+      await createCateringBooking(payload).unwrap();
 
       Swal.fire({
         icon: "success",
@@ -112,6 +125,10 @@ export default function CateringBookingModal() {
       });
     }
   };
+
+  if (isLoading) {
+    return <FullScreenLoader />;
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>

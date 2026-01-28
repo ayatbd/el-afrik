@@ -3,17 +3,21 @@ import { apiSlice } from "./apiSlice";
 export const cateringBookingApi = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
         getCateringBooking: builder.query({
-            query: () => "/catering/admin/bookings",
+            query: (params) => ({
+                url: "/catering/admin/bookings",
+                method: "GET",
+                params
+            }),
             providesTags: ["CateringBooking"],
         }),
 
-        createCategory: builder.mutation({
+        createCateringBooking: builder.mutation({
             query: (data) => ({
                 url: '/catering/reserve',
                 method: 'POST',
                 body: data,
             }),
-            invalidatesTags: ['Category'],
+            invalidatesTags: ['CateringBooking'],
         }),
 
         // Updated endpoint for downloading files
@@ -30,7 +34,7 @@ export const cateringBookingApi = apiSlice.injectEndpoints({
 
 export const {
     useGetCateringBookingQuery,
-    useCreateCategoryMutation,
+    useCreateCateringBookingMutation,
     useDownloadInvoiceQuery,      // Standard hook
     useLazyDownloadInvoiceQuery   // <--- YOU NEED THIS for the button click
 } = cateringBookingApi;
