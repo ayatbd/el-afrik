@@ -18,7 +18,14 @@ export const profileApi = apiSlice.injectEndpoints({
             },
             invalidatesTags: ["Profile"],
         }),
+        changePassword: builder.mutation({
+            query: (data) => ({
+                url: "/auth/changePassword",
+                method: "POST",
+                body: data,
+            }),
+        })
     }),
 });
 
-export const { useGetProfileQuery, useUpdateProfileMutation } = profileApi;
+export const { useGetProfileQuery, useUpdateProfileMutation, useChangePasswordMutation } = profileApi;
