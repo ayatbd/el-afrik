@@ -42,22 +42,20 @@ interface Meta {
 
 export default function UserManagementPage() {
   // --- 2. State Management ---
-  const [nameSearch, setNameSearch] = useState("");
-  const [emailSearch, setEmailSearch] = useState("");
+  // Combined search state instead of separate name/email
+  const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10; // Fixed Limit
+  const itemsPerPage = 10;
 
-  // --- 3. Debounce Search Terms ---
-  // This prevents API calls on every keystroke
-  const debouncedName = useDebounce(nameSearch, 500);
-  const debouncedEmail = useDebounce(emailSearch, 500);
+  // --- 3. Debounce Search Term ---
+  const debouncedSearch = useDebounce(searchTerm, 500);
 
   // --- 4. RTK Query Hooks ---
   const { data, isLoading, isFetching, isError } = useGetUserQuery({
     page: currentPage,
     limit: itemsPerPage,
-    firstName: debouncedName || "", // Use debounced value
-    email: debouncedEmail || "", // Use debounced value
+    // Send single 'search' param (Backend should handle regex for name OR email)
+    search: debouncedSearch || "",
   });
 
   const [blockUser] = useBlockUserMutation();
@@ -71,7 +69,6 @@ export default function UserManagementPage() {
     totalPage: 1,
   };
 
-  // Use meta.totalPage directly from backend, fallback to 1
   const totalPages = meta.totalPage > 0 ? meta.totalPage : 1;
 
   // --- 6. Handlers ---
@@ -79,13 +76,9 @@ export default function UserManagementPage() {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
 
-  const handleNameSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNameSearch(e.target.value);
-    setCurrentPage(1); // Reset to page 1 on filter change
-  };
-
-  const handleEmailSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmailSearch(e.target.value);
+  // Single handler for the combined search input
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
     setCurrentPage(1); // Reset to page 1 on filter change
   };
 
@@ -162,21 +155,13 @@ export default function UserManagementPage() {
         </div>
 
         <div className="flex items-center gap-5">
-          <div className="relative w-full md:w-60">
+          {/* Combined Search Input */}
+          <div className="relative w-full md:w-80">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
             <Input
-              value={nameSearch}
-              onChange={handleNameSearchChange}
-              placeholder="Search users by name..."
-              className="pl-10 bg-transparent border-gray-800 rounded-md focus-visible:ring-0 focus-visible:border-black placeholder:text-gray-500"
-            />
-          </div>
-          <div className="relative w-full md:w-60">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-            <Input
-              value={emailSearch}
-              onChange={handleEmailSearchChange}
-              placeholder="Search users by email..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+              placeholder="Search by name or email..."
               className="pl-10 bg-transparent border-gray-800 rounded-md focus-visible:ring-0 focus-visible:border-black placeholder:text-gray-500"
             />
           </div>
@@ -192,6 +177,9 @@ export default function UserManagementPage() {
               </TableHead>
               <TableHead className="text-black font-semibold text-base">
                 Contact
+              </TableHead>
+              <TableHead className="text-black font-semibold text-base">
+                Name
               </TableHead>
               <TableHead className="text-black font-semibold text-base">
                 Email
@@ -212,7 +200,6 @@ export default function UserManagementPage() {
           </TableHeader>
           <TableBody>
             {isLoading || isFetching ? (
-              // Using itemsPerPage safely here
               Array.from({ length: itemsPerPage }).map((_, idx) => (
                 <TableRow key={idx} className="animate-pulse">
                   <TableCell colSpan={7} className="py-4">
@@ -259,8 +246,13 @@ export default function UserManagementPage() {
                     </TableCell>
 
                     <TableCell className="py-4 text-gray-600">
+                      {user.firstName + " " + user.lastName || "N/A"}
+                    </TableCell>
+
+                    <TableCell className="py-4 text-gray-600">
                       {user.contact || "N/A"}
                     </TableCell>
+
                     <TableCell className="py-4 text-gray-600">
                       {user.email}
                     </TableCell>
@@ -331,7 +323,7 @@ export default function UserManagementPage() {
         </Table>
       </div>
 
-      {/* --- 8. Fixed Pagination Rendering --- */}
+      {/* --- 8. Pagination --- */}
       {!isLoading && totalPages > 1 && (
         <div className="mt-10 flex items-center justify-center gap-4 text-sm font-medium text-gray-600">
           <button

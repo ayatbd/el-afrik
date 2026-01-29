@@ -47,7 +47,7 @@ function useDebounce(value: string, delay: number) {
 const AllReservation = () => {
   // --- 2. State Management ---
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(5);
+  const [itemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
 
   // Filters
@@ -184,7 +184,13 @@ const AllReservation = () => {
     return pages;
   };
 
-  if (isLoading) return <FullScreenLoader />;
+  if (isLoading) {
+    return (
+      <div className="h-[80vh] w-full flex items-center justify-center">
+        <div className="animate-spin h-8 w-8 border-4 border-[#00B25D] border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full min-h-screen bg-slate-50 p-6 md:p-10 font-sans">

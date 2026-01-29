@@ -15,7 +15,7 @@ const AdminLogin = () => {
   const dispatch = useAppDispatch();
 
   const [email, setEmail] = useState("saciyof997@feanzier.com");
-  const [password, setPassword] = useState("Admin@1234");
+  const [password, setPassword] = useState("Rayhan@1234");
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

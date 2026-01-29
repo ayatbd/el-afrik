@@ -27,7 +27,7 @@ const SalesMatricData = () => {
   const chartData = response?.data?.earningGraphData || [];
 
   // 4. Generate a list of years for the dropdown (e.g., last 5 years)
-  const years = Array.from({ length: 10 }, (_, i) => currentYear - i + 6); // [2027, 2026, 2025...]
+  const years = Array.from({ length: 10 }, (_, i) => currentYear - i); // [2027, 2026, 2025...]
 
   if (isLoading) {
     return (
@@ -134,7 +134,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-white p-3 border border-gray-100 shadow-lg rounded-lg text-xs">
-        <p className="font-bold text-gray-800 mb-2">{label}</p>
+        <p className="font-bold text-gray-800">{label}</p>
         <div className="space-y-1">
           <p className="text-[#00B047] font-medium">
             Earnings: ${payload[0].value.toLocaleString()}

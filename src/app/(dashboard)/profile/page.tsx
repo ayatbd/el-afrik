@@ -105,8 +105,8 @@ export default function MyProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-[80vh] w-full items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-[#00B25D]" />
+      <div className="h-[80vh] w-full flex items-center justify-center">
+        <div className="animate-spin h-8 w-8 border-4 border-[#00B25D] border-t-transparent rounded-full"></div>
       </div>
     );
   }

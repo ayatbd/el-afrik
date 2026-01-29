@@ -25,7 +25,7 @@ const UserOverview = () => {
   const chartData = response?.data?.userGraphData || [];
 
   // Generate year options
-  const years = Array.from({ length: 10 }, (_, i) => currentYear - i + 6);
+  const years = Array.from({ length: 10 }, (_, i) => currentYear - i);
 
   if (isLoading) {
     return (

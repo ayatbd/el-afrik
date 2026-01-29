@@ -52,7 +52,7 @@ type QRCode = {
 const QRCodeTable = () => {
   // 1. Pagination State
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(5);
+  const [itemsPerPage] = useState(10);
 
   // 2. Fetch Data with Pagination
   const { data: responseData, isLoading } = useGetQrQuery({
@@ -144,7 +144,13 @@ const QRCodeTable = () => {
     return pages;
   };
 
-  if (isLoading) return <FullScreenLoader />;
+  if (isLoading) {
+    return (
+      <div className="h-[80vh] w-full flex items-center justify-center">
+        <div className="animate-spin h-8 w-8 border-4 border-[#00B25D] border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-10 px-4 md:px-8 space-y-8 min-h-screen bg-gray-50/30">

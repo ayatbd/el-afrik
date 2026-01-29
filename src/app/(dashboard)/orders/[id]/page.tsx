@@ -89,8 +89,8 @@ const OrderDetails = () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        Loading...
+      <div className="h-[80vh] w-full flex items-center justify-center">
+        <div className="animate-spin h-8 w-8 border-4 border-[#00B25D] border-t-transparent rounded-full"></div>
       </div>
     );
   }

@@ -15,7 +15,6 @@ export default function Main() {
   // console.log(dashboardStats);
   // console.log(yearlySummary);
 
-  if (isLoading) return <FullScreenLoader />;
   const topStats = [
     { label: "Total Users", value: lifetimeSummary?.totalUsers },
     { label: "Total Orders", value: lifetimeSummary?.totalOrders },
@@ -25,12 +24,19 @@ export default function Main() {
       value: lifetimeSummary?.totalEarnings?.toFixed(2),
     },
   ];
-  const bottomStats = [
-    { label: "Year", value: yearlySummary?.year || "0" },
-    { label: "Total Users", value: yearlySummary?.totalUsersInYear },
-    { label: "Total Sales", value: yearlySummary?.totalSalesInYear },
-    { label: "Total Earnings", value: yearlySummary?.totalEarningsInYear },
-  ];
+  // const bottomStats = [
+  //   { label: "Year", value: yearlySummary?.year || "0" },
+  //   { label: "Total Users", value: yearlySummary?.totalUsersInYear },
+  //   { label: "Total Sales", value: yearlySummary?.totalSalesInYear },
+  //   { label: "Total Earnings", value: yearlySummary?.totalEarningsInYear },
+  // ];
+  if (isLoading) {
+    return (
+      <div className="h-[80vh] w-full flex items-center justify-center">
+        <div className="animate-spin h-8 w-8 border-4 border-[#00B25D] border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
   return (
     <div className="p-6 bg-gray-50 min-h-screen space-y-6 w-full">
       {/* lifetimeSummary */}
@@ -52,7 +58,7 @@ export default function Main() {
         </div>
       </div>
       {/* lifetimeSummary */}
-      <div>
+      {/* <div>
         <h2 className="font-semibold text-gray-700 mb-4">Yearly Summary</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
           {bottomStats?.map((stat, idx) => (
@@ -68,7 +74,7 @@ export default function Main() {
             </Card>
           ))}
         </div>
-      </div>
+      </div> */}
       {/* <UserOverview /> */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <Card className="shadow-sm border-gray-100 space-y-5">

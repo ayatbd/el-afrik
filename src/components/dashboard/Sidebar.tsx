@@ -224,7 +224,7 @@ export default function Sidebar() {
               <li className="mt-10">
                 <Button
                   onClick={handleLogout}
-                  className="menu-item w-full text-gray-300 text-[15px] font-medium flex items-center gap-3 cursor-pointer hover:bg-[#00C058] focus:bg-[#00C058] active:bg-[#00C058] focus:text-white hover:text-white rounded-md px-3 py-3 transition-all duration-300"
+                  className="menu-item w-full text-gray-300 text-[15px] font-medium flex items-center gap-3 cursor-pointer border-0 outline-0 bg-indigo-700 hover:bg-indigo-800 focus:text-white hover:text-white rounded-md px-3 py-3 transition-all duration-300"
                 >
                   <span>Logout</span>
                 </Button>
