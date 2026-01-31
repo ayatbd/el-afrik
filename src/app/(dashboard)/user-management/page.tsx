@@ -232,7 +232,7 @@ export default function UserManagementPage() {
                         <Avatar className="h-10 w-10 border border-gray-200">
                           <AvatarImage src={user.image} alt={user.name} />
                           <AvatarFallback className="bg-gray-100 text-gray-600">
-                            {user.name?.charAt(0).toUpperCase() || "U"}
+                            {user.name?.charAt(0).toUpperCase() || "!?"}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex flex-col">

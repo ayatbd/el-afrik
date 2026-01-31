@@ -3,19 +3,7 @@
 "use client";
 
 import { useState, useEffect, ChangeEvent } from "react";
-import {
-  User,
-  Mail,
-  Phone,
-  MapPin,
-  Calendar,
-  Camera,
-  Save,
-  Loader2,
-  Award,
-  ShieldCheck,
-  Lock,
-} from "lucide-react";
+import { User, Camera, Save, Loader2, ShieldCheck, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -168,7 +156,7 @@ export default function MyProfilePage() {
             <Separator className="mb-6" />
 
             {/* Stats */}
-            <div className="w-full grid grid-cols-2 gap-4">
+            {/* <div className="w-full grid grid-cols-2 gap-4">
               <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
                 <p className="text-xs text-gray-500 uppercase font-semibold">
                   Points
@@ -186,7 +174,7 @@ export default function MyProfilePage() {
                   {profileData.loyalityTier}
                 </div>
               </div>
-            </div>
+            </div> */}
           </CardContent>
         </Card>
 

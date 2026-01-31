@@ -4,14 +4,15 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import UserOverview from "../modules/dashboard-home/UserOverview";
 import SalesMatricData from "../modules/dashboard-home/SalesMatricData";
 import { useGetDashboardDataQuery } from "@/redux/api/dashboardDataApi";
-import { FullScreenLoader } from "@/app/loading";
+import { useGetOrdersQuery } from "@/redux/api/ordersApi";
+import Items from "../modules/dashboard-home/Items";
 
 export default function Main() {
   const currentYear = new Date().getFullYear();
   const { data: dashboardStats, isLoading } =
     useGetDashboardDataQuery(currentYear);
   const lifetimeSummary = dashboardStats?.data?.lifetimeSummary || {};
-  const yearlySummary = dashboardStats?.data?.yearlySummary || {};
+  // const yearlySummary = dashboardStats?.data?.yearlySummary || {};
   // console.log(dashboardStats);
   // console.log(yearlySummary);
 
@@ -91,13 +92,13 @@ export default function Main() {
           </CardContent>
         </Card>
       </div>
-      {/* 
+
       <div>
         <h1 className="text-3xl font-semibold text-gray-900">
-          Last Update Items
+          On Going Orders
         </h1>
       </div>
-      <Items /> */}
+      <Items />
     </div>
   );
 }

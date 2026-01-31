@@ -1,5 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Table, // <--- 1. IMPORT TABLE COMPONENT HERE
   TableBody,
@@ -8,103 +8,175 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useGetProductsQuery } from "@/redux/api/productApi";
-import { Star } from "lucide-react"; // <--- 2. REMOVE 'Table' FROM HERE
+import { useGetOrdersQuery } from "@/redux/api/ordersApi";
+import Link from "next/link";
 
 const Items = () => {
-  const { data: initialData, isLoading } = useGetProductsQuery(undefined);
-
-  // Ensure the path to data is correct based on your API response
-  const items = initialData?.data?.result || [];
-
-  console.log("Items count:", items.length);
+  const { data, isLoading } = useGetOrdersQuery(undefined);
+  const orders = data?.data?.result || data?.data?.orders || [];
+  console.log("Items count:", orders);
 
   if (isLoading) {
     return <div className="w-full h-full text-center">Loading...</div>;
   }
 
   // If data exists but map doesn't work, ensure items is actually an array
-  if (!Array.isArray(items)) {
-    console.error("Items is not an array:", items);
+  if (!Array.isArray(orders)) {
+    console.error("Items is not an array:", orders);
     return <div>Error: Data format incorrect</div>;
   }
+
+  const getStatusColor = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case "delivered":
+      case "completed":
+        return "bg-green-500 text-white";
+      case "cancelled":
+        return "bg-red-500 text-white";
+      case "ongoing":
+      case "processing":
+        return "bg-blue-500 text-white";
+      default:
+        return "bg-gray-200 text-gray-700";
+    }
+  };
 
   return (
     <div className="rounded-md border">
       <Table>
         <TableHeader>
-          <TableRow className="border-b-0 hover:bg-transparent">
-            <TableHead className="w-25 text-base font-semibold text-black">
-              Item Image
+          <TableRow className="bg-gray-50 border-b hover:bg-gray-50">
+            <TableHead className="text-gray-900 font-semibold py-4 pl-6">
+              Order Info
             </TableHead>
-            <TableHead className="text-base font-semibold text-black">
-              Item Name
+            <TableHead className="text-gray-900 font-semibold py-4">
+              Financials
             </TableHead>
-            <TableHead className="text-base font-semibold text-black">
-              Revenue Generated
+            <TableHead className="text-gray-900 font-semibold py-4">
+              Date
             </TableHead>
-            <TableHead className="text-base font-semibold text-black">
-              Avg.Rating
+            <TableHead className="text-gray-900 font-semibold py-4">
+              Customer
             </TableHead>
-            <TableHead className="text-base font-semibold text-black">
-              Category
+            <TableHead className="text-gray-900 font-semibold py-4">
+              Type/Status
             </TableHead>
-            <TableHead className="text-base font-semibold text-black text-right pr-6">
-              Status
+            <TableHead className="text-gray-900 font-semibold py-4 text-right pr-6">
+              Action
             </TableHead>
           </TableRow>
         </TableHeader>
+
         <TableBody>
-          {items.slice(0, 5).map((item) => (
-            <TableRow
-              key={item?.id || Math.random()}
-              className="border-b-0 hover:bg-gray-50/50 transition-colors"
-            >
-              {/* Image Column */}
-              <TableCell className="py-4">
-                <Avatar className="h-14 w-14 border border-gray-100">
-                  <AvatarImage
-                    src={item?.images}
-                    alt={item?.name}
-                    className="object-cover"
-                  />
-                  <AvatarFallback className="bg-orange-100 text-orange-600">
-                    {item?.name?.substring(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-              </TableCell>
+          {orders.length > 0 ? (
+            orders.slice(0, 10).map(
+              (order: any, index: number) =>
+                order.orderStatus === "ongoing" && (
+                  <TableRow
+                    key={order._id || index}
+                    className="border-b hover:bg-gray-50/50 transition-colors"
+                  >
+                    <TableCell className="py-6 pl-6 align-top">
+                      <span className="font-mono text-gray-500 text-xs block mb-1">
+                        #{index + 1}
+                      </span>
+                      <span className="font-medium text-sm text-gray-900">
+                        ID: {order.orderId || order._id?.slice(-6)}
+                      </span>
+                    </TableCell>
 
-              {/* Name Column */}
-              <TableCell className="py-4 text-base font-medium text-gray-700">
-                {item?.name}
-              </TableCell>
+                    <TableCell className="py-6 align-top">
+                      <div className="flex flex-col gap-1">
+                        <span className="font-medium text-gray-900">
+                          Price: ${order.subtotal}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          Delivery: ${order.deliveryFee}
+                        </span>
+                        <span className="text-xs text-indigo-600 font-medium">
+                          Points: {order.totalPoints}
+                        </span>
+                      </div>
+                    </TableCell>
 
-              {/* Revenue Column */}
-              <TableCell className="py-4 text-base text-gray-700">
-                Data Loading...
-              </TableCell>
+                    <TableCell className="py-6 align-top text-gray-700 font-normal">
+                      {new Date(order.createdAt).toLocaleDateString()}
+                      <br />
+                      <span className="text-xs text-gray-400">
+                        {new Date(order.createdAt).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                    </TableCell>
 
-              {/* Rating Column */}
-              <TableCell className="py-4">
-                <div className="flex items-center gap-1.5 text-base text-gray-700">
-                  <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                  <span>{item?.rating}</span>
-                </div>
-              </TableCell>
+                    <TableCell className="py-6 align-top">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-9 w-9">
+                          <AvatarImage
+                            src={order.receiverAvatar}
+                            className="object-cover"
+                          />
+                          <AvatarFallback>
+                            {order.user?.firstName?.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col">
+                          <span className="text-gray-900 text-sm font-medium">
+                            {order.user?.firstName} {order.user?.lastName}
+                          </span>
+                          <span className="text-gray-500 text-xs">
+                            {order.customerPhone}
+                          </span>
+                        </div>
+                      </div>
+                    </TableCell>
 
-              {/* Category Column */}
-              <TableCell className="py-4 text-base text-gray-700">
-                {item?.category?.categoryName}
-              </TableCell>
+                    <TableCell className="py-6 align-top">
+                      <div className="flex flex-col gap-2 items-start">
+                        <span
+                          className={`px-2.5 py-0.5 text-xs font-medium rounded-full ${getStatusColor(order.orderStatus)}`}
+                        >
+                          {order.orderStatus}
+                        </span>
+                        <div className="flex gap-1">
+                          <span className="text-[10px] border border-gray-200 px-1.5 py-0.5 rounded text-gray-600 uppercase bg-gray-50">
+                            {order.orderType === "point_redemption"
+                              ? "Redeem"
+                              : order.orderType}
+                          </span>
+                          <span
+                            className={`text-[10px] border px-1.5 py-0.5 rounded uppercase ${order.paymentStatus === "paid" ? "border-green-200 text-green-700 bg-green-50" : "border-yellow-200 text-yellow-700 bg-yellow-50"}`}
+                          >
+                            {order.paymentStatus}
+                          </span>
+                        </div>
+                      </div>
+                    </TableCell>
 
-              {/* Status Column */}
-              <TableCell className="py-4 text-right pr-6">
-                <Badge className="bg-[#E6F8EB] text-[#00B25D] hover:bg-[#d8f5df] border-0 rounded-md px-3 py-1 text-sm font-normal shadow-none">
-                  {item?.status}
-                </Badge>
+                    <TableCell className="py-6 align-middle text-right pr-6">
+                      <Link href={`/orders/${order._id}`}>
+                        <Button
+                          size="sm"
+                          className="bg-[#00C058] hover:bg-[#00a84d] text-white"
+                        >
+                          View Details
+                        </Button>
+                      </Link>
+                    </TableCell>
+                  </TableRow>
+                ),
+            )
+          ) : (
+            <TableRow>
+              <TableCell
+                colSpan={8}
+                className="text-center py-10 text-gray-500"
+              >
+                No orders found matching your filters.
               </TableCell>
             </TableRow>
-          ))}
+          )}
         </TableBody>
       </Table>
     </div>

@@ -57,11 +57,11 @@ export default function Sidebar() {
       href: "/categories",
       icon: <TbCategoryPlus size={20} />,
     },
-    {
-      name: "Rider Tracking",
-      href: "/rider-tracking",
-      icon: <IoIosBicycle size={20} />,
-    },
+    // {
+    //   name: "Rider Tracking",
+    //   href: "/rider-tracking",
+    //   icon: <IoIosBicycle size={20} />,
+    // },
     {
       name: "Orders",
       href: "/orders",

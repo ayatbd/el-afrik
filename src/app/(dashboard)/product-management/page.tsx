@@ -304,7 +304,7 @@ export default function ManageProductsPage() {
           </Select>
 
           {/* Favorite Product Filter */}
-          <Select value={favoriteFilter} onValueChange={handleFavoriteChange}>
+          {/* <Select value={favoriteFilter} onValueChange={handleFavoriteChange}>
             <SelectTrigger className="w-45 h-11 border-gray-300 bg-white text-gray-500">
               <SelectValue placeholder="Select Favorite" />
             </SelectTrigger>
@@ -313,7 +313,7 @@ export default function ManageProductsPage() {
               <SelectItem value="true">Favorite</SelectItem>
               <SelectItem value="false">Non Favorite</SelectItem>
             </SelectContent>
-          </Select>
+          </Select> */}
         </div>
 
         <Link href="/add-products">

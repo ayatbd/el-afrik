@@ -22,7 +22,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useGetOrdersQuery } from "@/redux/api/ordersApi";
-import { FullScreenLoader } from "@/app/loading";
 
 function useDebounce(value: string, delay: number) {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -43,25 +42,23 @@ export default function OrdersPage() {
   const [orderType, setOrderType] = useState("");
   const [paymentStatus, setPaymentStatus] = useState("");
   const [sortOrder, setSortOrder] = useState("desc");
-
   const debouncedSearch = useDebounce(searchTerm, 500);
 
-  const { data, isLoading } = useGetOrdersQuery({
-    page: currentPage,
-    limit,
-    search: debouncedSearch,
-    orderStatus,
-    orderType,
-    paymentStatus,
-    sortBy: "createdAt",
-    sortOrder,
-  });
-
+  const { data, isLoading } = useGetOrdersQuery([
+    { name: "page", value: currentPage },
+    { name: "limit", value: limit },
+    { name: "search", value: debouncedSearch },
+    { name: "orderStatus", value: orderStatus },
+    { name: "orderType", value: orderType },
+    { name: "paymentStatus", value: paymentStatus },
+    { name: "sortBy", value: "createdAt" },
+    { name: "sortOrder", value: sortOrder },
+  ]);
   const orders = data?.data?.result || data?.data?.orders || [];
 
   // FIX 1: Standardize the property name (totalPages)
   const meta = data?.data?.meta || { total: 0, totalPages: 1 };
-  // console.log(meta.totalPages);
+  console.log(orders);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= meta.totalPages) {
@@ -219,9 +216,6 @@ export default function OrdersPage() {
                 Order Info
               </TableHead>
               <TableHead className="text-gray-900 font-semibold py-4">
-                Items
-              </TableHead>
-              <TableHead className="text-gray-900 font-semibold py-4">
                 Financials
               </TableHead>
               <TableHead className="text-gray-900 font-semibold py-4">
@@ -253,36 +247,6 @@ export default function OrdersPage() {
                     <span className="font-medium text-sm text-gray-900">
                       ID: {order.orderId || order._id?.slice(-6)}
                     </span>
-                  </TableCell>
-
-                  <TableCell className="py-6 align-top">
-                    <div className="flex items-center gap-3">
-                      <div className="flex -space-x-3">
-                        {order?.items
-                          ?.slice(0, 3)
-                          .map((item: any, idx: number) => (
-                            <Avatar
-                              key={idx}
-                              className="h-10 w-10 border-2 border-white shadow-sm"
-                            >
-                              <AvatarImage
-                                src={item.image}
-                                alt="Product"
-                                className="object-cover"
-                              />
-                              <AvatarFallback>IM</AvatarFallback>
-                            </Avatar>
-                          ))}
-                        {order?.items?.length > 3 && (
-                          <div className="h-10 w-10 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center text-xs text-gray-600 font-bold z-10">
-                            +{order.items.length - 3}
-                          </div>
-                        )}
-                      </div>
-                      <span className="text-gray-600 text-xs font-medium bg-gray-100 px-2 py-1 rounded">
-                        {order.items?.length} Items
-                      </span>
-                    </div>
                   </TableCell>
 
                   <TableCell className="py-6 align-top">

@@ -54,7 +54,10 @@ export default function Navbar() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Avatar className="h-10 w-10 cursor-pointer border-2 border-transparent hover:border-gray-400 transition-all">
-              <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+              <AvatarImage
+                src={user?.image || "https://github.com/shadcn.png"}
+                alt="@shadcn"
+              />
               <AvatarFallback className="bg-orange-600 text-white font-semibold">
                 AD
               </AvatarFallback>
