@@ -45,6 +45,7 @@ export default function UserManagementPage() {
   // Combined search state instead of separate name/email
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [userStatus, setUserStatus] = useState("");
   const itemsPerPage = 10;
 
   // --- 3. Debounce Search Term ---
@@ -56,6 +57,7 @@ export default function UserManagementPage() {
     limit: itemsPerPage,
     // Send single 'search' param (Backend should handle regex for name OR email)
     search: debouncedSearch || "",
+    status: userStatus,
   });
 
   const [blockUser] = useBlockUserMutation();
@@ -80,6 +82,11 @@ export default function UserManagementPage() {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
     setCurrentPage(1); // Reset to page 1 on filter change
+  };
+
+  const handleFilterChange = (setter: any, value: string) => {
+    setter(value);
+    setCurrentPage(1);
   };
 
   const handleBlockToggle = (user: any) => {
@@ -155,6 +162,15 @@ export default function UserManagementPage() {
         </div>
 
         <div className="flex items-center gap-5">
+          <select
+            className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            value={userStatus}
+            onChange={(e) => handleFilterChange(setUserStatus, e.target.value)}
+          >
+            <option value="">All Statuses</option>
+            <option value="blocked">Blocked</option>
+            <option value="in-progress">In Progress</option>
+          </select>
           {/* Combined Search Input */}
           <div className="relative w-full md:w-80">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />

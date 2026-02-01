@@ -33,8 +33,7 @@ interface ProductFormValues {
   calories: string;
   readyTime: string;
   status: string;
-  deliveryFee: number;
-  points: string;
+  points: number;
   description: string;
   promo: string;
   isFavourite: boolean;
@@ -115,12 +114,11 @@ export default function AddProductPage() {
 
       const bodyObj = {
         ...rest,
-        // Ensure numbers are actually numbers (Input type="number" can sometimes return strings in edge cases)
+        // Ensure numbers are actually numbers
         price: Number(formData.price),
         weight: Number(formData.weight),
         quantity: Number(formData.quantity),
-        deliveryFee: Number(formData.deliveryFee),
-        points: Number(points), // Convert Select string to Number
+        points: Number(points), // <--- FIXED THIS LINE
         discount: {
           discount_type,
           discount_amount: Number(discount_amount),
@@ -158,7 +156,7 @@ export default function AddProductPage() {
     }
   };
 
-  if (isLoading) {
+  if (categoriesLoading) {
     return (
       <div className="h-[80vh] w-full flex items-center justify-center">
         <div className="animate-spin h-8 w-8 border-4 border-[#00B25D] border-t-transparent rounded-full"></div>
@@ -296,30 +294,6 @@ export default function AddProductPage() {
               </span>
             )}
           </div>
-
-          <div className="space-y-3">
-            <Label className="text-gray-500">
-              Delivery Fee <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              type="number"
-              {...register("deliveryFee", {
-                required: "Fee is required",
-                valueAsNumber: true,
-              })}
-              placeholder="50"
-              className="h-12 border-gray-200 bg-white"
-            />
-            {errors.deliveryFee && (
-              <span className="text-xs text-red-500">
-                {errors.deliveryFee.message}
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* --- Discount & Nutrition --- */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="space-y-3">
             <Label className="text-gray-500">Discount Type</Label>
             <Controller
@@ -338,7 +312,10 @@ export default function AddProductPage() {
               )}
             />
           </div>
+        </div>
 
+        {/* --- Discount & Nutrition --- */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="space-y-3">
             <Label className="text-gray-500">Discount Amount</Label>
             <Input
@@ -380,10 +357,6 @@ export default function AddProductPage() {
               </span>
             )}
           </div>
-        </div>
-
-        {/* --- Inventory & Status --- */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="space-y-3">
             <Label className="text-gray-500">
               Quantity <span className="text-red-500">*</span>
@@ -403,7 +376,10 @@ export default function AddProductPage() {
               </span>
             )}
           </div>
+        </div>
 
+        {/* --- Inventory & Status --- */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="space-y-3">
             <Label className="text-gray-500">
               Weight (g) <span className="text-red-500">*</span>
@@ -458,16 +434,16 @@ export default function AddProductPage() {
               </Label>
               <Input
                 type="number"
-                {...register("deliveryFee", {
+                {...register("points", {
                   required: "Fee is required",
                   valueAsNumber: true,
                 })}
                 placeholder="50"
                 className="h-12 border-gray-200 bg-white"
               />
-              {errors.deliveryFee && (
+              {errors.points && (
                 <span className="text-xs text-red-500">
-                  {errors.deliveryFee.message}
+                  {errors.points.message}
                 </span>
               )}
             </div>

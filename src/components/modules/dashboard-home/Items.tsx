@@ -69,7 +69,7 @@ const Items = () => {
 
         <TableBody>
           {orders.length > 0 ? (
-            orders.slice(0, 10).map(
+            orders.slice(0, 5).map(
               (order: any, index: number) =>
                 order.orderStatus === "ongoing" && (
                   <TableRow

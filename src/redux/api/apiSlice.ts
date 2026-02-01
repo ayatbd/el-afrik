@@ -20,8 +20,10 @@ interface RootState {
     };
 }
 
+// http://15.223.245.199/api/v1
+
 const baseQuery = fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://15.223.245.199/api/v1',
+    baseUrl: 'http://10.10.20.34:5000/api/v1',
     prepareHeaders: (headers, { getState }) => {
         const state = getState() as RootState;
         let token = state.auth.accessToken;

@@ -58,7 +58,7 @@ export default function OrdersPage() {
 
   // FIX 1: Standardize the property name (totalPages)
   const meta = data?.data?.meta || { total: 0, totalPages: 1 };
-  console.log(orders);
+  // console.log(orders);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= meta.totalPages) {
