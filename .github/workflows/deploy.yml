@@ -1,74 +1,44 @@
-name: Deploy Next.js Dashboard
+name: Deploy Dashboard to EC2
  
 on:
-
   push:
-
     branches:
-
-      - main
+      - main  # যদি আপনার ব্রাঞ্চের নাম অন্য কিছু হয় (যেমন master), তবে সেটি দিন
  
 jobs:
-
   deploy:
-
     runs-on: ubuntu-latest
  
     steps:
-
       - name: Checkout Code
-
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
  
       - name: Deploy to EC2
-
-        uses: appleboy/ssh-action@v0.1.10
-
+        uses: appleboy/ssh-action@v1.0.3
         with:
-
           host: ${{ secrets.EC2_HOST }}
-
           username: ubuntu
-
           key: ${{ secrets.EC2_SSH_KEY }}
-
           script: |
-
-            # NVM লোড করা
-
+            # NVM এবং Node লোড করা
             export NVM_DIR="$HOME/.nvm"
-
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-
             mkdir -p ~/dashboard
-
             cd ~/dashboard
-
-            # গিট সেটআপ
-
+            # ১. গিট সেটআপ (SSH URL ব্যবহার করে)
             if [ ! -d ".git" ]; then
-
               git init
-
-              git remote add origin git@github.com:sparktechagency/আপনার_ড্যাশবোর্ড_রিপোজিটরি_নাম.git
-
+              git remote add origin git@github.com:sparktechagency/el_afrik_dashboard.git
             fi
-
+            # ২. কোড পুল করা
             git fetch --all
-
             git reset --hard origin/main
-
+            # ৩. ডিপেন্ডেন্সি ইন্সটল
             npm install
-
-            # Next.js বিল্ড (মেমোরি লিমিটসহ)
-
+            # ৪. Next.js বিল্ড (মেমোরি লিমিট সেট করে)
             NODE_OPTIONS="--max-old-space-size=1536" npm run build
-
-            # PM2 দিয়ে অ্যাপ রান (Next.js এর জন্য সাধারণত 'npm start' ব্যবহার করা হয়)
-
+            # ৫. PM2 দিয়ে রান করা
+            # Next.js এর জন্য সাধারণত npm start ব্যবহার করা হয়
             pm2 delete dashboard || true
-
             pm2 start npm --name "dashboard" -- start -- -p 3000
-
             pm2 save
- 
