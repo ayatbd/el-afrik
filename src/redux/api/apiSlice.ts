@@ -1,7 +1,6 @@
 import { createApi, fetchBaseQuery, BaseQueryApi, FetchArgs } from '@reduxjs/toolkit/query/react';
 import { setCredentials, logout } from '../features/auth/authSlice';
 import { Mutex } from 'async-mutex';
-import Cookies from 'js-cookie';
 
 const mutex = new Mutex();
 
@@ -23,7 +22,7 @@ interface RootState {
 // http://15.223.245.199/api/v1
 
 const baseQuery = fetchBaseQuery({
-    baseUrl: 'http://10.10.20.34:5000/api/v1',
+    baseUrl: 'http://15.223.245.199/api/v1',
     prepareHeaders: (headers, { getState }) => {
         const state = getState() as RootState;
         let token = state.auth.accessToken;
