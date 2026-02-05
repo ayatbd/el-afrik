@@ -35,8 +35,6 @@ interface ProductFormValues {
   status: string;
   points: number;
   description: string;
-  promo: string;
-  isFavourite: boolean;
   isFeatured: boolean;
 }
 
@@ -63,7 +61,6 @@ export default function AddProductPage() {
       name: "",
       discount_type: "percentage", // Default value
       discount_amount: 0,
-      isFavourite: false,
       isFeatured: false,
     },
   });
@@ -109,8 +106,7 @@ export default function AddProductPage() {
 
       // 2. Data Transformation (Matching your JSON structure)
       // Extract flattened discount fields to create the object
-      const { discount_type, discount_amount, points, promo, ...rest } =
-        formData;
+      const { discount_type, discount_amount, points, ...rest } = formData;
 
       const bodyObj = {
         ...rest,
@@ -123,8 +119,7 @@ export default function AddProductPage() {
           discount_type,
           discount_amount: Number(discount_amount),
         },
-        // Include promo only if it has a value
-        ...(promo && { promo }),
+        isRedem: true,
       };
 
       data.append("body", JSON.stringify(bodyObj));
@@ -452,15 +447,6 @@ export default function AddProductPage() {
 
         {/* --- Extra Options --- */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-end">
-          <div className="space-y-3 lg:col-span-2">
-            <Label className="text-gray-500">Promo Code</Label>
-            <Input
-              {...register("promo")}
-              placeholder="e.g. NEWYEAR2026"
-              className="h-12 border-gray-200 bg-white"
-            />
-          </div>
-
           {/* Checkboxes for Features */}
           <div className="flex items-center space-x-2 h-12 pb-2">
             <Controller
@@ -478,28 +464,6 @@ export default function AddProductPage() {
                     className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-gray-600"
                   >
                     Mark as Featured
-                  </label>
-                </div>
-              )}
-            />
-          </div>
-
-          <div className="flex items-center space-x-2 h-12 pb-2">
-            <Controller
-              name="isFavourite"
-              control={control}
-              render={({ field }) => (
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="isFavourite"
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                  <label
-                    htmlFor="isFavourite"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-gray-600"
-                  >
-                    Mark as Favourite
                   </label>
                 </div>
               )}

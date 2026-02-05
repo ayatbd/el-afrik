@@ -78,7 +78,7 @@ export default function MyProfilePage() {
     e.preventDefault();
     try {
       const data = new FormData();
-      data.append("data", JSON.stringify(formData)); // Adjust key 'data' based on backend
+      data.append("body", JSON.stringify(formData)); // Adjust key 'data' based on backend
       if (imageFile) {
         data.append("image", imageFile);
       }

@@ -3,7 +3,10 @@ import { apiSlice } from "./apiSlice";
 export const notificationApi = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
         getNotification: builder.query({
-            query: () => "/notification/my-notifications",
+            query: (params) => ({
+                url: "/notification/my-notifications",
+                params,
+            }),
             providesTags: ["Notification"],
         }),
         markNotificationRead: builder.mutation({

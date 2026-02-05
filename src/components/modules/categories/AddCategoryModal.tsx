@@ -108,7 +108,7 @@ export default function AddCategoryModal() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="bg-[#00B25D] hover:bg-[#009e52] cursor-pointer">
-          + Create New Ad
+          + Add a category
         </Button>
       </DialogTrigger>
 
