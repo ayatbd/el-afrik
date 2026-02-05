@@ -22,7 +22,7 @@ interface RootState {
 // http://15.223.245.199/api/v1
 
 const baseQuery = fetchBaseQuery({
-    baseUrl: 'http://15.223.245.199:5000/api/v1',
+    baseUrl: 'http://15.223.245.199/api/v1',
     prepareHeaders: (headers, { getState }) => {
         const state = getState() as RootState;
         let token = state.auth.accessToken;
