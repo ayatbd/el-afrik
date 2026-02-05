@@ -119,7 +119,6 @@ export default function AddProductPage() {
           discount_type,
           discount_amount: Number(discount_amount),
         },
-        isRedem: true,
       };
 
       data.append("body", JSON.stringify(bodyObj));

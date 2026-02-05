@@ -21,7 +21,7 @@ import {
 const NotificationsPage = () => {
   // --- State ---
   const [page, setPage] = useState(1);
-  const limit = 10;
+  const limit = 15;
 
   // --- RTK Query ---
   const {
@@ -35,11 +35,12 @@ const NotificationsPage = () => {
 
   const [markRead] = useMarkNotificationReadMutation();
 
-  const notifications = response?.data || [];
+  const notifications = response?.data.notifications || [];
 
   // Pagination Logic (Fallback if backend doesn't send meta)
-  const meta = response?.meta;
-  const totalPages = meta?.totalPage || 1;
+  const meta = response?.data.pagination;
+  console.log(meta);
+  const totalPages = meta?.totalPages || 1;
   const hasNextPage = meta ? page < totalPages : notifications.length === limit;
   const hasPrevPage = page > 1;
 

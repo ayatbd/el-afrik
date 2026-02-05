@@ -45,7 +45,7 @@ interface ProductFormValues {
   points: number;
   description: string;
   promo: string;
-  isFavourite: boolean;
+  isRedem: boolean;
   isFeatured: boolean;
 }
 
@@ -69,7 +69,7 @@ interface ProductData {
     discount_amount: number;
   };
   promo?: string;
-  isFavourite?: boolean;
+  isRedem?: boolean;
   isFeatured?: boolean;
 }
 
@@ -97,7 +97,7 @@ export default function EditProductModal({
       name: "",
       discount_type: "percentage",
       discount_amount: 0,
-      isFavourite: false,
+      isRedem: false,
       isFeatured: false,
     },
   });
@@ -131,7 +131,7 @@ export default function EditProductModal({
         readyTime: product.readyTime || "",
         description: product.description || "",
         promo: product.promo || "",
-        isFavourite: product.isFavourite || false,
+        isRedem: product.isRedem || false,
         isFeatured: product.isFeatured || false,
 
         // 2. Use the safely extracted category ID
@@ -453,14 +453,6 @@ export default function EditProductModal({
 
           {/* --- Extra Options --- */}
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-end">
-            <div className="space-y-3 lg:col-span-2">
-              <Label className="text-gray-500">Promo Code</Label>
-              <Input
-                {...register("promo")}
-                className="h-12 border-gray-200 bg-white"
-              />
-            </div>
-
             <div className="flex items-center space-x-2 h-12 pb-2">
               <Controller
                 name="isFeatured"
@@ -485,20 +477,20 @@ export default function EditProductModal({
 
             <div className="flex items-center space-x-2 h-12 pb-2">
               <Controller
-                name="isFavourite"
+                name="isRedem"
                 control={control}
                 render={({ field }) => (
                   <div className="flex items-center space-x-2">
                     <Checkbox
-                      id="isFavourite"
+                      id="isRedem"
                       checked={field.value}
                       onCheckedChange={field.onChange}
                     />
                     <label
-                      htmlFor="isFavourite"
+                      htmlFor="isRedem"
                       className="text-sm font-medium text-gray-600"
                     >
-                      Mark as Favourite
+                      Mark as Redeem
                     </label>
                   </div>
                 )}
