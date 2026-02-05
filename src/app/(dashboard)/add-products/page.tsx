@@ -306,7 +306,7 @@ export default function AddProductPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="percentage">Percentage (%)</SelectItem>
-                    <SelectItem value="discount_amount">Flat Amount</SelectItem>
+                    <SelectItem value="fixed">Flat Amount</SelectItem>
                   </SelectContent>
                 </Select>
               )}
