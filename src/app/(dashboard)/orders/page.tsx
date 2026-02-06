@@ -8,6 +8,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ArrowUpDown,
+  Pencil, // Import Pencil Icon
 } from "lucide-react";
 
 import {
@@ -22,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useGetOrdersQuery } from "@/redux/api/ordersApi";
+import { UpdateOrderModal } from "@/components/modules/orders/EditStatusModal";
 
 function useDebounce(value: string, delay: number) {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -44,7 +46,14 @@ export default function OrdersPage() {
   const [sortOrder, setSortOrder] = useState("desc");
   const debouncedSearch = useDebounce(searchTerm, 500);
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<{
+    id: string;
+    status: string;
+  } | null>(null);
+
   const { data, isLoading } = useGetOrdersQuery([
+    // ... params
     { name: "page", value: currentPage },
     { name: "limit", value: limit },
     { name: "search", value: debouncedSearch },
@@ -119,6 +128,11 @@ export default function OrdersPage() {
     return pages;
   };
 
+  const handleEditClick = (order: any) => {
+    setSelectedOrder({ id: order._id, status: order.orderStatus });
+    setIsModalOpen(true);
+  };
+
   if (isLoading) {
     return (
       <div className="h-[80vh] w-full flex items-center justify-center">
@@ -129,6 +143,12 @@ export default function OrdersPage() {
 
   return (
     <div className="min-h-screen w-full bg-[#F8F9FA] p-6 md:p-10 font-sans text-gray-900">
+      <UpdateOrderModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        orderId={selectedOrder?.id || null}
+        currentStatus={selectedOrder?.status || ""}
+      />
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
         <div className="flex items-center gap-4 w-full md:w-auto">
@@ -212,6 +232,7 @@ export default function OrdersPage() {
         <Table>
           <TableHeader>
             <TableRow className="bg-gray-50 border-b hover:bg-gray-50">
+              {/* ... other headers ... */}
               <TableHead className="text-gray-900 font-semibold py-4 pl-6">
                 Order Info
               </TableHead>
@@ -319,14 +340,28 @@ export default function OrdersPage() {
                   </TableCell>
 
                   <TableCell className="py-6 align-middle text-right pr-6">
-                    <Link href={`/orders/${order._id}`}>
+                    <div className="flex items-center justify-end gap-2">
+                      {/* EDIT STATUS BUTTON */}
                       <Button
                         size="sm"
-                        className="bg-[#00C058] hover:bg-[#00a84d] text-white"
+                        variant="outline"
+                        className="h-8 w-8 p-0 border-gray-300"
+                        onClick={() => handleEditClick(order)}
+                        title="Update Status"
                       >
-                        View Details
+                        <Pencil className="h-4 w-4 text-gray-600" />
                       </Button>
-                    </Link>
+
+                      {/* VIEW DETAILS BUTTON */}
+                      <Link href={`/orders/${order._id}`}>
+                        <Button
+                          size="sm"
+                          className="bg-[#00C058] hover:bg-[#00a84d] text-white h-8 text-xs"
+                        >
+                          View Details
+                        </Button>
+                      </Link>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
