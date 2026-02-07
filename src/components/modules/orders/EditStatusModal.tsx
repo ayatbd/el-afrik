@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from "react";
 import {
   Dialog,
@@ -11,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label"; // or generic label
 import { Textarea } from "@/components/ui/textarea"; // or generic textarea
 import { useUpdateOrderStatusMutation } from "@/redux/api/ordersApi";
-import { toast } from "sonner"; // Assuming you use sonner or similar for toasts
+import { toast } from "react-toastify";
 
 interface UpdateOrderModalProps {
   isOpen: boolean;
@@ -24,20 +25,19 @@ export function UpdateOrderModal({
   isOpen,
   onClose,
   orderId,
-  currentStatus,
 }: UpdateOrderModalProps) {
   const [status, setStatus] = useState<string>("");
   const [note, setNote] = useState("");
   const [updateOrderStatus, { isLoading }] = useUpdateOrderStatusMutation();
 
   // Reset state when modal opens
-  useEffect(() => {
-    if (isOpen) {
-      // Default to current status or empty
-      setStatus(currentStatus || "");
-      setNote("");
-    }
-  }, [isOpen, currentStatus]);
+  //   useEffect(() => {
+  //     if (isOpen) {
+  //       // Default to current status or empty
+  //       setStatus(currentStatus || "");
+  //       setNote("");
+  //     }
+  //   }, [isOpen, currentStatus]);
 
   const handleSubmit = async () => {
     if (!orderId || !status) return;
@@ -51,9 +51,10 @@ export function UpdateOrderModal({
 
       toast.success("Order status updated successfully");
       onClose();
-    } catch (error) {
-      console.error("Failed to update order:", error);
-      toast.error("Failed to update status");
+    } catch (error: any) {
+      const message = error?.data?.message || "Something Went Wrong.";
+      //console.error("Failed to update order:", error.data.message);
+      toast.error(message);
     }
   };
 

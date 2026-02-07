@@ -30,11 +30,14 @@ export const ordersApi = apiSlice.injectEndpoints({
             providesTags: ["Stats"],
         }),
         updateOrderStatus: builder.mutation({
-            query: ({ id, status, note }) => ({
-                url: `/order/admin/${id}/status`,
-                method: "PATCH",
-                body: { status, note }, // Added note here
-            }),
+            query: ({ id, status, note }) => {
+                // console.log({ id, status, note });
+                return {
+                    url: `/order/admin/${id}/status`,
+                    method: "PATCH",
+                    body: { status, note }, // Added note here
+                }
+            },
             invalidatesTags: ["Orders", "Stats"],
         }),
     }),

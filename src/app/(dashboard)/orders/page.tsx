@@ -8,7 +8,8 @@ import {
   ChevronLeft,
   ChevronRight,
   ArrowUpDown,
-  Pencil, // Import Pencil Icon
+  Pencil,
+  Eye,
 } from "lucide-react";
 
 import {
@@ -25,6 +26,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useGetOrdersQuery } from "@/redux/api/ordersApi";
 import { UpdateOrderModal } from "@/components/modules/orders/EditStatusModal";
 
+// Debounce Hook
 function useDebounce(value: string, delay: number) {
   const [debouncedValue, setDebouncedValue] = useState(value);
   useEffect(() => {
@@ -37,6 +39,7 @@ function useDebounce(value: string, delay: number) {
 }
 
 export default function OrdersPage() {
+  // State Management
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
@@ -52,8 +55,8 @@ export default function OrdersPage() {
     status: string;
   } | null>(null);
 
-  const { data, isLoading } = useGetOrdersQuery([
-    // ... params
+  // RTK Query Fetch
+  const { data, isLoading, isFetching } = useGetOrdersQuery([
     { name: "page", value: currentPage },
     { name: "limit", value: limit },
     { name: "search", value: debouncedSearch },
@@ -63,14 +66,21 @@ export default function OrdersPage() {
     { name: "sortBy", value: "createdAt" },
     { name: "sortOrder", value: sortOrder },
   ]);
+
   const orders = data?.data?.result || data?.data?.orders || [];
 
-  // FIX 1: Standardize the property name (totalPages)
-  const meta = data?.data?.meta || { total: 0, totalPages: 1 };
-  // console.log(orders);
+  // --- 1. RESOLVED: Robust Meta Calculation ---
+  const meta = data?.data?.pagination || { total: 0, totalPages: 0 };
 
+  // Calculate total pages safely.
+  // If api provides totalPages, use it. If not, calculate from total items.
+  const totalItems = meta.total || 0;
+  const calculatedPages = Math.ceil(totalItems / limit);
+  const totalPages = meta.totalPages || calculatedPages || 1;
+
+  // --- 2. RESOLVED: Handler checks against calculated totalPages ---
   const handlePageChange = (newPage: number) => {
-    if (newPage >= 1 && newPage <= meta.totalPages) {
+    if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage);
     }
   };
@@ -99,32 +109,23 @@ export default function OrdersPage() {
     }
   };
 
-  // FIX 2: Improved Logic to prevent overflowing total pages
+  // --- 3. RESOLVED: Visible Pages Logic ---
   const getVisiblePages = () => {
-    const total = meta.totalPages;
     const maxVisible = 5;
+    // Ensure startPage is at least 1
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+    let endPage = startPage + maxVisible - 1;
 
-    if (total <= maxVisible) {
-      // If total pages are less than max, return all [1, 2, 3...]
-      return Array.from({ length: total }, (_, i) => i + 1);
-    }
-
-    let start = Math.max(1, currentPage - 2);
-    let end = Math.min(total, currentPage + 2);
-
-    // Adjust if we are near the start
-    if (currentPage <= 3) {
-      end = Math.min(5, total); // Ensure end doesn't exceed total
-      start = 1;
-    }
-    // Adjust if we are near the end
-    else if (currentPage >= total - 2) {
-      start = Math.max(1, total - 4); // Ensure start doesn't go below 1
-      end = total;
+    // Adjust if endPage exceeds totalPages
+    if (endPage > totalPages) {
+      endPage = totalPages;
+      startPage = Math.max(1, endPage - maxVisible + 1);
     }
 
     const pages = [];
-    for (let i = start; i <= end; i++) pages.push(i);
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
     return pages;
   };
 
@@ -133,6 +134,8 @@ export default function OrdersPage() {
     setIsModalOpen(true);
   };
 
+  // Optional: Loading state for initial load only.
+  // Pagination updates usually feel better if the table stays visible (with opacity) rather than full spinner.
   if (isLoading) {
     return (
       <div className="h-[80vh] w-full flex items-center justify-center">
@@ -149,6 +152,7 @@ export default function OrdersPage() {
         orderId={selectedOrder?.id || null}
         currentStatus={selectedOrder?.status || ""}
       />
+
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
         <div className="flex items-center gap-4 w-full md:w-auto">
@@ -164,7 +168,7 @@ export default function OrdersPage() {
         </div>
       </div>
 
-      {/* --- Filters Toolbar --- */}
+      {/* Filters Toolbar */}
       <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <div className="relative">
@@ -181,7 +185,7 @@ export default function OrdersPage() {
           </div>
 
           <select
-            className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             value={orderStatus}
             onChange={(e) => handleFilterChange(setOrderStatus, e.target.value)}
           >
@@ -192,7 +196,7 @@ export default function OrdersPage() {
           </select>
 
           <select
-            className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             value={orderType}
             onChange={(e) => handleFilterChange(setOrderType, e.target.value)}
           >
@@ -203,7 +207,7 @@ export default function OrdersPage() {
           </select>
 
           <select
-            className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             value={paymentStatus}
             onChange={(e) =>
               handleFilterChange(setPaymentStatus, e.target.value)
@@ -227,12 +231,13 @@ export default function OrdersPage() {
         </div>
       </div>
 
-      {/* --- Table Section --- */}
-      <div className="w-full bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      {/* Table Section */}
+      <div
+        className={`w-full bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden ${isFetching ? "opacity-70 pointer-events-none" : ""}`}
+      >
         <Table>
           <TableHeader>
             <TableRow className="bg-gray-50 border-b hover:bg-gray-50">
-              {/* ... other headers ... */}
               <TableHead className="text-gray-900 font-semibold py-4 pl-6">
                 Order Info
               </TableHead>
@@ -299,16 +304,24 @@ export default function OrdersPage() {
                     <div className="flex items-center gap-3">
                       <Avatar className="h-9 w-9">
                         <AvatarImage
-                          src={order.receiverAvatar}
+                          src={
+                            typeof order.user === "object"
+                              ? order.receiverAvatar
+                              : undefined
+                          }
                           className="object-cover"
                         />
                         <AvatarFallback>
-                          {order.user?.firstName?.charAt(0)}
+                          {typeof order.user === "object"
+                            ? order.user?.firstName?.charAt(0)
+                            : "U"}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col">
                         <span className="text-gray-900 text-sm font-medium">
-                          {order.user?.firstName} {order.user?.lastName}
+                          {typeof order.user === "object"
+                            ? `${order.user?.firstName} ${order.user?.lastName}`
+                            : "Refreshing..."}
                         </span>
                         <span className="text-gray-500 text-xs">
                           {order.customerPhone}
@@ -341,7 +354,6 @@ export default function OrdersPage() {
 
                   <TableCell className="py-6 align-middle text-right pr-6">
                     <div className="flex items-center justify-end gap-2">
-                      {/* EDIT STATUS BUTTON */}
                       <Button
                         size="sm"
                         variant="outline"
@@ -352,13 +364,13 @@ export default function OrdersPage() {
                         <Pencil className="h-4 w-4 text-gray-600" />
                       </Button>
 
-                      {/* VIEW DETAILS BUTTON */}
                       <Link href={`/orders/${order._id}`}>
                         <Button
                           size="sm"
-                          className="bg-[#00C058] hover:bg-[#00a84d] text-white h-8 text-xs"
+                          variant="outline"
+                          className="h-8 w-8 p-0 border-gray-300"
                         >
-                          View Details
+                          <Eye className="h-4 w-4 text-gray-600" />
                         </Button>
                       </Link>
                     </div>
@@ -378,14 +390,15 @@ export default function OrdersPage() {
           </TableBody>
         </Table>
 
-        {/* --- Pagination Footer --- */}
-        {!isLoading && meta.totalPages > 1 && (
+        {/* --- 4. RESOLVED: Pagination Footer --- */}
+        {/* Only show if we have data and more than 1 page */}
+        {!isLoading && totalPages > 1 && (
           <div className="mt-8 flex items-center justify-center gap-2 mb-8">
             <Button
               variant="outline"
               size="icon"
               onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
+              disabled={currentPage <= 1}
               className="h-9 w-9 border-gray-200 hover:bg-gray-100 hover:text-black"
             >
               <ChevronLeft className="h-4 w-4" />
@@ -396,7 +409,6 @@ export default function OrdersPage() {
                 <button
                   key={page}
                   onClick={() => handlePageChange(page)}
-                  // FIX 3: Corrected check (page === currentPage)
                   className={`h-9 w-9 rounded-md text-sm font-medium transition-all
                   ${
                     page === currentPage
@@ -413,7 +425,7 @@ export default function OrdersPage() {
               variant="outline"
               size="icon"
               onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === meta.totalPages}
+              disabled={currentPage >= totalPages}
               className="h-9 w-9 border-gray-200 hover:bg-gray-100 hover:text-black"
             >
               <ChevronRight className="h-4 w-4" />
