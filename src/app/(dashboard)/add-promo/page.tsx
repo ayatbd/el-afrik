@@ -17,8 +17,10 @@ import {
 import { useAddPromoMutation } from "@/redux/api/PromoApi";
 import { useGetProductsQuery } from "@/redux/api/productApi";
 import Swal from "sweetalert2";
+import { useRouter } from "next/navigation";
 
 export default function AddProductPage() {
+  const router = useRouter();
   // 1. API Hooks
   const [addPromo, { isLoading: isSubmitting }] = useAddPromoMutation();
   const { data: productsData, isLoading: isLoadingProducts } =
@@ -88,6 +90,7 @@ export default function AddProductPage() {
           discountType: "",
           discountAmount: "",
         });
+        router.push("/special-promos");
       }
     } catch (err: any) {
       console.error(err);
@@ -205,7 +208,7 @@ export default function AddProductPage() {
               {/* Discount Type */}
               <div className="space-y-3">
                 <Label className="text-gray-600 font-medium">
-                  Discount Type
+                  Discount Type <span className="text-red-500">*</span>
                 </Label>
                 <Select
                   value={formData.discountType}
