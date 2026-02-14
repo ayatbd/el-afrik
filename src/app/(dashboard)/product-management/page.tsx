@@ -119,8 +119,7 @@ export default function ManageProductsPage() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [deleteProduct] = useDeleteProductMutation();
 
-  const { data: response, isLoading: isCategoriesLoading } =
-    useGetCategoriesQuery(undefined);
+  const { data: response } = useGetCategoriesQuery(undefined);
   const categories = response?.data?.result || [];
 
   // --- RTK Query ---
@@ -179,10 +178,10 @@ export default function ManageProductsPage() {
     setCurrentPage(1);
   };
 
-  const handleFavoriteChange = (value: string) => {
-    setFavoriteFilter(value);
-    setCurrentPage(1);
-  };
+  // const handleFavoriteChange = (value: string) => {
+  //   setFavoriteFilter(value);
+  //   setCurrentPage(1);
+  // };
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= meta.totalPage) {

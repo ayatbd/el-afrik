@@ -2,14 +2,12 @@
 
 import { useState, useEffect } from "react";
 import {
-  Search,
   Filter,
   Calendar,
   Users,
   Phone,
   Mail,
   CheckCircle,
-  XCircle,
   Clock,
   Download,
   Loader2,
@@ -29,7 +27,6 @@ import {
   useGetCateringBookingQuery,
   useLazyDownloadInvoiceQuery,
 } from "@/redux/api/cateringBookingApi";
-import { FullScreenLoader } from "@/app/loading";
 import { toast } from "sonner";
 
 // --- 1. Debounce Hook ---

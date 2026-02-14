@@ -80,7 +80,7 @@ export default function EditFaqModal({ faqData }: EditFaqModalProps) {
       <DialogTrigger asChild>
         {/* Trigger Button - Styled typically as an icon button for Edit */}
         <Button
-          variant="ghost"
+          variant="outline"
           size="icon"
           className="hover:bg-green-50 text-gray-500 hover:text-[#00B25D]"
         >

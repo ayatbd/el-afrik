@@ -48,8 +48,7 @@ export default function CategoryPage() {
   const { data, isLoading, isFetching } = useGetCategoriesQuery({
     page: currentPage,
     limit: 10,
-    // Pass filter to backend (Assuming backend accepts 'searchTerm' or 'categoryName')
-    // searchTerm: categoryFilter !== "all" ? categoryFilter : undefined,
+    categoryName: categoryFilter !== "all" ? categoryFilter : "",
   });
 
   const [deleteCategory] = useDeleteCategoryMutation();
@@ -171,19 +170,14 @@ export default function CategoryPage() {
 
       <div className="flex flex-col md:flex-row justify-between md:items-center mb-6 gap-4">
         <div className="flex items-center gap-4 w-full md:w-auto">
-          {/* 
-             NOTE: Using a Select to filter by category name from the *current list* 
-             is tricky because the list changes when you filter. 
-             If you want to filter globally, a Search Input is usually better UX.
-          */}
+          {/* Category Filter */}
           <Select value={categoryFilter} onValueChange={handleCategoryChange}>
             <SelectTrigger className="w-45 h-11 border-gray-300 bg-white text-gray-500">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Categories</SelectItem>
-              {/* This map might shrink if you filter. Consider fetching all categories separately for the dropdown options if needed. */}
-              {categories?.map((category: Category) => (
+              {categories?.map((category: any) => (
                 <SelectItem key={category._id} value={category.categoryName}>
                   {category.categoryName}
                 </SelectItem>

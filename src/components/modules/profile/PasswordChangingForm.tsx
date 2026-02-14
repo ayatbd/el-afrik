@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Eye, EyeOff, KeyRound, Loader2 } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "react-toastify";
 
 export default function PasswordChangeForm() {
   // State

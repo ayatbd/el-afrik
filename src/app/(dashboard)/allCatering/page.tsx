@@ -159,18 +159,6 @@ const CateringTable = () => {
               Manage your event packages and menus.
             </p>
           </div>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-            <Input
-              placeholder="Search 'birthday'"
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="pl-9"
-            />
-          </div>
         </div>
         <Link href="/add-catering">
           <Button className="bg-[#00B25D] hover:bg-[#009e52] text-white">

@@ -172,7 +172,7 @@ export default function UserManagementPage() {
             <option value="in-progress">In Progress</option>
           </select>
           {/* Combined Search Input */}
-          <div className="relative w-full md:w-80">
+          <div className="relative w-full md:w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
             <Input
               value={searchTerm}

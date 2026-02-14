@@ -1,10 +1,10 @@
 "use client";
+import { FullScreenLoader } from "@/app/loading";
 import AddFaqModal from "@/components/modules/faq/AddFaqModal";
 import EditFaqModal from "@/components/modules/faq/EditFaqModal";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useDeleteFaqMutation, useGetFaqQuery } from "@/redux/api/faqApi";
-import { Loader2, Search, Trash2 } from "lucide-react";
+import { Loader2, Trash2 } from "lucide-react";
 import { toast } from "react-toastify";
 
 interface FAQ {
@@ -22,11 +22,7 @@ const FaqPage = () => {
 
   // 2. Handle Loading State FIRST
   if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        Loading...
-      </div>
-    );
+    return <FullScreenLoader />;
   }
 
   // 3. Handle Error State
@@ -40,7 +36,7 @@ const FaqPage = () => {
   // Using optional chaining just in case structure differs
   const faqsData = faqs?.data?.result || [];
 
-  console.log("Faq Data:", faqsData);
+  // console.log("Faq Data:", faqsData);
 
   // delete handler
   const handleDelete = async (id: string) => {
@@ -56,7 +52,7 @@ const FaqPage = () => {
   };
 
   return (
-    <div className="p-6 md:p-10 max-w-6xl mx-auto min-h-screen">
+    <div className="p-6 md:p-10 md:min-w-7xl max-w-6xl mx-auto min-h-screen">
       {/* --- Header --- */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
@@ -70,11 +66,11 @@ const FaqPage = () => {
 
       {/* --- Search Bar --- */}
       <div className="relative mb-6">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+        {/* <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
         <Input
           placeholder="Search FAQs..."
           className="pl-10 h-11 bg-white border-gray-200"
-        />
+        /> */}
       </div>
 
       {/* --- FAQ List --- */}
@@ -100,17 +96,11 @@ const FaqPage = () => {
                 <EditFaqModal faqData={faq} />
                 <Button
                   onClick={() => handleDelete(faq._id)}
-                  type="button"
                   variant="outline"
-                  size="sm"
+                  size="icon"
                   className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
                 >
-                  <Trash2 className="h-4 w-4 mr-1" />{" "}
-                  {isDeleting ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    "Delete"
-                  )}
+                  <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
             </div>

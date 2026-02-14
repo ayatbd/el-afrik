@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import UserOverview from "../modules/dashboard-home/UserOverview";
 import SalesMatricData from "../modules/dashboard-home/SalesMatricData";
 import { useGetDashboardDataQuery } from "@/redux/api/dashboardDataApi";
-import { useGetOrdersQuery } from "@/redux/api/ordersApi";
 import Items from "../modules/dashboard-home/Items";
 
 export default function Main() {
@@ -25,12 +24,6 @@ export default function Main() {
       value: lifetimeSummary?.totalEarnings?.toFixed(2),
     },
   ];
-  // const bottomStats = [
-  //   { label: "Year", value: yearlySummary?.year || "0" },
-  //   { label: "Total Users", value: yearlySummary?.totalUsersInYear },
-  //   { label: "Total Sales", value: yearlySummary?.totalSalesInYear },
-  //   { label: "Total Earnings", value: yearlySummary?.totalEarningsInYear },
-  // ];
   if (isLoading) {
     return (
       <div className="h-[80vh] w-full flex items-center justify-center">
@@ -58,25 +51,6 @@ export default function Main() {
           ))}
         </div>
       </div>
-      {/* lifetimeSummary */}
-      {/* <div>
-        <h2 className="font-semibold text-gray-700 mb-4">Yearly Summary</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
-          {bottomStats?.map((stat, idx) => (
-            <Card key={idx} className="shadow-sm border-gray-100">
-              <CardContent className="flex flex-col items-center justify-center py-6 text-center">
-                <span className="text-gray-500 text-sm font-medium mb-2">
-                  {stat.label}
-                </span>
-                <span className="text-3xl font-bold text-gray-800">
-                  {stat.value}
-                </span>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div> */}
-      {/* <UserOverview /> */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <Card className="shadow-sm border-gray-100 space-y-5">
           <CardHeader className="flex md:flex-row flex-col items-center gap-y-8 justify-between pb-2 py-2"></CardHeader>
