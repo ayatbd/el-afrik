@@ -190,82 +190,87 @@ export default function CategoryPage() {
       </div>
 
       <div className="bg-transparent overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow className="border-b-0 hover:bg-transparent">
-              <TableHead className="text-gray-500 font-medium">S. no</TableHead>
-              <TableHead className="text-gray-500 font-medium">
-                Category Image
-              </TableHead>
-              <TableHead className="text-gray-500 font-medium">
-                Category Name
-              </TableHead>
-              <TableHead className="text-center text-gray-500 font-medium">
-                Action
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading || isFetching ? (
-              <TableRow>
-                <TableCell colSpan={4} className="h-24 text-center">
-                  <div className="flex justify-center items-center gap-2 text-gray-500">
-                    <Loader2 className="h-5 w-5 animate-spin" /> Loading data...
-                  </div>
-                </TableCell>
+        <div className="min-h-[50vh]">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-b-0 hover:bg-transparent">
+                <TableHead className="text-gray-500 font-medium">
+                  S. no
+                </TableHead>
+                <TableHead className="text-gray-500 font-medium">
+                  Category Image
+                </TableHead>
+                <TableHead className="text-gray-500 font-medium">
+                  Category Name
+                </TableHead>
+                <TableHead className="text-center text-gray-500 font-medium">
+                  Action
+                </TableHead>
               </TableRow>
-            ) : categories.length > 0 ? (
-              categories?.map((category: Category, index: number) => (
-                <TableRow
-                  key={category._id}
-                  className="border-b border-gray-100 hover:bg-white/50"
-                >
-                  <TableCell className="py-4 text-gray-500">
-                    {(currentPage - 1) * 10 + index + 1}.
-                  </TableCell>
-
-                  <TableCell className="py-4">
-                    <Avatar className="h-10 w-10 rounded-md">
-                      <AvatarImage
-                        src={category.image}
-                        alt={category.categoryName}
-                        className="object-cover"
-                      />
-                      <AvatarFallback className="rounded-md uppercase">
-                        {category.categoryName?.slice(0, 2)}
-                      </AvatarFallback>
-                    </Avatar>
-                  </TableCell>
-
-                  <TableCell className="py-4 text-gray-500">
-                    {category.categoryName}
-                  </TableCell>
-
-                  <TableCell className="py-4">
-                    <div className="flex items-center justify-center gap-5">
-                      <EditCategoryModal category={category} />
-                      <button
-                        onClick={() => handleDelete(category._id)}
-                        className="cursor-pointer text-red-500 hover:text-red-900 transition-colors"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+            </TableHeader>
+            <TableBody>
+              {isLoading || isFetching ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="h-24 text-center">
+                    <div className="flex justify-center items-center gap-2 text-gray-500">
+                      <Loader2 className="h-5 w-5 animate-spin" /> Loading
+                      data...
                     </div>
                   </TableCell>
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={4}
-                  className="h-24 text-center text-gray-500"
-                >
-                  No categories found.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              ) : categories.length > 0 ? (
+                categories?.map((category: Category, index: number) => (
+                  <TableRow
+                    key={category._id}
+                    className="border-b border-gray-100 hover:bg-white/50"
+                  >
+                    <TableCell className="py-4 text-gray-500">
+                      {(currentPage - 1) * 10 + index + 1}.
+                    </TableCell>
+
+                    <TableCell className="py-4">
+                      <Avatar className="h-10 w-10 rounded-md">
+                        <AvatarImage
+                          src={category.image}
+                          alt={category.categoryName}
+                          className="object-cover"
+                        />
+                        <AvatarFallback className="rounded-md uppercase">
+                          {category.categoryName?.slice(0, 2)}
+                        </AvatarFallback>
+                      </Avatar>
+                    </TableCell>
+
+                    <TableCell className="py-4 text-gray-500">
+                      {category.categoryName}
+                    </TableCell>
+
+                    <TableCell className="py-4">
+                      <div className="flex items-center justify-center gap-5">
+                        <EditCategoryModal category={category} />
+                        <button
+                          onClick={() => handleDelete(category._id)}
+                          className="cursor-pointer text-red-500 hover:text-red-900 transition-colors"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={4}
+                    className="h-24 text-center text-gray-500"
+                  >
+                    No categories found.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
 
         {/* --- Pagination Footer --- */}
         {!isLoading && meta.totalPage > 1 && (

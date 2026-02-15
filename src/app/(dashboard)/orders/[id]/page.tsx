@@ -49,6 +49,7 @@ const OrderDetails = () => {
   const { data: allOrder, isLoading, error } = useGetSingleOrderQuery(id);
 
   const order = allOrder?.data || {};
+  console.log(order);
 
   if (error || !order) {
     return (
@@ -121,17 +122,7 @@ const OrderDetails = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            {/* <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
-              <Printer size={16} /> Print Invoice
-            </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-red-50 border border-red-200 rounded-lg text-sm font-medium text-red-600 hover:bg-red-100 transition">
-              <XCircle size={16} /> Cancel
-            </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 border border-indigo-600 rounded-lg text-sm font-medium text-white hover:bg-indigo-700 transition shadow-sm">
-              <CheckCircle size={16} /> Mark Completed
-            </button> */}
-          </div>
+          <div className="flex items-center gap-3"></div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -245,10 +236,10 @@ const OrderDetails = () => {
                 <div className="flex items-center gap-3 text-sm text-gray-600">
                   <Mail size={16} className="text-gray-400" />
                   <a
-                    href={`mailto:${order?.customerEmail}`}
+                    href={`mailto:${order?.email}`}
                     className="hover:text-indigo-600"
                   >
-                    {order?.customerEmail}
+                    {order?.user?.email}
                   </a>
                 </div>
                 <div className="flex items-center gap-3 text-sm text-gray-600">
@@ -263,7 +254,7 @@ const OrderDetails = () => {
               </div>
 
               {/* Linked User Account (if different/available) */}
-              <div className="mt-6 pt-4 border-t border-gray-100">
+              {/* <div className="mt-6 pt-4 border-t border-gray-100">
                 <p className="text-xs font-semibold text-gray-400 uppercase mb-3">
                   Linked User Account
                 </p>
@@ -284,7 +275,7 @@ const OrderDetails = () => {
                     </p>
                   </div>
                 </div>
-              </div>
+              </div> */}
             </div>
 
             {/* Delivery/Pickup Info */}

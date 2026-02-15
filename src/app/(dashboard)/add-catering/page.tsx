@@ -2,6 +2,7 @@
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import { Upload, Plus, Trash2, Loader2, X } from "lucide-react";
 import { useAddCateringMutation } from "@/redux/api/cateringApi";
+import { toast } from "react-toastify";
 
 // Interface for form data state
 interface CateringFormData {
@@ -99,7 +100,7 @@ const AddCatering = () => {
       // 3. Send Request
       const res = await addCatering(formDataToSend).unwrap();
       console.log("Success:", res);
-      alert("Catering Menu Added Successfully!");
+      toast.success("Catering Menu Added Successfully!");
 
       // Reset Form
       setFormData({

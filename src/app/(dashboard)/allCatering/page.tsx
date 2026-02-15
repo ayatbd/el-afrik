@@ -26,7 +26,6 @@ import {
   Loader2,
   ChevronLeft,
   ChevronRight,
-  Search,
 } from "lucide-react";
 import {
   useDeleteCateringMutation,

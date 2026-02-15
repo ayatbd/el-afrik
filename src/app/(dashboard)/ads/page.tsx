@@ -15,15 +15,32 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Tag, AlertCircle, Trash2 } from "lucide-react";
+import {
+  Tag,
+  AlertCircle,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { toast } from "react-toastify";
 import { useDeleteAdMutation, useGetAdsQuery } from "@/redux/api/adsApi";
 import AdAdditionModal from "@/components/modules/ads/AdAdditionModal";
+import { useState } from "react";
 
 const AllAdsPage = () => {
-  const { data: response, isLoading, isError } = useGetAdsQuery(undefined);
-  const allAds = response?.data || [];
-  //   console.log(allAds);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const {
+    data: response,
+    isLoading,
+    isError,
+  } = useGetAdsQuery({
+    page: currentPage,
+    limit: 10,
+  });
+  const allAds = response?.data?.result || [];
+
+  const meta = response?.data?.meta;
 
   const [deleteAd] = useDeleteAdMutation();
 
@@ -37,6 +54,39 @@ const AllAdsPage = () => {
           ?.message as string | undefined) || "Failed to delete Ad";
       toast.error(errorMessage);
     }
+  };
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= meta.totalPage) {
+      setCurrentPage(page);
+    }
+  };
+
+  const getVisiblePages = () => {
+    const total = meta.totalPage;
+    const maxVisible = 5;
+
+    // If total pages are less than max, return all
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(total, currentPage + 2);
+
+    if (currentPage <= 3) {
+      endPage = 5;
+      startPage = 1;
+    } else if (currentPage >= total - 2) {
+      startPage = total - 4;
+      endPage = total;
+    }
+
+    const pages = [];
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    return pages;
   };
 
   if (isLoading) {
@@ -146,6 +196,41 @@ const AllAdsPage = () => {
               })}
             </TableBody>
           </Table>
+
+          {/* --- Pagination Footer --- */}
+          {!isLoading && meta.totalPage > 1 && (
+            <div className="mt-10 flex items-center justify-center gap-4 text-sm font-medium text-gray-600">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="p-2 text-black cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed transition-opacity hover:bg-gray-200 rounded"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+
+              {getVisiblePages().map((page) => (
+                <button
+                  key={page}
+                  onClick={() => handlePageChange(page)}
+                  className={`flex h-8 w-8 items-center justify-center rounded transition-colors ${
+                    currentPage === page
+                      ? "bg-black text-white cursor-default"
+                      : "cursor-pointer hover:bg-gray-200 text-gray-700"
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === meta.totalPage}
+                className="p-2 text-black cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed transition-opacity hover:bg-gray-200 rounded"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </div>
+          )}
 
           {/* Empty State */}
           {allAds.length === 0 && (

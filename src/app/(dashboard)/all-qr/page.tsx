@@ -67,6 +67,7 @@ const QRCodeTable = () => {
 
   // Modal State
   const [selectedQr, setSelectedQr] = useState<QRCode | null>(null);
+  console.log(selectedQr);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showModal, setShowModal] = useState(false); // Create Modal
 

@@ -45,7 +45,7 @@ const SpecialPromoPage = () => {
   // --- 1. State for Pagination & Filtering ---
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
-  const [filterType, setFilterType] = useState<string>("all"); // 'all', 'holiday', 'weekend', etc.
+  const [filterType, setFilterType] = useState<string>("all");
 
   // --- 2. API Query with Params ---
   // Ensure your backend accepts these query parameters
@@ -61,6 +61,7 @@ const SpecialPromoPage = () => {
 
   // Safe Data Extraction
   const promoData = responseData?.data?.result || [];
+  console.log(promoData);
   const meta = responseData?.data?.meta || { totalPage: 1, total: 0 };
 
   const [deletePromo] = useDeletePromoMutation();
@@ -256,7 +257,7 @@ const SpecialPromoPage = () => {
                           </div>
                           <div className="flex flex-col gap-0.5">
                             <span className="font-medium text-gray-900 line-clamp-1 text-sm">
-                              {promo?.product?.productName || "Product Name"}
+                              {promo?.product?.name || "Product Name"}
                             </span>
                             <span className="text-[10px] text-gray-500 flex items-center gap-1">
                               <CalendarDays size={10} />

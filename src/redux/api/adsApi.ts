@@ -4,7 +4,11 @@ import { apiSlice } from "./apiSlice";
 export const adsApi = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
         getAds: builder.query({
-            query: () => "ads/all-ads",
+            query: (params) => ({
+                url: "ads/all-ads",
+                method: "GET",
+                params,
+            }),
             providesTags: ["Ads"],
         }),
         deleteAd: builder.mutation({

@@ -85,6 +85,7 @@ const UserOverview = () => {
               tickLine={false}
               tick={{ fontSize: 12, fill: "#9CA3AF" }}
               allowDecimals={false} // Users cannot be fractions
+              // domain={[0, "dataMax" in chartData ? chartData.dataMax : 0]}
             />
 
             <Tooltip cursor={{ fill: "#F9FAFB" }} content={<CustomTooltip />} />
@@ -95,6 +96,10 @@ const UserOverview = () => {
               fill="#8B5CF6" // Purple color to distinguish from Sales
               radius={[4, 4, 0, 0]}
               barSize={24} // Slightly wider bars since it's a single metric
+              label={{ position: "top" }}
+              isAnimationActive={false}
+              animationDuration={0}
+              animationEasing="linear"
             />
           </BarChart>
         </ResponsiveContainer>
