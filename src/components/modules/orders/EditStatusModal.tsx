@@ -1,16 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label"; // or generic label
-import { Textarea } from "@/components/ui/textarea"; // or generic textarea
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useUpdateOrderStatusMutation } from "@/redux/api/ordersApi";
 import { toast } from "react-toastify";
 
@@ -30,15 +29,6 @@ export function UpdateOrderModal({
   const [note, setNote] = useState("");
   const [updateOrderStatus, { isLoading }] = useUpdateOrderStatusMutation();
 
-  // Reset state when modal opens
-  //   useEffect(() => {
-  //     if (isOpen) {
-  //       // Default to current status or empty
-  //       setStatus(currentStatus || "");
-  //       setNote("");
-  //     }
-  //   }, [isOpen, currentStatus]);
-
   const handleSubmit = async () => {
     if (!orderId || !status) return;
 
@@ -50,22 +40,30 @@ export function UpdateOrderModal({
       }).unwrap();
 
       toast.success("Order status updated successfully");
+
+      // Reset state after successful submission
+      setStatus("");
+      setNote("");
+
       onClose();
     } catch (error: any) {
       const message = error?.data?.message || "Something Went Wrong.";
-      //console.error("Failed to update order:", error.data.message);
       toast.error(message);
     }
   };
 
+  // Optional: Helper to close and reset if user clicks Cancel
+  const handleClose = () => {
+    setStatus("");
+    setNote("");
+    onClose();
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-106.25 bg-white text-black">
         <DialogHeader>
           <DialogTitle>Update Order Status</DialogTitle>
-          <DialogDescription>
-            Change the status of order #{orderId?.slice(-6)}
-          </DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-4 py-4">
@@ -111,7 +109,7 @@ export function UpdateOrderModal({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={isLoading}>
+          <Button variant="outline" onClick={handleClose} disabled={isLoading}>
             Cancel
           </Button>
           <Button
