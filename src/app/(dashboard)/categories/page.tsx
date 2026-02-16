@@ -7,14 +7,8 @@ import {
   ChevronRight,
   Trash2,
   Loader2,
+  Search,
 } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -32,6 +26,22 @@ import {
   useDeleteCategoryMutation,
   useGetCategoriesQuery,
 } from "@/redux/api/categoriesApi";
+import { Input } from "@/components/ui/input";
+import { toast } from 'react-toastify';
+
+// --- 1. Debounce Hook ---
+function useDebounce(value: string, delay: number) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+
+  return debouncedValue;
+}
 
 type Category = {
   _id: string;
@@ -42,13 +52,16 @@ type Category = {
 export default function CategoryPage() {
   // --- 1. State for Pagination & Filter ---
   const [currentPage, setCurrentPage] = useState(1);
-  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // --- 3. Debounce Search Term ---
+  const debouncedSearch = useDebounce(searchTerm, 500);
 
   // --- 2. API Hook ---
   const { data, isLoading, isFetching } = useGetCategoriesQuery({
     page: currentPage,
     limit: 10,
-    categoryName: categoryFilter !== "all" ? categoryFilter : "",
+    categoryName: debouncedSearch || "",
   });
 
   const [deleteCategory] = useDeleteCategoryMutation();
@@ -101,9 +114,9 @@ export default function CategoryPage() {
       if (result.isConfirmed) {
         try {
           await deleteCategory(id).unwrap();
-          Swal.fire("Deleted!", "Category has been deleted.", "success");
+          toast.success("Category has been deleted.");
         } catch (error) {
-          Swal.fire("Error!", "Failed to delete category.", "error");
+          toast.error("Failed to delete category.");
         }
       }
     });
@@ -115,8 +128,8 @@ export default function CategoryPage() {
     }
   };
 
-  const handleCategoryChange = (value: string) => {
-    setCategoryFilter(value);
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
     setCurrentPage(1); // Reset to page 1 on filter change
   };
 
@@ -170,20 +183,16 @@ export default function CategoryPage() {
 
       <div className="flex flex-col md:flex-row justify-between md:items-center mb-6 gap-4">
         <div className="flex items-center gap-4 w-full md:w-auto">
-          {/* Category Filter */}
-          <Select value={categoryFilter} onValueChange={handleCategoryChange}>
-            <SelectTrigger className="w-45 h-11 border-gray-300 bg-white text-gray-500">
-              <SelectValue placeholder="Category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
-              {categories?.map((category: any) => (
-                <SelectItem key={category._id} value={category.categoryName}>
-                  {category.categoryName}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {/* Combined Search Input */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+            <Input
+              value={searchTerm}
+              onChange={handleSearchChange}
+              placeholder="Search by name or email..."
+              className="pl-10 bg-transparent border-gray-800 rounded-md focus-visible:ring-0 focus-visible:border-black placeholder:text-gray-500"
+            />
+          </div>
         </div>
 
         <AddCategoryModal />
@@ -241,7 +250,7 @@ export default function CategoryPage() {
                       </Avatar>
                     </TableCell>
 
-                    <TableCell className="py-4 text-gray-500">
+                    <TableCell className="py-4 text-gray-500 capitalize">
                       {category.categoryName}
                     </TableCell>
 

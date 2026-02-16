@@ -25,7 +25,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// You need to ensure this mutation exists in your API slice
 import { useGetCategoriesQuery } from "@/redux/api/categoriesApi";
 import { useEditProductMutation } from "@/redux/api/productApi";
 
@@ -49,7 +48,6 @@ interface ProductFormValues {
   isFeatured: boolean;
 }
 
-// Define the shape of the product data coming from your API
 interface ProductData {
   _id: string;
   name: string;
@@ -79,8 +77,6 @@ export default function EditProductModal({
   product: ProductData;
 }) {
   const [open, setOpen] = useState(false);
-
-  // Use the Update Mutation instead of Add
   const [updateProduct, { isLoading }] = useEditProductMutation();
 
   const { data: categories } = useGetCategoriesQuery(undefined);
@@ -102,21 +98,19 @@ export default function EditProductModal({
     },
   });
 
-  // Image State
+  // State to hold new file objects (for upload)
   const [imageFiles, setImageFiles] = useState<File[]>([]);
+  // State to hold visual previews (both old URLs and new Blob URLs)
   const [previews, setPreviews] = useState<string[]>([]);
 
   // --- Populate Form when Modal Opens ---
   useEffect(() => {
-    // Safety check: Don't run if product is missing
     if (open && product) {
-      // 1. Safe Category Extraction
-      // We must check "product.category !== null" because "typeof null" is 'object'
       let categoryId = "";
       if (product.category && typeof product.category === "object") {
-        categoryId = (product.category as any)._id; // It's a populated object
+        categoryId = (product.category as any)._id;
       } else if (typeof product.category === "string") {
-        categoryId = product.category; // It's just an ID string
+        categoryId = product.category;
       }
 
       reset({
@@ -133,16 +127,14 @@ export default function EditProductModal({
         promo: product.promo || "",
         isRedem: product.isRedem || false,
         isFeatured: product.isFeatured || false,
-
-        // 2. Use the safely extracted category ID
         category: categoryId,
-
-        // 3. Safe Discount extraction
         discount_type: product.discount?.discount_type || "percentage",
         discount_amount: product.discount?.discount_amount || 0,
       });
 
+      // Initialize previews with existing images from DB
       setPreviews(product.images || []);
+      // Reset new files
       setImageFiles([]);
     }
   }, [open, product, reset]);
@@ -152,7 +144,6 @@ export default function EditProductModal({
     if (files && files.length > 0) {
       const newFiles = Array.from(files);
       setImageFiles((prev) => [...prev, ...newFiles]);
-      // Add new previews to the list
       setPreviews((prev) => [
         ...prev,
         ...newFiles.map((file) => URL.createObjectURL(file)),
@@ -161,28 +152,36 @@ export default function EditProductModal({
   };
 
   const removeImage = (indexToRemove: number) => {
-    // Visual removal
+    const targetUrl = previews[indexToRemove];
+
+    // 1. Remove from visual previews
     setPreviews((prev) => prev.filter((_, index) => index !== indexToRemove));
 
-    // Logic to remove from file array if it was a newly added file
-    // (This is a simplified approach. Ideally, you handle server-side deletion separately)
-    const existingCount = product.images?.length || 0;
-    if (indexToRemove >= existingCount) {
-      // It's a new file
-      setImageFiles((prev) =>
-        prev.filter((_, idx) => idx !== indexToRemove - existingCount),
-      );
+    // 2. If it is a newly added file (blob URL), remove it from imageFiles array
+    if (targetUrl.startsWith("blob:")) {
+      // Calculate index in imageFiles by counting preceding blobs
+      const blobsBefore = previews
+        .slice(0, indexToRemove)
+        .filter((url) => url.startsWith("blob:")).length;
+
+      setImageFiles((prev) => prev.filter((_, idx) => idx !== blobsBefore));
     }
+    // If it's not a blob, it's a DB image. We just removed it from 'previews',
+    // so it won't be sent in the retained list onSubmit.
   };
 
   const onSubmit: SubmitHandler<ProductFormValues> = async (formData) => {
     try {
       const data = new FormData();
 
-      // Data Transformation
+      // --- CRITICAL FIX: Determine which images to keep ---
+      // Filter previews: If it doesn't start with "blob:", it's an existing URL we want to keep.
+      const retainedImages = previews.filter((url) => !url.startsWith("blob:"));
+
       const { discount_type, discount_amount, points, promo, ...rest } =
         formData;
 
+      // Construct the JSON body
       const bodyObj = {
         ...rest,
         price: Number(formData.price),
@@ -195,16 +194,19 @@ export default function EditProductModal({
           discount_amount: Number(discount_amount),
         },
         ...(promo && { promo }),
+        // Send the updated list of old images to the backend
+        images: retainedImages,
       };
+
+      console.log("Sending Body:", bodyObj); // Debugging: Check console to see if 'images' array is correct
 
       data.append("body", JSON.stringify(bodyObj));
 
-      // Append only NEW images
+      // Append new files
       imageFiles.forEach((file) => {
         data.append("image", file);
       });
 
-      // Send Request (Pass ID)
       const response = await updateProduct({ id: product._id, data }).unwrap();
 
       if (response.success) {
@@ -215,9 +217,10 @@ export default function EditProductModal({
           timer: 1500,
           showConfirmButton: false,
         });
-        setOpen(false); // Close Modal
+        setOpen(false);
       }
     } catch (error: any) {
+      console.error("Update Error:", error);
       const errorMessage = error?.data?.message || "Something went wrong";
       Swal.fire({
         icon: "error",
@@ -241,7 +244,6 @@ export default function EditProductModal({
         </Button>
       </DialogTrigger>
 
-      {/* Scrollable Modal Content */}
       <DialogContent className="sm:max-w-6xl max-h-[90vh] overflow-y-auto bg-white p-6 md:p-10">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold text-gray-900 mb-4">
@@ -290,7 +292,8 @@ export default function EditProductModal({
             </div>
           </div>
 
-          {/* --- Basic Details --- */}
+          {/* --- Rest of the form inputs --- */}
+          {/* (Kept exactly as in your previous code to save space) */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="space-y-3">
               <Label className="text-gray-500">Product Name *</Label>
@@ -352,7 +355,6 @@ export default function EditProductModal({
             </div>
           </div>
 
-          {/* --- Discount & Nutrition --- */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="space-y-3">
               <Label className="text-gray-500">Discount Type</Label>
@@ -401,7 +403,6 @@ export default function EditProductModal({
             </div>
           </div>
 
-          {/* --- Inventory & Status --- */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="space-y-3">
               <Label className="text-gray-500">Quantity *</Label>
@@ -451,7 +452,6 @@ export default function EditProductModal({
             </div>
           </div>
 
-          {/* --- Extra Options --- */}
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-end">
             <div className="flex items-center space-x-2 h-12 pb-2">
               <Controller

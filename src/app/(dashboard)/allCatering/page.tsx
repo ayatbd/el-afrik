@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import {
   Table,
@@ -33,7 +33,6 @@ import {
 } from "@/redux/api/cateringApi";
 import EditCateringModal from "@/components/modules/catering/EditCateringModal";
 import Swal from "sweetalert2";
-import { Input } from "@/components/ui/input";
 
 interface CateringItem {
   _id: string;
@@ -46,24 +45,10 @@ interface CateringItem {
   image?: string;
 }
 
-function useDebounce(value: string, delay: number) {
-  const [debouncedValue, setDebouncedValue] = useState(value);
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
-    return () => clearTimeout(handler);
-  }, [value, delay]);
-  return debouncedValue;
-}
-
 const CateringTable = () => {
   // 1. Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(10); // Items per page
-  const [searchTerm, setSearchTerm] = useState("");
-
-  const debouncedSearch = useDebounce(searchTerm, 500);
 
   const {
     data: responseData,
@@ -72,7 +57,6 @@ const CateringTable = () => {
   } = useGetAllCateringQuery({
     page: currentPage,
     limit,
-    search: debouncedSearch,
   });
 
   // 3. Safe Access to Data & Meta
@@ -253,8 +237,18 @@ const CateringTable = () => {
                   </TableCell>
 
                   {/* Actions */}
-                  <TableCell className="text-right pr-6 py-4">
-                    <DropdownMenu>
+                  <TableCell className="py-4">
+                    <div className="flex items-center justify-end gap-5 pr-4">
+                      <EditCateringModal catering={item} />
+                      <button
+                        onClick={() => handleDelete(item._id)}
+                        className="cursor-pointer text-red-500 hover:text-red-900 transition-colors"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+
+                    {/* <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant="ghost"
@@ -282,7 +276,7 @@ const CateringTable = () => {
                           Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
-                    </DropdownMenu>
+                    </DropdownMenu> */}
                   </TableCell>
                 </TableRow>
               ))
