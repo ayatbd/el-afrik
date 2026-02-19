@@ -6,14 +6,13 @@ import { useState } from "react";
 
 const SendOtp = () => {
   const [email, setEmail] = useState("");
-  const router = useRouter();
   const [forgotPassword, { isLoading, error }] = useForgotPasswordMutation();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await forgotPassword({ email }).unwrap();
-      // Store email in sessionStorage to use in the next step
       sessionStorage.setItem("resetEmail", email);
       router.push("/verify-otp");
     } catch (err) {

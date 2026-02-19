@@ -10,6 +10,13 @@ export const categoryApi = apiSlice.injectEndpoints({
             }),
             providesTags: ['Category'],
         }),
+        getCategoriesDropdown: builder.query({
+            query: () => ({
+                url: '/category/allCategory?page=1&limit=1000',
+                method: 'GET'
+            }),
+            providesTags: ['Category'],
+        }),
         editCategory: builder.mutation({
             query: ({ id, data }) => ({
                 url: `/category/update-category/${id}`,
@@ -36,4 +43,4 @@ export const categoryApi = apiSlice.injectEndpoints({
     })
 })
 
-export const { useGetCategoriesQuery, useAddCategoryMutation, useEditCategoryMutation, useDeleteCategoryMutation } = categoryApi
+export const { useGetCategoriesQuery, useGetCategoriesDropdownQuery, useAddCategoryMutation, useEditCategoryMutation, useDeleteCategoryMutation } = categoryApi

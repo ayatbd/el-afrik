@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAddProductsMutation } from "@/redux/api/productApi";
-import { useGetCategoriesQuery } from "@/redux/api/categoriesApi";
+import { useGetCategoriesDropdownQuery } from "@/redux/api/categoriesApi";
 
 interface ProductFormValues {
   name: string;
@@ -47,7 +47,7 @@ export default function AddProductPage() {
   const router = useRouter();
   const [addProduct, { isLoading }] = useAddProductsMutation();
   const { data: categories, isLoading: categoriesLoading } =
-    useGetCategoriesQuery(undefined);
+    useGetCategoriesDropdownQuery(undefined);
   // console.log(categories.data.result);
   const categoriesData = categories?.data?.result || [];
 

@@ -27,6 +27,8 @@ import {
 
 import { useGetCategoriesQuery } from "@/redux/api/categoriesApi";
 import { useEditProductMutation } from "@/redux/api/productApi";
+import { toast } from "react-toastify";
+import Image from "next/image";
 
 // --- Types ---
 interface ProductFormValues {
@@ -88,24 +90,14 @@ export default function EditProductModal({
     control,
     reset,
     formState: { errors },
-  } = useForm<ProductFormValues>({
-    defaultValues: {
-      name: "",
-      discount_type: "percentage",
-      discount_amount: 0,
-      isRedem: false,
-      isFeatured: false,
-    },
-  });
+  } = useForm<ProductFormValues>();
 
-  // State to hold new file objects (for upload)
   const [imageFiles, setImageFiles] = useState<File[]>([]);
-  // State to hold visual previews (both old URLs and new Blob URLs)
   const [previews, setPreviews] = useState<string[]>([]);
 
-  // --- Populate Form when Modal Opens ---
   useEffect(() => {
     if (open && product) {
+      // ... (reset logic remains the same)
       let categoryId = "";
       if (product.category && typeof product.category === "object") {
         categoryId = (product.category as any)._id;
@@ -132,56 +124,59 @@ export default function EditProductModal({
         discount_amount: product.discount?.discount_amount || 0,
       });
 
-      // Initialize previews with existing images from DB
       setPreviews(product.images || []);
-      // Reset new files
       setImageFiles([]);
     }
   }, [open, product, reset]);
 
+  /**
+   * UPDATED: When user selects new photos,
+   * we remove the previous images and only show the new ones.
+   */
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
       const newFiles = Array.from(files);
-      setImageFiles((prev) => [...prev, ...newFiles]);
-      setPreviews((prev) => [
-        ...prev,
-        ...newFiles.map((file) => URL.createObjectURL(file)),
-      ]);
+
+      // Clean up previous blob URLs to avoid memory leaks
+      previews.forEach((url) => {
+        if (url.startsWith("blob:")) URL.revokeObjectURL(url);
+      });
+
+      // REPLACE instead of APPEND
+      setImageFiles(newFiles);
+      setPreviews(newFiles.map((file) => URL.createObjectURL(file)));
     }
   };
 
   const removeImage = (indexToRemove: number) => {
     const targetUrl = previews[indexToRemove];
 
-    // 1. Remove from visual previews
-    setPreviews((prev) => prev.filter((_, index) => index !== indexToRemove));
-
-    // 2. If it is a newly added file (blob URL), remove it from imageFiles array
+    // If we are removing one of the newly uploaded files
     if (targetUrl.startsWith("blob:")) {
-      // Calculate index in imageFiles by counting preceding blobs
-      const blobsBefore = previews
-        .slice(0, indexToRemove)
-        .filter((url) => url.startsWith("blob:")).length;
-
-      setImageFiles((prev) => prev.filter((_, idx) => idx !== blobsBefore));
+      setImageFiles((prev) => prev.filter((_, idx) => idx !== indexToRemove));
+      URL.revokeObjectURL(targetUrl);
     }
-    // If it's not a blob, it's a DB image. We just removed it from 'previews',
-    // so it won't be sent in the retained list onSubmit.
+
+    setPreviews((prev) => prev.filter((_, index) => index !== indexToRemove));
   };
 
   const onSubmit: SubmitHandler<ProductFormValues> = async (formData) => {
     try {
-      const data = new FormData();
-
-      // --- CRITICAL FIX: Determine which images to keep ---
-      // Filter previews: If it doesn't start with "blob:", it's an existing URL we want to keep.
-      const retainedImages = previews.filter((url) => !url.startsWith("blob:"));
+      /**
+       * LOGIC:
+       * If imageFiles has content, it means the user uploaded new photos.
+       * In that case, we send an empty array for 'images' to the DB so
+       * the old ones are deleted, and only the new ones are added.
+       */
+      const retainedImages =
+        imageFiles.length > 0
+          ? []
+          : previews.filter((url) => !url.startsWith("blob:"));
 
       const { discount_type, discount_amount, points, promo, ...rest } =
         formData;
 
-      // Construct the JSON body
       const bodyObj = {
         ...rest,
         price: Number(formData.price),
@@ -194,15 +189,12 @@ export default function EditProductModal({
           discount_amount: Number(discount_amount),
         },
         ...(promo && { promo }),
-        // Send the updated list of old images to the backend
-        images: retainedImages,
+        images: retainedImages, // Empty if new files are being uploaded
       };
 
-      console.log("Sending Body:", bodyObj); // Debugging: Check console to see if 'images' array is correct
-
+      const data = new FormData();
       data.append("body", JSON.stringify(bodyObj));
 
-      // Append new files
       imageFiles.forEach((file) => {
         data.append("image", file);
       });
@@ -213,24 +205,21 @@ export default function EditProductModal({
         Swal.fire({
           icon: "success",
           title: "Product Updated!",
-          text: "Changes have been saved successfully.",
+          text:
+            imageFiles.length > 0
+              ? "Previous images replaced with new ones."
+              : "Changes saved.",
           timer: 1500,
           showConfirmButton: false,
         });
         setOpen(false);
       }
     } catch (error: any) {
-      console.error("Update Error:", error);
-      const errorMessage = error?.data?.message || "Something went wrong";
-      Swal.fire({
-        icon: "error",
-        title: "Update Failed",
-        text: errorMessage,
-      });
+      toast.error(
+        "Update Failed: " + (error?.data?.message || "Something went wrong"),
+      );
     }
   };
-
-  if (!product) return null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -252,20 +241,19 @@ export default function EditProductModal({
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-          {/* --- Image Upload --- */}
           <div className="space-y-4">
             <Label className="text-base font-normal text-gray-500">
-              Product Images
+              Product Images (Uploading new will replace old ones)
             </Label>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <label className="flex flex-col items-center justify-center h-40 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50/50 hover:bg-gray-50 cursor-pointer">
                 <span className="text-green-500 font-medium text-sm">
-                  Add New
+                  Upload New Photos
                 </span>
                 <input
                   type="file"
                   accept="image/*"
-                  multiple
+                  multiple // Allows multiple selection
                   className="hidden"
                   onChange={handleImageChange}
                 />
@@ -275,25 +263,25 @@ export default function EditProductModal({
                   key={index}
                   className="relative h-40 w-full group rounded-lg overflow-hidden border border-gray-200"
                 >
-                  <img
+                  <Image
+                    width={200}
+                    height={200}
                     src={img}
                     alt="Preview"
                     className="h-full w-full object-cover"
                   />
-                  <button
+                  {/* <button
                     type="button"
                     onClick={() => removeImage(index)}
                     className="absolute top-1 right-1 p-1 bg-white/80 text-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     <X className="h-3 w-3" />
-                  </button>
+                  </button> */}
                 </div>
               ))}
             </div>
           </div>
 
-          {/* --- Rest of the form inputs --- */}
-          {/* (Kept exactly as in your previous code to save space) */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="space-y-3">
               <Label className="text-gray-500">Product Name *</Label>

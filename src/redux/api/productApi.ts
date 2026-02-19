@@ -35,7 +35,7 @@ export const productApi = apiSlice.injectEndpoints({
         }),
         editProduct: builder.mutation({
             query: ({ id, data }) => {
-                // console.log(data);
+                console.log(data);
                 return {
                     url: `product/update-product/${id}`,
                     method: 'PATCH',
