@@ -103,9 +103,6 @@ export default function AddProductPage() {
 
     try {
       const data = new FormData();
-
-      // 2. Data Transformation (Matching your JSON structure)
-      // Extract flattened discount fields to create the object
       const { discount_type, discount_amount, points, ...rest } = formData;
 
       const bodyObj = {

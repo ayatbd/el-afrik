@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { useGetCategoriesQuery } from "@/redux/api/categoriesApi";
+import { useGetCategoriesDropdownQuery } from "@/redux/api/categoriesApi";
 import { useEditProductMutation } from "@/redux/api/productApi";
 import { toast } from "react-toastify";
 import Image from "next/image";
@@ -81,7 +81,7 @@ export default function EditProductModal({
   const [open, setOpen] = useState(false);
   const [updateProduct, { isLoading }] = useEditProductMutation();
 
-  const { data: categories } = useGetCategoriesQuery(undefined);
+  const { data: categories } = useGetCategoriesDropdownQuery(undefined);
   const categoriesData = categories?.data?.result || [];
 
   const {
